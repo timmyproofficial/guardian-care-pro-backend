@@ -13,6 +13,7 @@ import { SupportWorkerSkill } from '../types/user.types';
  */
 export interface IWorker extends IUser {
   skills?: SupportWorkerSkill[];
+  bio?: string;
   qualifications: {
     title: string;
     issuer: string;
@@ -51,6 +52,7 @@ export interface IWorker extends IUser {
     count: number;
   };
   verificationStatus: {
+    profileSetupComplete: boolean;
     identityVerified: boolean;
     policeCheckVerified: boolean;
     ndisWorkerScreeningVerified: boolean;
@@ -79,6 +81,11 @@ const workerSchema = new Schema<IWorker>(
         enum: Object.values(SupportWorkerSkill),
       }],
       // required: true,
+    },
+
+    bio: {
+      type: String,
+      maxlength: 500,
     },
     
     // Formal qualifications
@@ -150,6 +157,7 @@ const workerSchema = new Schema<IWorker>(
     
     // Verification status
     verificationStatus: {
+      profileSetupComplete: { type: Boolean, default: false },
       identityVerified: { type: Boolean, default: false },
       policeCheckVerified: { type: Boolean, default: false },
       ndisWorkerScreeningVerified: { type: Boolean, default: false },

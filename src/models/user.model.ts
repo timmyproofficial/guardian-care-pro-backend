@@ -31,7 +31,7 @@ export interface IUser extends Document {
     country: string;
   };
   profileImage?: string;
-  bio?: string;
+  // bio?: string;
   notificationPreferences: NotificationPreference;
   isEmailVerified: boolean;
   emailVerificationToken?: string;
@@ -121,10 +121,10 @@ const userSchema = new Schema<IUser>(
     profileImage: {
       type: String, // URL to profile image
     },
-    bio: {
-      type: String,
-      maxlength: 500,
-    },
+    // bio: {
+    //   type: String,
+    //   maxlength: 500,
+    // },
     notificationPreferences: {
       type: String,
       enum: Object.values(NotificationPreference),

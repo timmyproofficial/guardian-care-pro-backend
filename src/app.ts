@@ -21,6 +21,8 @@ import { errorConverter, errorHandler, notFoundHandler } from './middlewares/err
  */
 const app: Express = express();
 
+const allowedOrigins = ['http://localhost:3000', 'http://localhost:8080'];
+
 // Set security headers
 app.use(helmet());
 
@@ -40,9 +42,20 @@ app.use(compression());
 app.use(cookieParser());
 
 // Enable CORS with credentials support
+// app.use(cors({
+//   origin: config.corsOrigin || '*',
+//   credentials: true, // Important for cookies to work with cross-origin requests
+// }));
+
 app.use(cors({
-  origin: config.corsOrigin || '*',
-  credentials: true, // Important for cookies to work with cross-origin requests
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // if using cookies/auth headers
 }));
 
 // Request logging in development

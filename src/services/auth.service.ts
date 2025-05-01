@@ -293,6 +293,7 @@ export const authService = {
             ...userInput,
             status: UserStatus.PENDING,
             verificationStatus: {
+              profileSetupComplete: false,
               identityVerified: false,
               policeCheckVerified: false,
               ndisWorkerScreeningVerified: false,
