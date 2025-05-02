@@ -13,7 +13,7 @@ import config from '../config/env';
 import { TokenType } from '../models/token.model';
 import Token, { IToken } from '../models/token.model';
 import User, { IUser } from '../models/user.model';
-import Admin from '@/models/admin.model';
+import Admin from '../models/admin.model';
 import Participant from '../models/participant.model';
 import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
