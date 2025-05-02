@@ -11,6 +11,7 @@ import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
 import Coordinator from '../models/coordinator.model';
 import { UserStatus } from '../types/user.types';
+import { uploadProfileImage } from '../utils/cloudinary';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 
@@ -238,6 +239,32 @@ export const userService = {
       return user;
     } catch (error) {
       logger.error(`Error updating status for user ${userId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update user profile image
+  */
+  updateProfileImage: async (userId: string, filePath: string): Promise<IUser | null> => {
+    try {
+      // Upload the image to Cloudinary
+      const uploadResult = await uploadProfileImage(filePath, userId);
+      
+      // Update the user with the new profile image URL
+      const user = await User.findByIdAndUpdate(
+        userId,
+        { profileImage: uploadResult.secure_url },
+        { new: true }
+      );
+      
+      if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+      }
+      
+      return user;
+    } catch (error) {
+      logger.error(`Error updating profile image for user ${userId}:`, error);
       throw error;
     }
   },
