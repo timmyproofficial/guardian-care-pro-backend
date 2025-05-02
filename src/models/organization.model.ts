@@ -1,36 +1,50 @@
 /**
  * Organization model definition
- * Schema for organizations that represent a participant and have support workers
+ * Schema for participant-centric organizations that connect with support workers
  */
 
 import mongoose, { Document, Schema } from 'mongoose';
+
+export enum InviteStatus {
+  PENDING = 'pending',
+  ACCEPTED = 'accepted',
+  DECLINED = 'declined'
+}
+
+export interface ServiceAgreement {
+  hourlyRate: number;
+  startDate: Date;
+  endDate?: Date;
+  termsAccepted: boolean;
+  additionalTerms?: string;
+}
+
+export interface WorkerInvite {
+  workerId: mongoose.Types.ObjectId;
+  inviteDate: Date;
+  status: InviteStatus;
+  proposedHourlyRate: number;
+  notes?: string;
+  adminNotes?: string;
+  adminId?: mongoose.Types.ObjectId;
+  responseDate?: Date;
+  declineReason?: string;
+  serviceAgreement?: ServiceAgreement;
+}
 
 /**
  * Organization document interface
  */
 export interface IOrganization extends Document {
   name: string;
-  participants: mongoose.Types.ObjectId[];
-  supportWorkers: mongoose.Types.ObjectId[];
-  contactPerson: {
-    name: string;
-    email: string;
-    phone: string;
-  };
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
-  isVerified: boolean;
-  ndisRegistered: boolean;
-  ndisRegistrationNumber?: string;
-  abn: string; // Australian Business Number
+  participantId: mongoose.Types.ObjectId;
+  workers: {
+    workerId: mongoose.Types.ObjectId;
+    serviceAgreement: ServiceAgreement;
+    joinedDate: Date;
+  }[];
+  pendingInvites: WorkerInvite[];
   description?: string;
-  logo?: string;
-  website?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -47,111 +61,114 @@ const organizationSchema = new Schema<IOrganization>(
       trim: true,
     },
     
-    // Participants associated with this organization
-    participants: [{
+    // Participant who owns this organization
+    participantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-    }],
+      required: true
+    },
     
-    // Support workers associated with this organization
-    supportWorkers: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    
-    // Primary contact person
-    contactPerson: {
-      name: {
-        type: String,
-        required: true,
+    // Support workers connected to this organization
+    workers: [{
+      workerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
       },
-      email: {
-        type: String,
-        required: true,
-      },
-      phone: {
-        type: String,
-        required: true,
-      },
-    },
-    
-    // Physical address
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      postalCode: String,
-      country: String,
-    },
-    
-    // Verification status
-    isVerified: {
-      type: Boolean,
-      default: false,
-    },
-    
-    // NDIS registration information
-    ndisRegistered: {
-      type: Boolean,
-      default: false,
-    },
-    
-    ndisRegistrationNumber: {
-      type: String,
-    },
-    
-    // Australian Business Number
-    abn: {
-      type: String,
-      required: true,
-      validate: {
-        validator: function(value: string) {
-          // ABN validation (11 digits)
-          return /^\d{11}$/.test(value);
+      serviceAgreement: {
+        hourlyRate: {
+          type: Number,
+          required: true,
+          min: 0
         },
-        message: 'ABN must be an 11-digit number',
+        startDate: {
+          type: Date,
+          required: true,
+          default: Date.now
+        },
+        endDate: {
+          type: Date
+        },
+        termsAccepted: {
+          type: Boolean,
+          required: true,
+          default: false
+        },
+        additionalTerms: {
+          type: String
+        }
       },
-    },
+      joinedDate: {
+        type: Date,
+        required: true,
+        default: Date.now
+      }
+    }],
+    
+    // Pending invites to support workers
+    pendingInvites: [{
+      workerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      inviteDate: {
+        type: Date,
+        required: true,
+        default: Date.now
+      },
+      status: {
+        type: String,
+        enum: Object.values(InviteStatus),
+        default: InviteStatus.PENDING
+      },
+      proposedHourlyRate: {
+        type: Number,
+        required: true,
+        min: 0
+      },
+      notes: {
+        type: String
+      },
+      adminNotes: {
+        type: String
+      },
+      adminId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      responseDate: {
+        type: Date
+      },
+      declineReason: {
+        type: String
+      },
+      serviceAgreement: {
+        hourlyRate: Number,
+        startDate: Date,
+        endDate: Date,
+        termsAccepted: Boolean,
+        additionalTerms: String
+      }
+    }],
     
     // Organization description
     description: {
-      type: String,
-    },
-    
-    // Logo URL
-    logo: {
-      type: String,
-    },
-    
-    // Website URL
-    website: {
-      type: String,
-      validate: {
-        validator: (value: string) => {
-          // Simple URL validation
-          try {
-            new URL(value);
-            return true;
-          } catch (err) {
-            return false;
-          }
-        },
-        message: 'Website must be a valid URL',
-      },
-    },
+      type: String
+    }
   },
   {
-    timestamps: true, // Adds createdAt and updatedAt fields
+    timestamps: true // Adds createdAt and updatedAt fields
   }
 );
 
 /**
  * Add indexes for faster queries
  */
-organizationSchema.index({ name: 1 });
-organizationSchema.index({ participants: 1 });
-organizationSchema.index({ supportWorkers: 1 });
-organizationSchema.index({ ndisRegistered: 1 });
+organizationSchema.index({ participantId: 1 });
+organizationSchema.index({ 'workers.workerId': 1 });
+organizationSchema.index({ 'pendingInvites.workerId': 1 });
+organizationSchema.index({ 'pendingInvites.status': 1 });
 
 /**
  * Create and export the Organization model
