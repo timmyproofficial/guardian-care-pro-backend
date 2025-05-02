@@ -302,7 +302,7 @@ export const authService = {
             },
           });
           break;
-        case UserRole.COORDINATOR:
+        case UserRole.ADMIN:
           user = await Coordinator.create({
             ...userInput,
             status: UserStatus.PENDING,

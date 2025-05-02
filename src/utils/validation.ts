@@ -23,7 +23,7 @@ export const authValidation = {
         UserRole.PARTICIPANT,
         UserRole.GUARDIAN, 
         UserRole.SUPPORT_WORKER,
-        UserRole.COORDINATOR
+        UserRole.ADMIN
       ),
     phone: Joi.string().required(),
   }),
@@ -206,6 +206,46 @@ export const documentValidation = {
   verifyDocument: Joi.object({
     status: Joi.string().required().valid('approved', 'rejected', 'pending'),
     notes: Joi.string(),
+  }),
+};
+
+/**
+ * Organization validation schemas
+ */
+export const organizationValidation = {
+  // Create organization
+  createOrganization: Joi.object({
+    name: Joi.string().required(),
+    description: Joi.string(),
+  }),
+
+  // Invite worker
+  inviteWorker: Joi.object({
+    workerId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+    proposedHourlyRate: Joi.number().required().min(0),
+    notes: Joi.string(),
+  }),
+
+  // Process invite
+  processInvite: Joi.object({
+    status: Joi.string().required().valid('accepted', 'declined'),
+    adminNotes: Joi.string(),
+    declineReason: Joi.string().when('status', {
+      is: 'declined',
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+    serviceAgreement: Joi.object({
+      hourlyRate: Joi.number().required().min(0),
+      startDate: Joi.date().required(),
+      endDate: Joi.date(),
+      termsAccepted: Joi.boolean().required().valid(true),
+      additionalTerms: Joi.string(),
+    }).when('status', {
+      is: 'accepted',
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
   }),
 };
 
