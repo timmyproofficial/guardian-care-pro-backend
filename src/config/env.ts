@@ -39,6 +39,11 @@ const envVarsSchema = Joi.object()
     SMTP_PORT: Joi.number().description('SMTP port'),
     SMTP_USERNAME: Joi.string().description('SMTP username'),
     SMTP_PASSWORD: Joi.string().description('SMTP password'),
+
+    // Cloudinary
+    CLOUDINARY_CLOUD_NAME: Joi.string().required().description('Cloudinary cloud name'),
+    CLOUDINARY_API_KEY: Joi.string().required().description('Cloudinary API key'),
+    CLOUDINARY_API_SECRET: Joi.string().required().description('Cloudinary API secret'),
     
     // Storage (AWS S3)
     AWS_BUCKET_NAME: Joi.string().description('AWS S3 bucket name'),
@@ -98,6 +103,13 @@ const config = {
         pass: envVars.SMTP_PASSWORD,
       },
     },
+  },
+
+  // Cloudinary config
+  cloudinary: {
+    cloudName: envVars.CLOUDINARY_CLOUD_NAME,
+    apiKey: envVars.CLOUDINARY_API_KEY,
+    apiSecret: envVars.CLOUDINARY_API_SECRET,
   },
   
   // AWS S3 config
