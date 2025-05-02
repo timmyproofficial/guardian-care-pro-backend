@@ -11,9 +11,16 @@ export enum UserRole {
     PARTICIPANT = 'participant',
     GUARDIAN = 'guardian',
     SUPPORT_WORKER = 'supportWorker',
-    COORDINATOR = 'coordinator',
+    // COORDINATOR = 'coordinator',
     ADMIN = 'admin'
   }
+
+// Admin types enumeration (sub-roles)
+export enum AdminType {
+  COORDINATOR = 'coordinator',
+  SUPER_ADMIN = 'superAdmin',
+  EDITOR = 'editor'
+}
   
   /**
    * User status enumeration
