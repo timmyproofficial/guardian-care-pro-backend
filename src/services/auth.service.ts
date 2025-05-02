@@ -13,10 +13,11 @@ import config from '../config/env';
 import { TokenType } from '../models/token.model';
 import Token, { IToken } from '../models/token.model';
 import User, { IUser } from '../models/user.model';
+import Admin from '@/models/admin.model';
 import Participant from '../models/participant.model';
 import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
-import Coordinator from '../models/coordinator.model';
+// import Coordinator from '../models/coordinator.model';
 import { UserRole, UserStatus, UserRegistrationInput } from '../types/user.types';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
@@ -303,7 +304,7 @@ export const authService = {
           });
           break;
         case UserRole.ADMIN:
-          user = await Coordinator.create({
+          user = await Admin.create({
             ...userInput,
             status: UserStatus.PENDING,
           });
