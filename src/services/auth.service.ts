@@ -306,6 +306,7 @@ export const authService = {
         case UserRole.ADMIN:
           user = await Admin.create({
             ...userInput,
+            adminType: 'superAdmin',
             status: UserStatus.PENDING,
           });
           break;
