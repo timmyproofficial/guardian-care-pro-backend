@@ -6,7 +6,7 @@
 import express, { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
-// import organizationRoute from './organization.route';
+import organizationRoute from './organization.route';
 // import workerRoute from './worker.route';
 // import participantRoute from './participant.route';
 // import shiftRoute from './shift.route';
@@ -36,11 +36,11 @@ const routes: Route[] = [
     route: userRoute,
     authRequired: true,
   },
-  // {
-  //   path: '/organizations',
-  //   route: organizationRoute,
-  //   authRequired: true,
-  // },
+  {
+    path: '/organizations',
+    route: organizationRoute,
+    authRequired: true,
+  },
 //   {
 //     path: '/workers',
 //     route: workerRoute,

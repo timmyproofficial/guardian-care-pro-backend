@@ -20,6 +20,7 @@ export interface ServiceAgreement {
 }
 
 export interface WorkerInvite {
+  _id?: mongoose.Types.ObjectId; // Add this line to explicitly define _id
   workerId: mongoose.Types.ObjectId;
   inviteDate: Date;
   status: InviteStatus;

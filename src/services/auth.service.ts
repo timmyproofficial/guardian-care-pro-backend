@@ -19,9 +19,10 @@ import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
 // import Coordinator from '../models/coordinator.model';
 import { UserRole, UserStatus, UserRegistrationInput } from '../types/user.types';
+import { organizationService } from './organization.service';
+import { emailService } from './email.service';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
-import { emailService } from './email.service';
 
 /**
  * Interface for auth tokens
@@ -282,6 +283,14 @@ export const authService = {
             ...userInput,
             status: UserStatus.PENDING,
           });
+
+          // Automatically create an organization for the participant
+          const organizationName = `${user.firstName}'s Organization`;
+          await organizationService.createOrganization(
+            user._id.toString(),
+            organizationName,
+            'Support worker organization'
+          );
           break;
         case UserRole.GUARDIAN:
           user = await Guardian.create({
@@ -315,10 +324,10 @@ export const authService = {
       }
       
       // Generate OTP code for email verification
-      const otpCode = await generateEmailVerificationOTP(user._id.toString());
+      // const otpCode = await generateEmailVerificationOTP(user._id.toString());
       
       // Send verification email with OTP
-      await emailService.sendVerificationOTP(user.email, user.firstName, otpCode);
+      // await emailService.sendVerificationOTP(user.email, user.firstName, otpCode);
       
       return user;
     } catch (error) {
