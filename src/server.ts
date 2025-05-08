@@ -8,6 +8,7 @@ import http from 'http';
 import app from './app';
 import config from './config/env';
 import logger from './utils/logger';
+import { initializeRateTimeBands } from './seed/rateTimeBand.seed';
 
 /**
  * Normalize port value
@@ -107,6 +108,8 @@ startServer()
     logger.error('Failed to start server:', error);
     process.exit(1);
   });
+
+initializeRateTimeBands();
 
 // For testing purposes
 export default server;
