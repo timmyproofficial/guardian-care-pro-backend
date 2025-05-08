@@ -222,8 +222,16 @@ export const organizationValidation = {
   // Invite worker
   inviteWorker: Joi.object({
     workerId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
-    proposedHourlyRate: Joi.number().required().min(0),
-    notes: Joi.string(),
+    proposedRates: Joi.object({
+      baseHourlyRate: Joi.number().required().min(0),
+      shiftRates: Joi.array().items(
+        Joi.object({
+          rateTimeBandId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+          hourlyRate: Joi.number().required().min(0)
+        })
+      ).required()
+    }).required(),
+    notes: Joi.string()
   }),
 
   // Process invite
@@ -236,7 +244,13 @@ export const organizationValidation = {
       otherwise: Joi.optional(),
     }),
     serviceAgreement: Joi.object({
-      hourlyRate: Joi.number().required().min(0),
+      baseHourlyRate: Joi.number().required().min(0),
+      shiftRates: Joi.array().items(
+        Joi.object({
+          rateTimeBandId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+          hourlyRate: Joi.number().required().min(0)
+        })
+      ).required(),
       startDate: Joi.date().required(),
       endDate: Joi.date(),
       termsAccepted: Joi.boolean().required().valid(true),
@@ -245,8 +259,40 @@ export const organizationValidation = {
       is: 'accepted',
       then: Joi.required(),
       otherwise: Joi.optional(),
-    }),
+    })
   }),
+};
+
+/**
+ * RateTimeBand validation schemas
+ */
+export const rateTimeBandValidation = {
+  // Create rate time band
+  createRateTimeBand: Joi.object({
+    name: Joi.string().required(),
+    code: Joi.string().required().uppercase(),
+    startTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    endTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    description: Joi.string(),
+    isWeekend: Joi.boolean(),
+    isPublicHoliday: Joi.boolean(),
+    isSleepover: Joi.boolean(),
+    baseRateMultiplier: Joi.number().min(1)
+  }),
+
+  // Update rate time band
+  updateRateTimeBand: Joi.object({
+    name: Joi.string(),
+    code: Joi.string().uppercase(),
+    startTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    endTime: Joi.string().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    description: Joi.string(),
+    isWeekend: Joi.boolean(),
+    isPublicHoliday: Joi.boolean(),
+    isSleepover: Joi.boolean(),
+    baseRateMultiplier: Joi.number().min(1),
+    isActive: Joi.boolean()
+  })
 };
 
 /**
@@ -281,7 +327,12 @@ export const shiftValidation = {
       endDate: Joi.date().greater(Joi.ref('...startTime')),
     }),
   }).custom((value, helpers) => {
-    if (value.recurrence && value.recurrence.pattern !== 'none' && !value.recurrence.occurrences && !value.recurrence.endDate) {
+    if (value.recurrence 
+      && value.recurrence.pattern 
+      !== 'none' 
+      && !value.recurrence.occurrences 
+      && !value.recurrence.endDate) 
+    {
       return helpers.error('Recurrence must include either occurrences or endDate');
     }
     return value;

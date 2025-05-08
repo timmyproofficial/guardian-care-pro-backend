@@ -7,6 +7,7 @@ import express, { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
 import organizationRoute from './organization.route';
+import rateTimeBandRoute from './rateTimeBand.route';
 // import workerRoute from './worker.route';
 // import participantRoute from './participant.route';
 // import shiftRoute from './shift.route';
@@ -41,6 +42,11 @@ const routes: Route[] = [
     route: organizationRoute,
     authRequired: true,
   },
+  {
+    path: '/rate-time-band',
+    route: rateTimeBandRoute,
+    authRequired: true,
+  }
 //   {
 //     path: '/workers',
 //     route: workerRoute,

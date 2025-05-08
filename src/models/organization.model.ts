@@ -24,19 +24,21 @@ export interface ServiceAgreement {
   additionalTerms?: string;
 }
 
+export interface ProposedRate {
+  baseHourlyRate: number;
+  shiftRates: {
+    rateTimeBandId: mongoose.Types.ObjectId;
+    hourlyRate: number;
+  }[];
+}
+
 export interface WorkerInvite {
   _id?: mongoose.Types.ObjectId; // Add this line to explicitly define _id
   workerId: mongoose.Types.ObjectId;
   inviteDate: Date;
   status: InviteStatus;
 
-  proposedRates: {
-    baseHourlyRate: number;
-    shiftRates: {
-      rateTimeBandId: mongoose.Types.ObjectId;
-      hourlyRate: number;
-    }[];
-  };
+  proposedRates: ProposedRate;
 
   notes?: string;
   adminNotes?: string;

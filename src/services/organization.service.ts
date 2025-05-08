@@ -5,7 +5,12 @@
 
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
-import Organization, { InviteStatus, IOrganization, ServiceAgreement } from '../models/organization.model';
+import Organization, { 
+  InviteStatus, 
+  IOrganization, 
+  ProposedRate, 
+  ServiceAgreement 
+} from '../models/organization.model';
 import User from '../models/user.model';
 import Worker from '../models/worker.model';
 import Participant from '../models/participant.model';
@@ -107,10 +112,19 @@ export const organizationService = {
   /**
    * Send an invite to a support worker
    */
+  /**
+ * Send an invite to a support worker
+ */
   inviteWorker: async (
     organizationId: string,
     workerId: string,
-    proposedHourlyRate: number,
+    proposedRates: {
+      baseHourlyRate: number;
+      shiftRates: {
+        rateTimeBandId: string;
+        hourlyRate: number;
+      }[];
+    },
     notes?: string
   ): Promise<IOrganization> => {
     try {
@@ -148,13 +162,22 @@ export const organizationService = {
           'Worker already has a pending invite'
         );
       }
+
+      // Convert shiftTypeIds to ObjectIds
+      const shiftRates = proposedRates.shiftRates.map(rate => ({
+        rateTimeBandId: new mongoose.Types.ObjectId(rate.rateTimeBandId),
+        hourlyRate: rate.hourlyRate
+      }));
       
       // Create the invite
       const invite = {
         workerId: new mongoose.Types.ObjectId(workerId),
         inviteDate: new Date(),
         status: InviteStatus.PENDING,
-        proposedHourlyRate,
+        proposedRates: {
+          baseHourlyRate: proposedRates.baseHourlyRate,
+          shiftRates
+        },
         notes
       };
       
@@ -169,6 +192,9 @@ export const organizationService = {
     }
   },
 
+  /**
+ * Process a worker invite (admin function)
+ */
   /**
  * Process a worker invite (admin function)
  */
@@ -213,6 +239,14 @@ export const organizationService = {
           throw new ApiError(
             httpStatus.BAD_REQUEST, 
             'Service agreement required for accepting invite'
+          );
+        }
+        
+        // Validate that the service agreement includes shift rates
+        if (!serviceAgreement.baseHourlyRate || !serviceAgreement.shiftRates) {
+          throw new ApiError(
+            httpStatus.BAD_REQUEST,
+            'Service agreement must include base hourly rate and shift rates'
           );
         }
         
@@ -304,7 +338,7 @@ getPendingInvites: async (): Promise<{
           workerId: invite.workerId.toString(),
           workerName: userMap.get(invite.workerId.toString()),
           inviteDate: invite.inviteDate,
-          proposedHourlyRate: invite.proposedHourlyRate,
+          proposedRates: invite.proposedRates,
           notes: invite.notes
         }));
       
@@ -360,7 +394,7 @@ getPendingInvites: async (): Promise<{
       participantName: string;
       status: InviteStatus;
       inviteDate: Date;
-      proposedHourlyRate: number;
+      proposedRates: ProposedRate;
       notes?: string;
       adminNotes?: string;
       responseDate?: Date;
@@ -383,7 +417,7 @@ getPendingInvites: async (): Promise<{
               participantName: participantMap.get(org.participantId.toString()),
               status: invite.status,
               inviteDate: invite.inviteDate,
-              proposedHourlyRate: invite.proposedHourlyRate,
+              proposedRates: invite.proposedRates,
               notes: invite.notes,
               adminNotes: invite.adminNotes,
               responseDate: invite.responseDate,
