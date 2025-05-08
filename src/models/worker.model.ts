@@ -28,12 +28,16 @@ export interface IWorker extends IUser {
     endDate?: Date;
     description: string;
   }[];
-  hourlyRate: {
+  hourlyRate?: {
     baseRate: number;
     weekendRate?: number;
     holidayRate?: number;
     overnightRate?: number;
   };
+  shiftRates: {
+    rateTimeBandId: mongoose.Types.ObjectId;
+    hourlyRate: number;
+  }[];
   availability: {
     weekdays: {
       day: string;
@@ -125,7 +129,20 @@ const workerSchema = new Schema<IWorker>(
       holidayRate: { type: Number },
       overnightRate: { type: Number },
     },
-    
+
+    shiftRates: [{
+      rateTimeBandId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'RateTimeBand',
+        required: true
+      },
+      hourlyRate: {
+        type: Number,
+        required: true,
+        min: 0
+      }
+    }],
+
     // Availability schedule
     availability: {
       weekdays: [{

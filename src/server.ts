@@ -109,7 +109,7 @@ startServer()
     process.exit(1);
   });
 
-initializeRateTimeBands();
+// initializeRateTimeBands();
 
 // For testing purposes
 export default server;

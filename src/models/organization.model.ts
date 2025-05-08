@@ -12,7 +12,12 @@ export enum InviteStatus {
 }
 
 export interface ServiceAgreement {
-  hourlyRate: number;
+  // Used for shift without specific rate
+  baseHourlyRate: number;
+  shiftRates: {
+    rateTimeBandId: mongoose.Types.ObjectId;
+    hourlyRate: number;
+  }[];
   startDate: Date;
   endDate?: Date;
   termsAccepted: boolean;
@@ -24,7 +29,15 @@ export interface WorkerInvite {
   workerId: mongoose.Types.ObjectId;
   inviteDate: Date;
   status: InviteStatus;
-  proposedHourlyRate: number;
+
+  proposedRates: {
+    baseHourlyRate: number;
+    shiftRates: {
+      rateTimeBandId: mongoose.Types.ObjectId;
+      hourlyRate: number;
+    }[];
+  };
+
   notes?: string;
   adminNotes?: string;
   adminId?: mongoose.Types.ObjectId;
@@ -77,11 +90,23 @@ const organizationSchema = new Schema<IOrganization>(
         required: true
       },
       serviceAgreement: {
-        hourlyRate: {
+        baseHourlyRate: {
           type: Number,
           required: true,
           min: 0
         },
+        shiftRates: [{
+          rateTimeBandId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'RateTimeBand',
+            required: true
+          },
+          hourlyRate: {
+            type: Number,
+            required: true,
+            min: 0
+          }
+        }],
         startDate: {
           type: Date,
           required: true,
@@ -123,10 +148,24 @@ const organizationSchema = new Schema<IOrganization>(
         enum: Object.values(InviteStatus),
         default: InviteStatus.PENDING
       },
-      proposedHourlyRate: {
-        type: Number,
-        required: true,
-        min: 0
+      proposedRates: {
+        baseHourlyRate: {
+          type: Number,
+          required: true,
+          min: 0
+        },
+        shiftRates: [{
+          rateTimeBandId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'RateTimeBand',
+            required: true
+          },
+          hourlyRate: {
+            type: Number,
+            required: true,
+            min: 0
+          }
+        }]
       },
       notes: {
         type: String
@@ -145,7 +184,14 @@ const organizationSchema = new Schema<IOrganization>(
         type: String
       },
       serviceAgreement: {
-        hourlyRate: Number,
+        baseHourlyRate: Number,
+        shiftRates: [{
+          rateTimeBandId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'RateTimeBand'
+          },
+          hourlyRate: Number
+        }],
         startDate: Date,
         endDate: Date,
         termsAccepted: Boolean,
