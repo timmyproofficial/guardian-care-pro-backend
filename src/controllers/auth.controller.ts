@@ -42,7 +42,9 @@ export const authController = {
           { 
             user, 
             verificationRequired: true, 
-            userId: user._id 
+            userId: user._id, 
+            access: tokens.access?.token,
+            refresh: tokens.refresh?.token
           }, 
           'User registered successfully. Please verify your email address using the code sent to your email.'
         )
@@ -77,7 +79,11 @@ export const authController = {
         path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
       });
       
-      res.json(successResponse({ user }, 'Login successful'));
+      res.json(successResponse({ 
+        user, 
+        access: tokens.access?.token, 
+        refresh: tokens.refresh?.token 
+      }, 'Login successful'));
     } catch (error) {
       next(error);
     }

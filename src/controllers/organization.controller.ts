@@ -90,12 +90,12 @@ export const organizationController = {
       }
       
       const { organizationId } = req.params;
-      const { workerId, proposedHourlyRate, notes } = req.body;
+      const { workerId, proposedRates, notes } = req.body;
       
       const organization = await organizationService.inviteWorker(
         organizationId,
         workerId,
-        proposedHourlyRate,
+        proposedRates,
         notes
       );
       

@@ -64,9 +64,13 @@ export const organizationService = {
           select: 'firstName lastName email phone profileImage'
         },
         {
+          path: 'pendingInvites.proposedRates.shiftRates.rateTimeBandId',
+          select: 'name code startTime endTime isActive'
+        },
+        {
           path: 'workers.workerId',
           select: 'firstName lastName email phone profileImage'
-        }
+        },
       ]);
       return organizations;
     } catch (error) {
@@ -302,6 +306,9 @@ getPendingInvites: async (): Promise<{
     // Find all organizations with pending invites
     const organizations = await Organization.find({
       'pendingInvites.status': InviteStatus.PENDING
+    }).populate({
+      path: 'pendingInvites.proposedRates.shiftRates.rateTimeBandId',
+      select: 'name code startTime endTime isActive'
     });
     
     // Collect all relevant user IDs
