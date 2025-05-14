@@ -84,6 +84,7 @@ export const userValidation = {
     phone: Joi.string(),
     gender: Joi.string().valid(...Object.values(Gender)),
     dateOfBirth: Joi.date(),
+    // languages: Joi.array().items(Joi.string()),
     address: Joi.object({
       street: Joi.string().required(),
       city: Joi.string().required(),

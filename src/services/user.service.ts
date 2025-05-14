@@ -6,14 +6,15 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import User, { IUser } from '../models/user.model';
-import Participant from '../models/participant.model';
+import Participant, { IParticipant } from '../models/participant.model';
 import Guardian from '../models/guardian.model';
-import Worker from '../models/worker.model';
+import Worker, { IWorker } from '../models/worker.model';
 import Coordinator from '../models/coordinator.model';
 import { UserStatus } from '../types/user.types';
 import { uploadProfileImage } from '../utils/cloudinary';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
+import Admin, { IAdmin } from '../models/admin.model';
 
 
 /**
@@ -86,6 +87,97 @@ export const userService = {
       throw error;
     }
   },
+
+  /**
+   * Update worker profile by ID
+   */
+  updateWorkerById: async (workerId: string, updateData: Partial<IWorker>): Promise<IWorker | null> => {
+    try {
+      // Validate workerId
+      if (!mongoose.Types.ObjectId.isValid(workerId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid workerId');
+      }
+
+      // Check if user exists and is a worker
+      const worker = await Worker.findById(workerId);
+      if (!worker) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Worker not found');
+      }
+
+      // Update worker with role-specific fields
+      const updatedWorker = await Worker.findByIdAndUpdate(
+        workerId,
+        updateData,
+        { new: true, runValidators: true }
+      );
+
+      return updatedWorker;
+    } catch (error) {
+      logger.error(`Error updating worker ${workerId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update participant profile by ID
+   */
+  updateParticipantById: async (
+    participantId: string, updateData: Partial<IParticipant>
+  ): Promise<IParticipant | null> => {
+    try {
+      // Similar implementation to updateWorkerById but for Participant model
+      if (!mongoose.Types.ObjectId.isValid(participantId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid participantId');
+      }
+
+      const participant = await Participant.findById(participantId);
+      if (!participant) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
+      }
+
+      const updatedParticipant = await Participant.findByIdAndUpdate(
+        participantId,
+        updateData,
+        { new: true, runValidators: true }
+      );
+
+      return updatedParticipant;
+    } catch (error) {
+      logger.error(`Error updating participant ${participantId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update admin profile by ID
+   */
+  updateAdminById: async (
+    adminId: string, updateData: Partial<IAdmin>): Promise<IAdmin | null> => {
+
+    try {
+      // Similar implementation for Admin model
+      if (!mongoose.Types.ObjectId.isValid(adminId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid adminId');
+      }
+
+      const admin = await Admin.findById(adminId);
+      if (!admin) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
+      }
+
+      const updatedAdmin = await Admin.findByIdAndUpdate(
+        adminId,
+        updateData,
+        { new: true, runValidators: true }
+      );
+
+      return updatedAdmin;
+    } catch (error) {
+      logger.error(`Error updating admin ${adminId}:`, error);
+      throw error;
+    }
+  },
+
 
   /**
    * Update user password
