@@ -8,10 +8,10 @@ import authRoute from './auth.route';
 import userRoute from './user.route';
 import organizationRoute from './organization.route';
 import rateTimeBandRoute from './rateTimeBand.route';
+import shiftRoute from './shift.route';
+import timesheetRoute from './timesheet.route';
 // import workerRoute from './worker.route';
 // import participantRoute from './participant.route';
-// import shiftRoute from './shift.route';
-// import timesheetRoute from './timesheet.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
 
@@ -46,27 +46,17 @@ const routes: Route[] = [
     path: '/rate-time-band',
     route: rateTimeBandRoute,
     authRequired: true,
-  }
-//   {
-//     path: '/workers',
-//     route: workerRoute,
-//     authRequired: true,
-//   },
-//   {
-//     path: '/participants',
-//     route: participantRoute,
-//     authRequired: true,
-//   },
-//   {
-//     path: '/shifts',
-//     route: shiftRoute,
-//     authRequired: true,
-//   },
-//   {
-//     path: '/timesheets',
-//     route: timesheetRoute,
-//     authRequired: true,
-//   },
+  },
+  {
+    path: '/shifts',
+    route: shiftRoute,
+    authRequired: true,
+  },
+  {
+    path: '/timesheets',
+    route: timesheetRoute,
+    authRequired: true,
+  },
 //   {
 //     path: '/documents',
 //     route: documentRoute,
