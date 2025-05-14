@@ -23,7 +23,7 @@ export enum ShiftStatus {
    */
   export enum ShiftType {
     DIRECT_BOOKING = 'directBooking',  // Specific worker was requested
-    OPEN_REQUEST = 'openRequest'       // Open to eligible workers
+    // OPEN_REQUEST = 'openRequest'       // Open to eligible workers
   }
   
   /**
@@ -73,7 +73,7 @@ export enum ShiftStatus {
    */
   export enum LocationType {
     IN_PERSON = 'inPerson',  // At participant's address or specified location
-    VIRTUAL = 'virtual'      // Online/video call
+    // VIRTUAL = 'virtual'      // Online/video call
   }
   
   /**
@@ -91,11 +91,11 @@ export enum ShiftStatus {
     // Location details
     locationType: LocationType;
     address?: string;                // Required for in-person shifts
-    virtualLink?: string;            // Required for virtual shifts
+    // virtualLink?: string;            // Required for virtual shifts
     
     // Shift configuration
     shiftType: ShiftType;
-    requiresSupervision: boolean;    // Whether agency oversight is required
+    // requiresSupervision: boolean;    // Whether agency oversight is required
     specialInstructions?: string;    // Any notes or requirements
     
     // Recurrence (for recurring shifts)
@@ -132,9 +132,9 @@ export enum ShiftStatus {
       amount: number;
       receiptUrl?: string;
     }[];
-    incidentReport?: {
-      description: string;
-      severity: 'low' | 'medium' | 'high';
-      interventionTaken: string;
-    };
+    // incidentReport?: {
+    //   description: string;
+    //   severity: 'low' | 'medium' | 'high';
+    //   interventionTaken: string;
+    // };
   }
