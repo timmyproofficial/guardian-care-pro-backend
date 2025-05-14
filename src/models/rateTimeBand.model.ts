@@ -6,6 +6,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export interface IRateTimeBand extends Document {
+  _id: mongoose.Types.ObjectId;
   name: string;
   code: string;
   startTime?: string; // Format: HH:MM (24-hour)
