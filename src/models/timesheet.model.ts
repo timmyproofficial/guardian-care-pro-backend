@@ -34,6 +34,7 @@ export interface RateCalculation {
  * Defines the structure of a timesheet document
  */
 export interface ITimesheet extends Document {
+  _id: mongoose.Types.ObjectId;
   shiftId: mongoose.Types.ObjectId;          // Reference to the completed shift
   shiftIdRef: string;                         // Unique shift identifier
   organizationId: mongoose.Types.ObjectId;    // Organization this timesheet belongs to
