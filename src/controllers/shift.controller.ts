@@ -14,10 +14,10 @@ import {
 //   RecurrencePattern, 
   CancellationReason
 } from '../types/shift.types';
-import Shift, { IShift } from '@/models/shift.model';
+import Shift, { IShift } from '../models/shift.model';
 import { successResponse, errorResponse } from '../utils/api-response';
 import mongoose from 'mongoose';
-import logger from '@/utils/logger';
+import logger from '../utils/logger';
 
 /**
    * Helper function to get all shifts with filtering for admins
