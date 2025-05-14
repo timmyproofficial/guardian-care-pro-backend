@@ -212,11 +212,29 @@ const workerSchema = new Schema<IWorker>(
 /**
  * Add indexes for faster queries
  */
+// workerSchema.index({ skills: 1 });
+// workerSchema.index({ serviceAreas: 1 });
+// workerSchema.index({ 'hourlyRate.baseRate': 1 });
+// workerSchema.index({ 'verificationStatus.onboardingComplete': 1 });
+// workerSchema.index({ organizations: 1 });
+
+/**
+ * Add indexes for faster queries
+ */
 workerSchema.index({ skills: 1 });
 workerSchema.index({ serviceAreas: 1 });
+workerSchema.index({ languages: 1 });
 workerSchema.index({ 'hourlyRate.baseRate': 1 });
 workerSchema.index({ 'verificationStatus.onboardingComplete': 1 });
 workerSchema.index({ organizations: 1 });
+workerSchema.index({ 'ratings.average': -1 });
+workerSchema.index({ firstName: 'text', lastName: 'text', bio: 'text' });
+workerSchema.index({ 'availability.weekdays.day': 1, 'availability.weekdays.available': 1 });
+workerSchema.index({ 
+  'verificationStatus.identityVerified': 1, 
+  'verificationStatus.policeCheckVerified': 1, 
+  'verificationStatus.ndisWorkerScreeningVerified': 1 
+});
 
 /**
  * Create and export the Support Worker model
