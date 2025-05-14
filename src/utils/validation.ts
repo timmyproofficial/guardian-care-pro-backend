@@ -4,7 +4,17 @@
  */
 
 import Joi from 'joi';
-import { UserRole } from '../types/user.types';
+import { UserRole, Gender, NotificationPreference } from '../types/user.types';
+import { 
+  ShiftStatus, 
+  ShiftType, 
+  RecurrencePattern, 
+  CancellationReason,
+  ServiceType,
+  LocationType,
+  TimesheetStatus
+} from '../types/shift.types';
+import { SubscriptionTier } from '../types/payment.types';
 import { password } from './custom-validators';
 
 /**
@@ -72,7 +82,7 @@ export const userValidation = {
     firstName: Joi.string(),
     lastName: Joi.string(),
     phone: Joi.string(),
-    gender: Joi.string(),
+    gender: Joi.string().valid(...Object.values(Gender)),
     dateOfBirth: Joi.date(),
     address: Joi.object({
       street: Joi.string().required(),
@@ -81,8 +91,7 @@ export const userValidation = {
       postalCode: Joi.string().required(),
       country: Joi.string().required(),
     }),
-    bio: Joi.string().max(500),
-    notificationPreferences: Joi.string(),
+    notificationPreferences: Joi.string().valid(...Object.values(NotificationPreference)),
   }),
 
   // Update user password
@@ -129,12 +138,14 @@ export const workerValidation = {
   // Update worker profile
   updateWorker: Joi.object({
     skills: Joi.array().items(Joi.string()),
+    bio: Joi.string().max(500),
     qualifications: Joi.array().items(
       Joi.object({
         title: Joi.string().required(),
         issuer: Joi.string().required(),
         issueDate: Joi.date().required(),
         expiryDate: Joi.date(),
+        verified: Joi.boolean(),
       })
     ),
     experience: Joi.array().items(
@@ -179,33 +190,6 @@ export const workerValidation = {
       })
     ).required(),
     unavailableDates: Joi.array().items(Joi.date()),
-  }),
-
-  // Process onboarding fee
-  processOnboardingFee: Joi.object({
-    paymentToken: Joi.string().required(),
-  }),
-};
-
-/**
- * Document validation schemas
- */
-export const documentValidation = {
-  // Upload document
-  uploadDocument: Joi.object({
-    documentType: Joi.string().required(),
-    title: Joi.string().required(),
-    description: Joi.string(),
-    issuingAuthority: Joi.string(),
-    referenceNumber: Joi.string(),
-    issueDate: Joi.date(),
-    expiryDate: Joi.date(),
-  }),
-
-  // Verify document
-  verifyDocument: Joi.object({
-    status: Joi.string().required().valid('approved', 'rejected', 'pending'),
-    notes: Joi.string(),
   }),
 };
 
@@ -301,55 +285,43 @@ export const rateTimeBandValidation = {
 export const shiftValidation = {
   // Create shift
   createShift: Joi.object({
-    participantId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+    organizationId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
     workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-    serviceType: Joi.string().required(),
+    serviceType: Joi.string().required().valid(...Object.values(ServiceType)),
     startTime: Joi.date().required(),
     endTime: Joi.date().required().greater(Joi.ref('startTime')),
-    locationType: Joi.string().required().valid('inPerson', 'virtual'),
+    locationType: Joi.string().required().valid(...Object.values(LocationType)),
     address: Joi.string().when('locationType', {
-      is: 'inPerson',
+      is: LocationType.IN_PERSON,
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
-    virtualLink: Joi.string().when('locationType', {
-      is: 'virtual',
-      then: Joi.required(),
-      otherwise: Joi.optional(),
-    }),
-    shiftType: Joi.string().required().valid('directBooking', 'openRequest'),
-    requiresSupervision: Joi.boolean().required(),
-    supervisingOrganizationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    shiftType: Joi.string().required().valid(...Object.values(ShiftType)),
+    requiresSupervision: Joi.boolean(),
     specialInstructions: Joi.string(),
     recurrence: Joi.object({
-      pattern: Joi.string().required().valid('none', 'daily', 'weekly', 'biweekly', 'monthly'),
+      pattern: Joi.string().required().valid(...Object.values(RecurrencePattern)),
       occurrences: Joi.number().integer().min(1).max(50),
       endDate: Joi.date().greater(Joi.ref('...startTime')),
+    }).custom((value, helpers) => {
+      if (value.pattern !== RecurrencePattern.NONE && !value.occurrences && !value.endDate) {
+        return helpers.error('Recurrence must include either occurrences or endDate');
+      }
+      return value;
     }),
-  }).custom((value, helpers) => {
-    if (value.recurrence 
-      && value.recurrence.pattern 
-      !== 'none' 
-      && !value.recurrence.occurrences 
-      && !value.recurrence.endDate) 
-    {
-      return helpers.error('Recurrence must include either occurrences or endDate');
-    }
-    return value;
   }),
 
   // Update shift
   updateShift: Joi.object({
     workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    serviceType: Joi.string().valid(...Object.values(ServiceType)),
     startTime: Joi.date(),
     endTime: Joi.date(),
-    locationType: Joi.string().valid('inPerson', 'virtual'),
+    locationType: Joi.string().valid(...Object.values(LocationType)),
     address: Joi.string(),
-    virtualLink: Joi.string(),
     requiresSupervision: Joi.boolean(),
-    supervisingOrganizationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     specialInstructions: Joi.string(),
-    status: Joi.string().valid('open', 'pending', 'confirmed', 'inProgress', 'completed', 'cancelled'),
+    status: Joi.string().valid(...Object.values(ShiftStatus)),
     updateRecurring: Joi.boolean(),
   }).custom((value, helpers) => {
     if (value.endTime && value.startTime && new Date(value.endTime) <= new Date(value.startTime)) {
@@ -358,9 +330,20 @@ export const shiftValidation = {
     return value;
   }),
 
+  // Respond to shift
+  respondToShift: Joi.object({
+    accept: Joi.boolean().required(),
+    declineReason: Joi.string().when('accept', {
+      is: false,
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
+  }),
+
   // Cancel shift
   cancelShift: Joi.object({
-    reason: Joi.string().required(),
+    reason: Joi.string().required().valid(...Object.values(CancellationReason)),
+    note: Joi.string(),
   }),
 };
 
@@ -370,21 +353,19 @@ export const shiftValidation = {
 export const timesheetValidation = {
   // Submit timesheet
   submitTimesheet: Joi.object({
+    shiftId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
     actualStartTime: Joi.date().required(),
     actualEndTime: Joi.date().required().greater(Joi.ref('actualStartTime')),
+    extraTime: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
       Joi.object({
+        title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
-        receiptUrl: Joi.string(),
+        receiptUrl: Joi.string().uri(),
       })
     ),
-    incidentReport: Joi.object({
-      description: Joi.string().required(),
-      severity: Joi.string().required().valid('low', 'medium', 'high'),
-      interventionTaken: Joi.string().required(),
-    }),
   }),
 
   // Reject timesheet
@@ -396,19 +377,40 @@ export const timesheetValidation = {
   reviseTimesheet: Joi.object({
     actualStartTime: Joi.date(),
     actualEndTime: Joi.date().greater(Joi.ref('actualStartTime')),
+    extraTime: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
       Joi.object({
+        title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
-        receiptUrl: Joi.string(),
+        receiptUrl: Joi.string().uri(),
       })
     ),
-    incidentReport: Joi.object({
-      description: Joi.string().required(),
-      severity: Joi.string().required().valid('low', 'medium', 'high'),
-      interventionTaken: Joi.string().required(),
+  }).custom((value, helpers) => {
+    // Ensure at least one field is being updated
+    if (!value.actualStartTime && !value.actualEndTime && 
+        value.extraTime === undefined && !value.notes && !value.expenses) {
+      return helpers.error('At least one field must be updated');
+    }
+    return value;
+  }),
+  
+  // Admin update timesheet status
+  adminUpdateTimesheet: Joi.object({
+    status: Joi.string().valid(...Object.values(TimesheetStatus)),
+    reason: Joi.string().when('status', {
+      is: TimesheetStatus.REJECTED,
+      then: Joi.required(),
+      otherwise: Joi.optional(),
     }),
+    isPaid: Joi.boolean(),
+  }).custom((value, helpers) => {
+    // Ensure at least one field is being updated
+    if (value.status === undefined && value.isPaid === undefined) {
+      return helpers.error('At least one field must be provided for update');
+    }
+    return value;
   }),
 };
 
@@ -418,7 +420,7 @@ export const timesheetValidation = {
 export const subscriptionValidation = {
   // Create/update subscription
   createSubscription: Joi.object({
-    tier: Joi.string().required().valid('basic', 'standard', 'premium'),
+    tier: Joi.string().required().valid(...Object.values(SubscriptionTier)),
     paymentMethod: Joi.string().required().valid('creditCard', 'directDebit', 'bankTransfer', 'paypal', 'ndis'),
     autoRenew: Joi.boolean().required(),
     paymentToken: Joi.string().when('paymentMethod', {
