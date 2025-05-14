@@ -34,12 +34,11 @@ export class NotificationService {
       const endTime = new Date(shift.endTime).toLocaleString();
       
       // Create notification message
-      const message = `${participantName} has assigned you a new shift 
-      (ID: ${shift.shiftId}) from ${startTime} to ${endTime}. 
-      Please confirm or decline this shift.`;
+      const message = `${participantName} has assigned you a new shift (ID: ${shift.shiftId}) 
+      from ${startTime} to ${endTime}. Please confirm or decline this shift.`;
       
       // Log notification for now (would be sent via actual notification system)
-      logger.info(`Notification to worker ${worker._id}: ${message}`);
+      logger.info(`Notification to worker ${worker._id.toString()}: ${message}`);
       
       // TODO: Implement actual notification sending
       // e.g. emailService.sendEmail(worker.email, 'New Shift Assignment', message)
@@ -67,7 +66,7 @@ export class NotificationService {
       const message = `${workerName} has confirmed your shift (ID: ${shift.shiftId}) on ${startTime}.`;
       
       // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      logger.info(`Notification to participant ${participant._id.toString()}: ${message}`);
       
       // TODO: Implement actual notification sending
     } catch (error) {
@@ -97,7 +96,7 @@ export class NotificationService {
       }
       
       // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      logger.info(`Notification to participant ${participant._id.toString()}: ${message}`);
       
       // TODO: Implement actual notification sending
     } catch (error) {
@@ -117,8 +116,8 @@ export class NotificationService {
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
       // Create notification message
-      const message = `${workerName} has marked shift (ID: ${shift.shiftId}) 
-      as completed. A timesheet will be submitted soon.`;
+      const message = `${workerName} has marked shift (ID: ${shift.shiftId}) as completed. 
+      A timesheet will be submitted soon.`;
       
       // Log notification for now
       logger.info(`Notification to participant ${participant._id}: ${message}`);
@@ -263,9 +262,8 @@ export class NotificationService {
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
       
       // Create notification message
-      const message = `${participantName} 
-      has approved your timesheet for shift ${timesheet.shiftIdRef}. 
-      The payment will be processed accordingly.`;
+      const message = `${participantName} has approved your timesheet for shift 
+      ${timesheet.shiftIdRef}. The payment will be processed accordingly.`;
       
       // Log notification for now
       logger.info(`Notification to worker ${worker._id}: ${message}`);
@@ -315,8 +313,7 @@ export class NotificationService {
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
       // Create notification message
-      const message = `${workerName} 
-      has revised the timesheet for shift 
+      const message = `${workerName} has revised the timesheet for shift 
       ${timesheet.shiftIdRef}. Please review the updated timesheet.`;
       
       // Log notification for now
