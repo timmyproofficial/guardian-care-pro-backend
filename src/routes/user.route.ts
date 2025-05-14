@@ -62,6 +62,14 @@ router.get(
   userController.getUserByEmail
 );
 
+// Admin routes for role-specific updates
+router.patch(
+  '/:role/:userId',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.updateUserByRoleAndId
+);
+
 router.patch(
   '/:userId',
   authenticate,

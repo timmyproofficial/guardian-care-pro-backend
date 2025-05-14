@@ -8,7 +8,7 @@ import httpStatus from 'http-status';
 import { userService } from '../services/user.service';
 import { successResponse, errorResponse } from '../utils/api-response';
 import { AuthenticatedRequest } from '@/middlewares/auth.middleware';
-import { UserStatus } from '../types/user.types';
+import { UserRole, UserStatus } from '../types/user.types';
 import fs from 'fs';
 
 export const userController = {
@@ -77,18 +77,83 @@ export const userController = {
   },
 
   /**
-   * Update current user profile
+   * Update current user profile based on role
    * @route PATCH /api/users/profile
    */
   updateProfile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Unauthorized: User not found on request' });
+        return res.status(httpStatus.UNAUTHORIZED).json({ 
+          message: 'Unauthorized: User not found on request' 
+        });
       }
   
-      const userId = req.user._id;
-      const user = await userService.updateUserById(userId.toString(), req.body);
-      return res.json(successResponse({ user }, 'User profile updated successfully'));
+      const userId = req.user._id.toString();
+      const userRole = req.user.role;
+      let updatedUser;
+      
+      // Route to the appropriate service method based on user role
+      switch (userRole) {
+        case UserRole.SUPPORT_WORKER:
+          updatedUser = await userService.updateWorkerById(userId, req.body);
+          break;
+        case UserRole.PARTICIPANT:
+          updatedUser = await userService.updateParticipantById(userId, req.body);
+          break;
+        case UserRole.ADMIN:
+          updatedUser = await userService.updateAdminById(userId, req.body);
+          break;
+        case UserRole.GUARDIAN:
+          // Add method for guardian if needed
+          updatedUser = await userService.updateUserById(userId, req.body);
+          break;
+        default:
+          updatedUser = await userService.updateUserById(userId, req.body);
+      }
+      
+      return res.json(successResponse({ user: updatedUser }, 'User profile updated successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+  
+  /**
+   * Update specific user by ID and role (admin function)
+   * @route PATCH /api/users/:role/:userId
+   */
+  updateUserByRoleAndId: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { role, userId } = req.params;
+      let updatedUser;
+      
+      switch (role) {
+        case UserRole.SUPPORT_WORKER:
+          updatedUser = await userService.updateWorkerById(userId, req.body);
+          break;
+        case UserRole.PARTICIPANT:
+          updatedUser = await userService.updateParticipantById(userId, req.body);
+          break;
+        case UserRole.ADMIN:
+          updatedUser = await userService.updateAdminById(userId, req.body);
+          break;
+        case UserRole.GUARDIAN:
+          // Add method for guardian if needed
+          updatedUser = await userService.updateUserById(userId, req.body);
+          break;
+        default:
+          return res.status(httpStatus.BAD_REQUEST).json(
+            errorResponse('Invalid user role', httpStatus.BAD_REQUEST)
+          );
+      }
+      
+      if (!updatedUser) {
+        return res.status(httpStatus.NOT_FOUND).json(
+          errorResponse('User not found', httpStatus.NOT_FOUND)
+        );
+      }
+      
+      return res.json(successResponse({ user: updatedUser }, 'User updated successfully'));
     } catch (error) {
       next(error);
       return;
