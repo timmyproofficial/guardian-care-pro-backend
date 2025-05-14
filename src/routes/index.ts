@@ -10,7 +10,7 @@ import organizationRoute from './organization.route';
 import rateTimeBandRoute from './rateTimeBand.route';
 import shiftRoute from './shift.route';
 import timesheetRoute from './timesheet.route';
-// import workerRoute from './worker.route';
+import workerRoute from './worker.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -55,6 +55,11 @@ const routes: Route[] = [
   {
     path: '/timesheets',
     route: timesheetRoute,
+    authRequired: true,
+  },
+  {
+    path: '/workers',
+    route: workerRoute,
     authRequired: true,
   },
 //   {
