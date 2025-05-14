@@ -19,6 +19,7 @@ import { generateShiftId } from '../utils/generators';
  * Defines the structure of a shift document
  */
 export interface IShift extends Document {
+  _id: mongoose.Types.ObjectId;
   shiftId: string;                           // Unique shift identifier
   organizationId: mongoose.Types.ObjectId;   // Organization this shift belongs to
   participantId: mongoose.Types.ObjectId;    // Participant who created the shift
