@@ -18,6 +18,8 @@ export interface ServiceAgreement {
     rateTimeBandId: mongoose.Types.ObjectId;
     hourlyRate: number;
   }[];
+  // Distance travel rate per kilometer
+  distanceTravelRate: number;
   startDate: Date;
   endDate?: Date;
   termsAccepted: boolean;
@@ -30,6 +32,8 @@ export interface ProposedRate {
     rateTimeBandId: mongoose.Types.ObjectId;
     hourlyRate: number;
   }[];
+  // Distance travel rate per kilometer
+  distanceTravelRate: number;
 }
 
 export interface WorkerInvite {
@@ -109,6 +113,12 @@ const organizationSchema = new Schema<IOrganization>(
             min: 0
           }
         }],
+        distanceTravelRate: {
+          type: Number,
+          required: true,
+          min: 0,
+          default: 0
+        },
         startDate: {
           type: Date,
           required: true,
@@ -167,7 +177,13 @@ const organizationSchema = new Schema<IOrganization>(
             required: true,
             min: 0
           }
-        }]
+        }],
+        distanceTravelRate: {
+          type: Number,
+          required: true,
+          min: 0,
+          default: 0
+        }
       },
       notes: {
         type: String
@@ -194,6 +210,7 @@ const organizationSchema = new Schema<IOrganization>(
           },
           hourlyRate: Number
         }],
+        distanceTravelRate: Number,
         startDate: Date,
         endDate: Date,
         termsAccepted: Boolean,
