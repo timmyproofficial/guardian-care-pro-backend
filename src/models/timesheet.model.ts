@@ -7,6 +7,15 @@ import mongoose, { Document, Schema } from 'mongoose';
 import { TimesheetStatus } from '../types/shift.types';
 
 /**
+ * Enum for expense payer type
+ * Tracks who paid for an expense
+ */
+export enum ExpensePayer {
+  PARTICIPANT = 'participant',
+  SUPPORT_WORKER = 'supportWorker'
+}
+
+/**
  * Expense interface
  * Structure for tracking expenses during a shift
  */
@@ -15,6 +24,7 @@ export interface Expense {
   description: string;
   amount: number;
   receiptUrl?: string;
+  payer: ExpensePayer; // Who paid for the expense
 }
 
 /**
@@ -48,17 +58,25 @@ export interface ITimesheet extends Document {
   actualEndTime: Date;                        // Actual time the shift ended
   extraTime: number;                          // Additional minutes beyond scheduled end time
   
+  // Distance Travel
+  distanceTravelKm: number;                   // Distance traveled in kilometers
+  distanceTravelRate: number;                 // Rate per kilometer as per service agreement
+  distanceTravelAmount: number;               // Total amount for distance travel
+  
   // Notes and feedback
   notes?: string;                             // Notes about the shift
   
   // Expenses
   expenses: Expense[];                        // List of expenses incurred
+  participantExpensesTotal: number;           // Sum of expenses paid by participant
+  workerExpensesTotal: number;                // Sum of expenses paid by worker
   totalExpenses: number;                      // Sum of all expenses
   
   // Payment calculation
   rateCalculations: RateCalculation[];        // Breakdown of rate calculations
   subtotal: number;                           // Total for services before expenses
-  totalAmount: number;                        // Total amount including expenses
+  totalAmount: number;                        // Total amount including service fees and distance travel
+  grandTotal: number;                         // Total amount including expenses
   
   // Status tracking
   status: TimesheetStatus;                    // Status of the timesheet
@@ -131,6 +149,21 @@ const timesheetSchema = new Schema<ITimesheet>(
       default: 0,
       min: 0
     },
+    distanceTravelKm: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    distanceTravelRate: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    distanceTravelAmount: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     notes: {
       type: String
     },
@@ -150,8 +183,24 @@ const timesheetSchema = new Schema<ITimesheet>(
       },
       receiptUrl: {
         type: String
+      },
+      payer: {
+        type: String,
+        enum: Object.values(ExpensePayer),
+        required: true,
+        default: ExpensePayer.PARTICIPANT
       }
     }],
+    participantExpensesTotal: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
+    workerExpensesTotal: {
+      type: Number,
+      default: 0,
+      min: 0
+    },
     totalExpenses: {
       type: Number,
       default: 0,
@@ -189,6 +238,11 @@ const timesheetSchema = new Schema<ITimesheet>(
       min: 0
     },
     totalAmount: {
+      type: Number,
+      required: true,
+      min: 0
+    },
+    grandTotal: {
       type: Number,
       required: true,
       min: 0
