@@ -26,6 +26,16 @@ const storage = new CloudinaryStorage({
   } as any,
 });
 
+// Configure CloudinaryStorage for multer
+const receiptStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'receipt-images',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif'],
+    // transformation: [{ width: 500, height: 500, crop: 'limit' }],
+  } as any,
+});
+
 // Configure multer for document uploads
 const documentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
@@ -61,6 +71,30 @@ export const uploadProfileImage = async (
 };
 
 /**
+ * Upload receipt image to Cloudinary
+ * @param filePath Path to the temporary file
+ * @param receiptId Unique ID for the receipt (can be shift ID + timestamp)
+ * @returns Cloudinary upload result
+ */
+export const uploadReceiptImage = async (filePath: string, receiptId: string) => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'receipt_images',
+      public_id: `receipt_${receiptId}`,
+      overwrite: true,
+      transformation: [
+        { width: 1000, height: 1000, crop: 'limit' }
+      ]
+    });
+
+    return result;
+  } catch (error) {
+    logger.error('Error uploading receipt image to Cloudinary:', error);
+    throw error;
+  }
+};
+
+/**
  * Upload a document to Cloudinary
  * @param filePath - Path to the local file
  * @param documentId - Document ID for naming the file
@@ -85,6 +119,9 @@ export const uploadDocument = async (
 
 // Multer upload configuration for profile images
 export const profileUpload = multer({ storage: storage });
+
+// Multer upload configuration for profile images
+export const receiptUpload = multer({ storage: receiptStorage });
 
 // Multer upload configuration for documents
 export const documentUpload = multer({ storage: documentStorage });

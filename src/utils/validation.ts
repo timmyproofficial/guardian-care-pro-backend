@@ -214,7 +214,8 @@ export const organizationValidation = {
           rateTimeBandId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
           hourlyRate: Joi.number().required().min(0)
         })
-      ).required()
+      ).required(),
+      distanceTravelRate: Joi.number().min(0).required()
     }).required(),
     notes: Joi.string()
   }),
@@ -236,6 +237,7 @@ export const organizationValidation = {
           hourlyRate: Joi.number().required().min(0)
         })
       ).required(),
+      distanceTravelRate: Joi.number().min(0).required(), // Add distance travel rate
       startDate: Joi.date().required(),
       endDate: Joi.date(),
       termsAccepted: Joi.boolean().required().valid(true),
@@ -357,13 +359,14 @@ export const timesheetValidation = {
     shiftId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
     actualStartTime: Joi.date().required(),
     actualEndTime: Joi.date().required().greater(Joi.ref('actualStartTime')),
-    extraTime: Joi.number().min(0),
+    distanceTravelKm: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
       Joi.object({
         title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
+        payer: Joi.string().valid('participant', 'supportWorker').required(),
         receiptUrl: Joi.string().uri(),
       })
     ),
@@ -378,20 +381,21 @@ export const timesheetValidation = {
   reviseTimesheet: Joi.object({
     actualStartTime: Joi.date(),
     actualEndTime: Joi.date().greater(Joi.ref('actualStartTime')),
-    extraTime: Joi.number().min(0),
+    distanceTravelKm: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
       Joi.object({
         title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
+        payer: Joi.string().valid('participant', 'supportWorker').required(),
         receiptUrl: Joi.string().uri(),
       })
     ),
   }).custom((value, helpers) => {
     // Ensure at least one field is being updated
     if (!value.actualStartTime && !value.actualEndTime && 
-        value.extraTime === undefined && !value.notes && !value.expenses) {
+        value.distanceTravelKm === undefined && !value.notes && !value.expenses) {
       return helpers.error('At least one field must be updated');
     }
     return value;

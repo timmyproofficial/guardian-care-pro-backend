@@ -6,7 +6,7 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import moment from 'moment';
-import Timesheet, { ITimesheet, Expense, RateCalculation } from '../models/timesheet.model';
+import Timesheet, { ITimesheet, Expense, RateCalculation, ExpensePayer } from '../models/timesheet.model';
 import Shift from '../models/shift.model';
 import Organization from '../models/organization.model';
 import User from '../models/user.model';
@@ -16,6 +16,7 @@ import { ShiftStatus, TimesheetStatus } from '../types/shift.types';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 import { NotificationService } from './notification.service';
+import { uploadReceiptImage } from '../utils/cloudinary';
 
 /**
  * Interface for timesheet creation input
@@ -24,9 +25,9 @@ interface CreateTimesheetInput {
   shiftId: string;
   actualStartTime: Date;
   actualEndTime: Date;
-  extraTime?: number; // in minutes
+  distanceTravelKm?: number; // Added distance travel field
   notes?: string;
-  expenses?: Expense[];
+  expenses?: Partial<Expense>[];
 }
 
 /**
@@ -38,6 +39,14 @@ interface ServiceAgreementRate {
 }
 
 /**
+ * Interface for expense with file
+ */
+// interface ExpenseWithFile extends Omit<Expense, 'receiptUrl'> {
+//   receiptFile?: Express.Multer.File;
+//   receiptUrl?: string;
+// }
+
+/**
  * Timesheet service implementation
  */
 export const timesheetService = {
@@ -46,7 +55,8 @@ export const timesheetService = {
    */
   createTimesheet: async (
     workerId: string,
-    timesheetData: CreateTimesheetInput
+    timesheetData: CreateTimesheetInput,
+    files?: Express.Multer.File[]
   ): Promise<ITimesheet> => {
     try {
       // Get the shift
@@ -101,8 +111,66 @@ export const timesheetService = {
         );
       }
       
-      // Calculate extra time
-      const extraTimeMinutes = timesheetData.extraTime || 0;
+      // Calculate extra time automatically by comparing scheduled and actual times
+      const scheduledStart = moment(shift.startTime);
+      const scheduledEnd = moment(shift.endTime);
+      const actualStart = moment(timesheetData.actualStartTime);
+      const actualEnd = moment(timesheetData.actualEndTime);
+      
+      // Calculate the difference in minutes
+      const scheduledDuration = scheduledEnd.diff(scheduledStart, 'minutes');
+      const actualDuration = actualEnd.diff(actualStart, 'minutes');
+      
+      // Extra time is the positive difference (if actual > scheduled)
+      const extraTimeMinutes = Math.max(0, actualDuration - scheduledDuration);
+      
+      // Process distance travel
+      const distanceTravelKm = timesheetData.distanceTravelKm || 0;
+      const distanceTravelRate = workerAgreement.serviceAgreement.distanceTravelRate || 0;
+      const distanceTravelAmount = distanceTravelKm * distanceTravelRate;
+      
+      // Process expenses with files if provided
+      const expenses: Expense[] = [];
+      let participantExpensesTotal = 0;
+      let workerExpensesTotal = 0;
+      
+      if (timesheetData.expenses && timesheetData.expenses.length > 0) {
+        // Map expenses with files
+        for (let i = 0; i < timesheetData.expenses.length; i++) {
+          const expense = timesheetData.expenses[i];
+          
+          // Find corresponding file if it exists
+          let receiptUrl;
+          if (files && files.length > 0) {
+            const file = files.find(f => f.fieldname === `expenses[${i}][receiptFile]`);
+            if (file) {
+              // Upload to cloudinary
+              const uploadResult = await uploadReceiptImage(file.path, `${shift.shiftId}-expense-${i}`);
+              receiptUrl = uploadResult.secure_url;
+            }
+          }
+          
+          // Create expense object
+          const expenseObj: Expense = {
+            title: expense.title!,
+            description: expense.description!,
+            amount: expense.amount!,
+            payer: expense.payer || ExpensePayer.PARTICIPANT,
+            receiptUrl
+          };
+          
+          // Add to totals based on payer
+          if (expenseObj.payer === ExpensePayer.PARTICIPANT) {
+            participantExpensesTotal += expenseObj.amount;
+          } else {
+            workerExpensesTotal += expenseObj.amount;
+          }
+          
+          expenses.push(expenseObj);
+        }
+      }
+      
+      const totalExpenses = participantExpensesTotal + workerExpensesTotal;
       
       // Calculate rate breakdown based on time bands
       const { rateCalculations, subtotal } = await calculateRateBreakdown(
@@ -113,9 +181,11 @@ export const timesheetService = {
         workerAgreement.serviceAgreement.shiftRates
       );
       
-      // Calculate total expenses
-      const expenses = timesheetData.expenses || [];
-      const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+      // Calculate total amount (service fees + distance travel)
+      const totalAmount = subtotal + distanceTravelAmount;
+      
+      // Calculate grand total (total amount + expenses)
+      const grandTotal = totalAmount + totalExpenses;
       
       // Create timesheet
       const timesheet = await Timesheet.create({
@@ -129,12 +199,18 @@ export const timesheetService = {
         actualStartTime: timesheetData.actualStartTime,
         actualEndTime: timesheetData.actualEndTime,
         extraTime: extraTimeMinutes,
+        distanceTravelKm,
+        distanceTravelRate,
+        distanceTravelAmount,
         notes: timesheetData.notes,
         expenses,
+        participantExpensesTotal,
+        workerExpensesTotal,
         totalExpenses,
         rateCalculations,
         subtotal,
-        totalAmount: subtotal + totalExpenses,
+        totalAmount,
+        grandTotal,
         status: TimesheetStatus.PENDING
       });
       
@@ -430,10 +506,11 @@ export const timesheetService = {
     updateData: {
       actualStartTime?: Date;
       actualEndTime?: Date;
-      extraTime?: number;
+      distanceTravelKm?: number;
       notes?: string;
-      expenses?: Expense[];
-    }
+      expenses?: Partial<Expense>[];
+    },
+    files?: Express.Multer.File[]
   ): Promise<ITimesheet> => {
     try {
       // Get the timesheet
@@ -481,18 +558,97 @@ export const timesheetService = {
       // Prepare update data
       const actualStartTime = updateData.actualStartTime || timesheet.actualStartTime;
       const actualEndTime = updateData.actualEndTime || timesheet.actualEndTime;
-      const extraTime = updateData.extraTime !== undefined ? updateData.extraTime : timesheet.extraTime;
-      const expenses = updateData.expenses || timesheet.expenses;
+      
+      // Calculate extra time automatically if time has changed
+      let extraTimeMinutes = timesheet.extraTime;
+      
+      if (updateData.actualStartTime || updateData.actualEndTime) {
+        // Get shift for scheduled times
+        const shift = await Shift.findById(timesheet.shiftId);
+        
+        if (!shift) {
+          throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
+        }
+        
+        // Calculate new extra time
+        const scheduledStart = moment(shift.startTime);
+        const scheduledEnd = moment(shift.endTime);
+        const actualStart = moment(actualStartTime);
+        const actualEnd = moment(actualEndTime);
+        
+        // Calculate the difference in minutes
+        const scheduledDuration = scheduledEnd.diff(scheduledStart, 'minutes');
+        const actualDuration = actualEnd.diff(actualStart, 'minutes');
+        
+        // Extra time is the positive difference (if actual > scheduled)
+        extraTimeMinutes = Math.max(0, actualDuration - scheduledDuration);
+      }
+      
+      // Update distance travel if provided
+      const distanceTravelKm = updateData.distanceTravelKm !== undefined ? 
+        updateData.distanceTravelKm : timesheet.distanceTravelKm;
+      const distanceTravelRate = workerAgreement.serviceAgreement.distanceTravelRate || 0;
+      const distanceTravelAmount = distanceTravelKm * distanceTravelRate;
+      
+      // Process expenses if provided
+      let expenses = [...timesheet.expenses];
+      let participantExpensesTotal = timesheet.participantExpensesTotal;
+      let workerExpensesTotal = timesheet.workerExpensesTotal;
+      
+      if (updateData.expenses) {
+        // Reset expense totals
+        participantExpensesTotal = 0;
+        workerExpensesTotal = 0;
+        
+        // New expenses array
+        expenses = [];
+        
+        // Process each expense
+        for (let i = 0; i < updateData.expenses.length; i++) {
+          const expense = updateData.expenses[i];
+          
+          // Find corresponding file if it exists
+          let receiptUrl = expense.receiptUrl;
+          if (files && files.length > 0) {
+            const file = files.find(f => f.fieldname === `expenses[${i}][receiptFile]`);
+            if (file) {
+              // Upload to cloudinary
+              const uploadResult = await uploadReceiptImage(file.path, `${timesheet.shiftIdRef}-expense-${i}-revised`);
+              receiptUrl = uploadResult.secure_url;
+            }
+          }
+          
+          // Create expense object
+          const expenseObj: Expense = {
+            title: expense.title!,
+            description: expense.description!,
+            amount: expense.amount!,
+            payer: expense.payer || ExpensePayer.PARTICIPANT,
+            receiptUrl
+          };
+          
+          // Add to totals based on payer
+          if (expenseObj.payer === ExpensePayer.PARTICIPANT) {
+            participantExpensesTotal += expenseObj.amount;
+          } else {
+            workerExpensesTotal += expenseObj.amount;
+          }
+          
+          expenses.push(expenseObj);
+        }
+      }
+      
+      const totalExpenses = participantExpensesTotal + workerExpensesTotal;
       
       // Recalculate rates if time changed
       let rateCalculations = timesheet.rateCalculations;
       let subtotal = timesheet.subtotal;
       
-      if (updateData.actualStartTime || updateData.actualEndTime || updateData.extraTime !== undefined) {
+      if (updateData.actualStartTime || updateData.actualEndTime) {
         const result = await calculateRateBreakdown(
           actualStartTime,
           actualEndTime,
-          extraTime,
+          extraTimeMinutes,
           workerAgreement.serviceAgreement.baseHourlyRate,
           workerAgreement.serviceAgreement.shiftRates
         );
@@ -501,8 +657,11 @@ export const timesheetService = {
         subtotal = result.subtotal;
       }
       
-      // Recalculate total expenses if expenses changed
-      const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+      // Calculate total amount (service fees + distance travel)
+      const totalAmount = subtotal + distanceTravelAmount;
+      
+      // Calculate grand total (total amount + expenses)
+      const grandTotal = totalAmount + totalExpenses;
       
       // Update timesheet
       const revisedTimesheet = await Timesheet.findByIdAndUpdate(
@@ -510,13 +669,19 @@ export const timesheetService = {
         {
           actualStartTime,
           actualEndTime,
-          extraTime,
+          extraTime: extraTimeMinutes,
+          distanceTravelKm,
+          distanceTravelRate,
+          distanceTravelAmount,
           notes: updateData.notes || timesheet.notes,
           expenses,
+          participantExpensesTotal,
+          workerExpensesTotal,
           totalExpenses,
           rateCalculations,
           subtotal,
-          totalAmount: subtotal + totalExpenses,
+          totalAmount,
+          grandTotal,
           status: TimesheetStatus.REVISED,
           rejectionReason: undefined // Clear previous rejection reason
         },

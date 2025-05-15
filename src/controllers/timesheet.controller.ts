@@ -13,6 +13,7 @@ import { TimesheetStatus } from '../types/shift.types';
 import { successResponse, errorResponse } from '../utils/api-response';
 import Timesheet, { ITimesheet } from '../models/timesheet.model';
 import logger from '../utils/logger';
+import fs from 'fs';
 
 export const timesheetController = {
   /**
@@ -120,10 +121,30 @@ export const timesheetController = {
         shiftId,
         actualStartTime,
         actualEndTime,
-        extraTime,
+        distanceTravelKm, // New field
         notes,
         expenses
       } = req.body;
+      
+      // Process expenses data if provided
+      let parsedExpenses;
+      if (expenses) {
+        // Parse expenses data from form-data if needed
+        if (typeof expenses === 'string') {
+          try {
+            parsedExpenses = JSON.parse(expenses);
+          } catch (error) {
+            return res.status(httpStatus.BAD_REQUEST).json(
+              errorResponse('Invalid expenses format', httpStatus.BAD_REQUEST)
+            );
+          }
+        } else {
+          parsedExpenses = expenses;
+        }
+      }
+      
+      // Get files from multer
+      const files = req.files as Express.Multer.File[] | undefined;
       
       const timesheet = await timesheetService.createTimesheet(
         workerId,
@@ -131,16 +152,35 @@ export const timesheetController = {
           shiftId,
           actualStartTime: new Date(actualStartTime),
           actualEndTime: new Date(actualEndTime),
-          extraTime,
+          distanceTravelKm: distanceTravelKm ? parseFloat(distanceTravelKm) : 0,
           notes,
-          expenses
-        }
+          expenses: parsedExpenses
+        },
+        files
       );
+      
+      // Clean up temporary files if needed
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        });
+      }
       
       return res.status(httpStatus.CREATED).json(
         successResponse({ timesheet }, 'Timesheet created successfully')
       );
     } catch (error) {
+      // Clean up temporary files in case of error
+      if (req.files) {
+        const files = req.files as Express.Multer.File[];
+        files.forEach(file => {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        });
+      }
       return next(error);
     }
   },
@@ -392,13 +432,35 @@ export const timesheetController = {
       
       const { timesheetId } = req.params;
       const workerId = req.user._id.toString();
+      
+      // Extract and parse form data
       const {
         actualStartTime,
         actualEndTime,
-        extraTime,
+        distanceTravelKm,
         notes,
         expenses
       } = req.body;
+      
+      // Process expenses data if provided
+      let parsedExpenses;
+      if (expenses) {
+        // Parse expenses data from form-data if needed
+        if (typeof expenses === 'string') {
+          try {
+            parsedExpenses = JSON.parse(expenses);
+          } catch (error) {
+            return res.status(httpStatus.BAD_REQUEST).json(
+              errorResponse('Invalid expenses format', httpStatus.BAD_REQUEST)
+            );
+          }
+        } else {
+          parsedExpenses = expenses;
+        }
+      }
+      
+      // Get files from multer
+      const files = req.files as Express.Multer.File[] | undefined;
       
       const timesheet = await timesheetService.reviseTimesheet(
         timesheetId,
@@ -406,14 +468,33 @@ export const timesheetController = {
         {
           actualStartTime: actualStartTime ? new Date(actualStartTime) : undefined,
           actualEndTime: actualEndTime ? new Date(actualEndTime) : undefined,
-          extraTime,
+          distanceTravelKm: distanceTravelKm ? parseFloat(distanceTravelKm) : undefined,
           notes,
-          expenses
-        }
+          expenses: parsedExpenses
+        },
+        files
       );
+      
+      // Clean up temporary files if needed
+      if (files && files.length > 0) {
+        files.forEach(file => {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        });
+      }
       
       return res.json(successResponse({ timesheet }, 'Timesheet revised successfully'));
     } catch (error) {
+      // Clean up temporary files in case of error
+      if (req.files) {
+        const files = req.files as Express.Multer.File[];
+        files.forEach(file => {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        });
+      }
       return next(error);
     }
   },
