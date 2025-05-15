@@ -8,7 +8,7 @@ import { authenticate, authorize } from '../middlewares/auth.middleware';
 import validate from '../middlewares/validate.middleware';
 import { timesheetValidation } from '../utils/validation';
 import { UserRole } from '../types/user.types';
-import { uploadTimesheetData } from '@/utils/multer';
+import { uploadTimesheetData } from '../utils/multer';
 
 const router = express.Router();
 
