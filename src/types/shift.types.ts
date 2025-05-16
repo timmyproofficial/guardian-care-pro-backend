@@ -3,6 +3,8 @@
  * Includes enums and interfaces for shift management
  */
 
+import mongoose from 'mongoose';
+
 /**
  * Shift status enumeration
  * Defines the possible status values for shifts
@@ -75,36 +77,50 @@ export enum ShiftStatus {
     IN_PERSON = 'inPerson',  // At participant's address or specified location
     // VIRTUAL = 'virtual'      // Online/video call
   }
+
+  /**
+ * Worker assignment status for multi-worker shifts
+ */
+export interface WorkerAssignment {
+  workerId: mongoose.Types.ObjectId;
+  status: ShiftStatus;
+  declineReason?: string;
+  responseDate?: Date;
+  cancelledBy?: mongoose.Types.ObjectId;
+  cancellationReason?: CancellationReason;
+  cancellationNote?: string;
+}
   
   /**
    * Shift input interface
    * Data required for creating a shift
    */
   export interface ShiftInput {
-    // Basic information
-    participantId: string;
-    workerId?: string;               // Optional for open requests
-    serviceType: ServiceType;
-    startTime: Date;
-    endTime: Date;
-    
-    // Location details
-    locationType: LocationType;
-    address?: string;                // Required for in-person shifts
-    // virtualLink?: string;            // Required for virtual shifts
-    
-    // Shift configuration
-    shiftType: ShiftType;
-    // requiresSupervision: boolean;    // Whether agency oversight is required
-    specialInstructions?: string;    // Any notes or requirements
-    
-    // Recurrence (for recurring shifts)
-    recurrence?: {
-      pattern: RecurrencePattern;
-      occurrences?: number;          // Number of occurrences
-      endDate?: Date;                // End date for recurring shifts
-    };
-  }
+  // Basic information
+  participantId: string;
+  isMultiWorkerShift: boolean;       // Flag to indicate if shift requires multiple workers
+  workerId?: string;                  // Used for single-worker shifts
+  workerIds?: string[];              // Used for multi-worker shifts (up to 3)
+  serviceType: ServiceType;
+  startTime: Date;
+  endTime: Date;
+  
+  // Location details
+  locationType: LocationType;
+  address?: string;                   // Required for in-person shifts
+  
+  // Shift configuration
+  shiftType: ShiftType;
+  requiresSupervision?: boolean;      // Whether agency oversight is required
+  specialInstructions?: string;       // Any notes or requirements
+  
+  // Recurrence (for recurring shifts)
+  recurrence?: {
+    pattern: RecurrencePattern;
+    occurrences?: number;             // Number of occurrences
+    endDate?: Date;                   // End date for recurring shifts
+  };
+}
   
   /**
    * Timesheet status enumeration
