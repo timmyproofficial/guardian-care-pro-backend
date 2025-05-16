@@ -10,7 +10,8 @@ import {
   RecurrencePattern, 
   ServiceType, 
   LocationType, 
-  CancellationReason 
+  CancellationReason, 
+  WorkerAssignment
 } from '../types/shift.types';
 import { generateShiftId } from '../utils/generators';
 
@@ -23,7 +24,9 @@ export interface IShift extends Document {
   shiftId: string;                           // Unique shift identifier
   organizationId: mongoose.Types.ObjectId;   // Organization this shift belongs to
   participantId: mongoose.Types.ObjectId;    // Participant who created the shift
-  workerId?: mongoose.Types.ObjectId;        // Support worker assigned to the shift
+  isMultiWorkerShift: boolean;               // Whether shift requires multiple workers
+  workerId?: mongoose.Types.ObjectId;        // Support worker assigned to the shift (single-worker mode)
+  workerAssignments?: WorkerAssignment[];    // Support workers assigned to the shift (multi-worker mode)
   serviceType: ServiceType;                  // Type of service requested
   startTime: Date;                           // Scheduled start time
   endTime: Date;                             // Scheduled end time
@@ -78,10 +81,43 @@ const shiftSchema = new Schema<IShift>(
       ref: 'User',
       required: true
     },
+    isMultiWorkerShift: {
+      type: Boolean,
+      default: false
+    },
     workerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
+    workerAssignments: [{
+      workerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      status: {
+        type: String,
+        enum: Object.values(ShiftStatus),
+        default: ShiftStatus.PENDING
+      },
+      declineReason: {
+        type: String
+      },
+      responseDate: {
+        type: Date
+      },
+      cancelledBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      cancellationReason: {
+        type: String,
+        enum: Object.values(CancellationReason)
+      },
+      cancellationNote: {
+        type: String
+      }
+    }],
     serviceType: {
       type: String,
       enum: Object.values(ServiceType),
@@ -172,6 +208,7 @@ const shiftSchema = new Schema<IShift>(
 shiftSchema.index({ shiftId: 1 }, { unique: true });
 shiftSchema.index({ participantId: 1 });
 shiftSchema.index({ workerId: 1 });
+shiftSchema.index({ 'workerAssignments.workerId': 1 }); // Add index for worker assignments
 shiftSchema.index({ organizationId: 1 });
 shiftSchema.index({ status: 1 });
 shiftSchema.index({ startTime: 1 });
