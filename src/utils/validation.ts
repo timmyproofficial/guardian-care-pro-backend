@@ -289,7 +289,21 @@ export const shiftValidation = {
   // Create shift
   createShift: Joi.object({
     organizationId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
-    workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    isMultiWorkerShift: Joi.boolean().required(),
+    workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).when('isMultiWorkerShift', {
+      is: false,
+      then: Joi.optional(),
+      otherwise: Joi.forbidden()
+    }),
+    workerIds: Joi.array()
+    .items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
+    .min(1)
+    .max(3)
+    .when('isMultiWorkerShift', {
+      is: true,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
     serviceType: Joi.string().required().valid(...Object.values(ServiceType)),
     startTime: Joi.date().required(),
     endTime: Joi.date().required().greater(Joi.ref('startTime')),
@@ -314,9 +328,12 @@ export const shiftValidation = {
     }),
   }),
 
-  // Update shift
+  // Update shift validation schema updates
   updateShift: Joi.object({
     workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    workerIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).max(3),
     serviceType: Joi.string().valid(...Object.values(ServiceType)),
     startTime: Joi.date(),
     endTime: Joi.date(),
@@ -330,7 +347,23 @@ export const shiftValidation = {
     if (value.endTime && value.startTime && new Date(value.endTime) <= new Date(value.startTime)) {
       return helpers.error('End time must be after start time');
     }
+    
+    // Prevent updating both workerId and workerIds
+    if (value.workerId && value.workerIds) {
+      return helpers.error('Cannot update both workerId and workerIds');
+    }
+    
     return value;
+  }),
+
+  // Add new validation for multi-worker specific operations
+  respondToWorkerAssignment: Joi.object({
+    accept: Joi.boolean().required(),
+    declineReason: Joi.string().when('accept', {
+      is: false,
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
   }),
 
   // Respond to shift
