@@ -50,6 +50,7 @@ export interface ITimesheet extends Document {
   organizationId: mongoose.Types.ObjectId;    // Organization this timesheet belongs to
   participantId: mongoose.Types.ObjectId;     // Participant who created the shift
   workerId: mongoose.Types.ObjectId;          // Support worker who completed the shift
+  isMultiWorkerShift: boolean;                // Whether this is part of a multi-worker shift
   
   // Time tracking
   scheduledStartTime: Date;                   // Original scheduled start time
@@ -121,6 +122,10 @@ const timesheetSchema = new Schema<ITimesheet>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
+    },
+    isMultiWorkerShift: {
+      type: Boolean,
+      default: false
     },
     scheduledStartTime: {
       type: Date,
