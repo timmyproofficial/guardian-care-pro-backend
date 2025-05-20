@@ -8,6 +8,7 @@ import httpStatus from 'http-status';
 import { organizationService } from '../services/organization.service';
 import { successResponse, errorResponse } from '../utils/api-response';
 import { InviteStatus } from '../models/organization.model';
+import { UserRole } from '../types/user.types';
 
 // Define an interface for request with user property
 interface AuthRequest extends Request {
@@ -72,6 +73,66 @@ export const organizationController = {
       }
       
       return res.json(successResponse({ organizations }, 'Organizations retrieved successfully'));
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  /**
+ * Get organization ID for the authenticated participant
+ * @route GET /api/organizations/my-organization-id
+ */
+  getMyOrganizationId: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+      
+      // Check if user is a participant
+      if (req.user.role !== UserRole.PARTICIPANT) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only participants can access this endpoint', httpStatus.FORBIDDEN)
+        );
+      }
+      
+      const participantId = req.user._id.toString();
+      
+      // Get the organization ID
+      const organizationId = await organizationService.getOrganizationIdForParticipant(participantId);
+      
+      return res.json(successResponse({ organizationId }, 'Organization ID retrieved successfully'));
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  /**
+   * Get organization ID for a specified participant (admin only)
+   * @route GET /api/organizations/participant/:participantId/organization-id
+   */
+  getOrganizationIdForParticipant: async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+      
+      // Check if user is an admin
+      if (req.user.role !== UserRole.ADMIN) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only administrators can access this endpoint', httpStatus.FORBIDDEN)
+        );
+      }
+      
+      const { participantId } = req.params;
+      
+      // Get the organization ID
+      const organizationId = await organizationService.getOrganizationIdForParticipant(participantId);
+      
+      return res.json(successResponse({ organizationId }, 'Organization ID retrieved successfully'));
     } catch (error) {
       return next(error);
     }

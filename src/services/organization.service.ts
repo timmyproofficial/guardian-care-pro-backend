@@ -113,6 +113,30 @@ export const organizationService = {
     }
   },
 
+  /**
+ * Get organization ID for a participant
+ */
+  /**
+ * Get organization ID for a participant
+ */
+  getOrganizationIdForParticipant: async (participantId: string): Promise<string> => {
+    try {
+      // Find the organization for this participant
+      const organization = await Organization.findOne({ 
+        participantId: new mongoose.Types.ObjectId(participantId) 
+      }) as (IOrganization & { _id: mongoose.Types.ObjectId }) | null;
+      
+      if (!organization) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found for this participant');
+      }
+      
+      return organization._id.toString();
+    } catch (error) {
+      logger.error(`Error getting organization ID for participant ${participantId}:`, error);
+      throw error;
+    }
+  },
+
 /**
  * Send an invite to a support worker
  */

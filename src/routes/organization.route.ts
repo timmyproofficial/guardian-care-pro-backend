@@ -62,6 +62,22 @@ router.get(
   (req: Request, res, next) => organizationController.getWorkerInvites(req as any, res, next)
 );
 
+// Get organization ID for the authenticated participant
+router.get(
+  '/my-organization-id',
+  authenticate,
+  authorize([UserRole.PARTICIPANT]),
+  (req: Request, res, next) => organizationController.getMyOrganizationId(req as any, res, next)
+);
+
+// Get organization ID for a specified participant (admin only)
+router.get(
+  '/participant/:participantId/organization-id',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  (req: Request, res, next) => organizationController.getOrganizationIdForParticipant(req as any, res, next)
+);
+
 // Remove worker from organization (Participant or Admin)
 router.delete(
   '/:organizationId/workers/:workerId',
