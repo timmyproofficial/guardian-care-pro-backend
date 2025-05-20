@@ -351,9 +351,10 @@ export const shiftController = {
   },
 
   /**
-   * Respond to shift (worker accepts or declines)
-   * @route POST /api/shifts/:shiftId/respond
-   */
+ * Respond to shift (worker accepts or declines)
+ * Updated to handle multi-worker shifts
+ * @route POST /api/shifts/:shiftId/respond
+ */
   respondToShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
