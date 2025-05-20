@@ -18,6 +18,7 @@ import Shift, { IShift } from '../models/shift.model';
 import { successResponse, errorResponse } from '../utils/api-response';
 import mongoose from 'mongoose';
 import logger from '../utils/logger';
+import { timesheetController } from './timesheet.controller';
 
 /**
    * Helper function to get all shifts with filtering for admins
@@ -308,6 +309,90 @@ export const shiftController = {
       }
       
       return res.json(successResponse({ shifts }, 'Shifts retrieved successfully'));
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  /**
+ * Get all timesheets for a specific shift
+ * Used for multi-worker shifts to view all worker timesheets
+ * @route GET /api/shifts/:shiftId/timesheets
+ */
+  getShiftTimesheets: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+      
+      const { shiftId } = req.params;
+      
+      // Get the shift first to check permissions
+      const shift = await Shift.findById(shiftId);
+      
+      if (!shift) {
+        return res.status(httpStatus.NOT_FOUND).json(
+          errorResponse('Shift not found', httpStatus.NOT_FOUND)
+        );
+      }
+      
+      // Check permissions to view shift's timesheets
+      if (
+        req.user.role === UserRole.PARTICIPANT && 
+        shift.participantId.toString() !== req.user._id.toString()
+      ) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('You do not have permission to view timesheets for this shift', httpStatus.FORBIDDEN)
+        );
+      }
+      
+      // For workers, they can only see their own timesheet
+      if (
+        req.user.role === UserRole.SUPPORT_WORKER
+      ) {
+        if (shift.isMultiWorkerShift) {
+          // Check if worker is assigned to this shift
+          const isAssigned = (shift.workerAssignments || []).some(
+            a => a.workerId.toString() === req.user?._id.toString()
+          );
+          
+          if (!isAssigned) {
+            return res.status(httpStatus.FORBIDDEN).json(
+              errorResponse('You do not have permission to view timesheets for this shift', httpStatus.FORBIDDEN)
+            );
+          }
+        } else if (shift.workerId?.toString() !== req.user._id.toString()) {
+          return res.status(httpStatus.FORBIDDEN).json(
+            errorResponse('You do not have permission to view timesheets for this shift', httpStatus.FORBIDDEN)
+          );
+        }
+      }
+      
+      // Get timesheets for this shift
+      const timesheets = await timesheetController.getAllTimesheets({
+        shiftId: shiftId
+      });
+      
+      // For workers, filter to only show their own timesheet
+      let filteredTimesheets = timesheets;
+      if (req.user.role === UserRole.SUPPORT_WORKER) {
+        filteredTimesheets = timesheets.filter(
+          t => t.workerId.toString() === req.user!._id.toString()
+        );
+      }
+      
+      return res.json(
+        successResponse(
+          { 
+            shift, 
+            timesheets: filteredTimesheets,
+            isMultiWorkerShift: shift.isMultiWorkerShift 
+          }, 
+          'Timesheets retrieved successfully'
+        )
+      );
     } catch (error) {
       return next(error);
     }

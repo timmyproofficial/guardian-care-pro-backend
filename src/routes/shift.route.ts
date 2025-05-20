@@ -34,6 +34,13 @@ router.get(
   shiftController.getShiftById
 );
 
+// Get timesheets for a specific shift
+router.get(
+  '/:shiftId/timesheets',
+  authenticate,
+  shiftController.getShiftTimesheets
+);
+
 // Get shift by unique shift ID
 router.get(
   '/byShiftId/:shiftIdRef',
