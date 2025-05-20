@@ -17,8 +17,8 @@ import fs from 'fs';
 
 export const timesheetController = {
   /**
-   * Helper function to get all timesheets with filtering for admins
-   */
+ * Helper function to get all timesheets with filtering for admins
+ */
   getAllTimesheets: async (filter: {
     status?: TimesheetStatus;
     startDate?: Date;
@@ -27,6 +27,7 @@ export const timesheetController = {
     participantId?: string;
     organizationId?: string;
     isPaid?: boolean;
+    shiftId?: string;
   }): Promise<ITimesheet[]> => {
     try {
       const query: any = {};
@@ -52,6 +53,10 @@ export const timesheetController = {
         query.isPaid = filter.isPaid;
       }
       
+      if (filter.shiftId) {
+        query.shiftId = new mongoose.Types.ObjectId(filter.shiftId);
+      }
+      
       if (filter.startDate || filter.endDate) {
         query.actualStartTime = {};
         
@@ -70,7 +75,7 @@ export const timesheetController = {
         .populate([
           {
             path: 'shiftId',
-            select: 'shiftId serviceType'
+            select: 'shiftId serviceType isMultiWorkerShift'
           },
           {
             path: 'participantId',

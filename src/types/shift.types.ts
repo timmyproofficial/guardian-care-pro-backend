@@ -16,7 +16,8 @@ export enum ShiftStatus {
     IN_PROGRESS = 'inProgress',  // Shift is currently in progress
     COMPLETED = 'completed',     // Shift is finished
     CANCELLED = 'cancelled',     // Shift was cancelled
-    NO_SHOW = 'noShow'           // Worker didn't show up
+    NO_SHOW = 'noShow',           // Worker didn't show up
+    DECLINED = 'declined'        // Worker declined the shift
 }
   
   /**

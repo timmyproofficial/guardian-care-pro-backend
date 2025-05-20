@@ -3,14 +3,30 @@
  * Handles sending notifications to users for various events
  */
 
+import mongoose from 'mongoose';
 import { IShift } from '../models/shift.model';
 import { ITimesheet } from '../models/timesheet.model';
 import User from '../models/user.model';
 import logger from '../utils/logger';
+import { WorkerAssignment } from '@/types/shift.types';
 
 // This is a placeholder for an actual notification system
 // In a real implementation, this would connect to a notification provider
 // like Firebase Cloud Messaging, email service, SMS gateway, etc.
+
+/**
+ * Type definition to accept either IShift document or plain object
+ */
+type ShiftLike = IShift | (Record<string, any> & {
+  _id: mongoose.Types.ObjectId;
+  participantId: mongoose.Types.ObjectId;
+  workerId?: mongoose.Types.ObjectId;
+  shiftId: string;
+  startTime: Date;
+  endTime: Date;
+  isMultiWorkerShift?: boolean;
+  workerAssignments?: WorkerAssignment[];
+});
 
 /**
  * Notification service implementation
@@ -18,12 +34,18 @@ import logger from '../utils/logger';
 export class NotificationService {
   /**
    * Notify worker about a new shift assignment
-   */
-  static async notifyWorkerOfNewShift(shift: IShift): Promise<void> {
+   * Works for both single and multi-worker shifts
+  */
+  static async notifyWorkerOfNewShift(shift: ShiftLike): Promise<void> {
     try {
-      if (!shift.workerId) return;
+      // For multi-worker shifts, the workerId may be passed separately
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
       
-      const worker = await User.findById(shift.workerId);
+      if (!workerId) return;
+      
+      const worker = await User.findById(workerId);
       if (!worker) return;
       
       const participant = await User.findById(shift.participantId);
@@ -34,36 +56,50 @@ export class NotificationService {
       const endTime = new Date(shift.endTime).toLocaleString();
       
       // Create notification message
-      const message = `${participantName} has assigned you a new shift (ID: ${shift.shiftId}) 
-      from ${startTime} to ${endTime}. Please confirm or decline this shift.`;
+      let message = `${participantName} has assigned you a new shift (ID: ${shift.shiftId}) 
+      from ${startTime} to ${endTime}.`;
+      
+      if (shift.isMultiWorkerShift) {
+        message += ' This is a multi-worker shift.';
+      }
+      
+      message += ' Please confirm or decline this shift.';
       
       // Log notification for now (would be sent via actual notification system)
       logger.info(`Notification to worker ${worker._id.toString()}: ${message}`);
       
       // TODO: Implement actual notification sending
-      // e.g. emailService.sendEmail(worker.email, 'New Shift Assignment', message)
-      // or pushNotification.send(worker.deviceToken, { title: 'New Shift', body: message })
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
   }
 
   /**
-   * Notify participant about a shift confirmation
-   */
-  static async notifyParticipantOfShiftConfirmation(shift: IShift): Promise<void> {
+ * Notify participant about a shift confirmation
+ * Works for both single and multi-worker shifts
+ */
+  static async notifyParticipantOfShiftConfirmation(shift: ShiftLike): Promise<void> {
     try {
       const participant = await User.findById(shift.participantId);
       if (!participant) return;
       
-      const worker = await User.findById(shift.workerId);
+      // For multi-worker shifts, the workerId may be passed separately
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
+      
+      const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
       // Format shift details
       const startTime = new Date(shift.startTime).toLocaleString();
       
       // Create notification message
-      const message = `${workerName} has confirmed your shift (ID: ${shift.shiftId}) on ${startTime}.`;
+      let message = `${workerName} has confirmed your shift (ID: ${shift.shiftId}) on ${startTime}.`;
+      
+      if (shift.isMultiWorkerShift) {
+        message += ' This is part of your multi-worker shift.';
+      }
       
       // Log notification for now
       logger.info(`Notification to participant ${participant._id.toString()}: ${message}`);
@@ -105,19 +141,27 @@ export class NotificationService {
   }
 
   /**
-   * Notify participant about a shift completion
-   */
-  static async notifyParticipantOfShiftCompletion(shift: IShift): Promise<void> {
+ * Notify participant about a shift completion
+ */
+  static async notifyParticipantOfShiftCompletion(shift: ShiftLike): Promise<void> {
     try {
       const participant = await User.findById(shift.participantId);
       if (!participant) return;
       
-      const worker = await User.findById(shift.workerId);
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
+      
+      const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
       // Create notification message
-      const message = `${workerName} has marked shift (ID: ${shift.shiftId}) as completed. 
+      let message = `${workerName} has marked shift (ID: ${shift.shiftId}) as completed. 
       A timesheet will be submitted soon.`;
+      
+      if (shift.isMultiWorkerShift) {
+        message += ' This is part of your multi-worker shift.';
+      }
       
       // Log notification for now
       logger.info(`Notification to participant ${participant._id}: ${message}`);
@@ -129,14 +173,18 @@ export class NotificationService {
   }
 
   /**
-   * Notify participant about a shift cancellation
-   */
-  static async notifyParticipantOfShiftCancellation(shift: IShift): Promise<void> {
+ * Notify participant about a shift cancellation
+ */
+  static async notifyParticipantOfShiftCancellation(shift: ShiftLike): Promise<void> {
     try {
       const participant = await User.findById(shift.participantId);
       if (!participant) return;
       
-      const worker = await User.findById(shift.workerId);
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
+      
+      const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
       // Format shift details
@@ -153,6 +201,10 @@ export class NotificationService {
         message += ` Note: ${shift.cancellationNote}`;
       }
       
+      if (shift.isMultiWorkerShift) {
+        message += ' This is part of your multi-worker shift.';
+      }
+      
       // Log notification for now
       logger.info(`Notification to participant ${participant._id}: ${message}`);
       
@@ -163,13 +215,17 @@ export class NotificationService {
   }
 
   /**
-   * Notify worker about a shift cancellation
-   */
-  static async notifyWorkerOfShiftCancellation(shift: IShift): Promise<void> {
+ * Notify worker about a shift cancellation
+ */
+  static async notifyWorkerOfShiftCancellation(shift: ShiftLike): Promise<void> {
     try {
-      if (!shift.workerId) return;
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
+        
+      if (!workerId) return;
       
-      const worker = await User.findById(shift.workerId);
+      const worker = await User.findById(workerId);
       if (!worker) return;
       
       const participant = await User.findById(shift.participantId);
@@ -189,6 +245,10 @@ export class NotificationService {
         message += ` Note: ${shift.cancellationNote}`;
       }
       
+      if (shift.isMultiWorkerShift) {
+        message += ' This is part of your multi-worker shift assignment.';
+      }
+      
       // Log notification for now
       logger.info(`Notification to worker ${worker._id}: ${message}`);
       
@@ -199,13 +259,17 @@ export class NotificationService {
   }
 
   /**
-   * Notify worker about being removed from a shift
-   */
-  static async notifyWorkerOfShiftRemoval(shift: IShift): Promise<void> {
+ * Notify worker about being removed from a shift
+ */
+  static async notifyWorkerOfShiftRemoval(shift: ShiftLike): Promise<void> {
     try {
-      if (!shift.workerId) return;
+      const workerId = shift.isMultiWorkerShift 
+        ? shift.workerId // For multi-worker shifts when calling with a specific worker
+        : shift.workerId; // For single-worker shifts
+        
+      if (!workerId) return;
       
-      const worker = await User.findById(shift.workerId);
+      const worker = await User.findById(workerId);
       if (!worker) return;
       
       const participant = await User.findById(shift.participantId);
@@ -215,7 +279,11 @@ export class NotificationService {
       const startTime = new Date(shift.startTime).toLocaleString();
       
       // Create notification message
-      const message = `${participantName} has removed you from shift (ID: ${shift.shiftId}) on ${startTime}.`;
+      let message = `${participantName} has removed you from shift (ID: ${shift.shiftId}) on ${startTime}.`;
+      
+      if (shift.isMultiWorkerShift) {
+        message += ' This was part of a multi-worker shift.';
+      }
       
       // Log notification for now
       logger.info(`Notification to worker ${worker._id}: ${message}`);

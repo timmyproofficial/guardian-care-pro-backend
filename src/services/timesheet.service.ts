@@ -51,8 +51,8 @@ interface ServiceAgreementRate {
  */
 export const timesheetService = {
   /**
-   * Create a new timesheet
-   */
+ * Create a new timesheet
+ */
   createTimesheet: async (
     workerId: string,
     timesheetData: CreateTimesheetInput,
@@ -67,23 +67,49 @@ export const timesheetService = {
       }
       
       // Check if the worker is assigned to the shift
-      if (shift.workerId?.toString() !== workerId) {
-        throw new ApiError(
-          httpStatus.FORBIDDEN, 
-          'You are not assigned to this shift'
+      if (shift.isMultiWorkerShift) {
+        // For multi-worker shifts, check worker assignments
+        const workerAssignment = (shift.workerAssignments || []).find(
+          assignment => assignment.workerId.toString() === workerId
         );
+        
+        if (!workerAssignment) {
+          throw new ApiError(
+            httpStatus.FORBIDDEN, 
+            'You are not assigned to this shift'
+          );
+        }
+        
+        // Check if the worker's assignment is completed
+        if (workerAssignment.status !== ShiftStatus.COMPLETED) {
+          throw new ApiError(
+            httpStatus.BAD_REQUEST, 
+            'Timesheet can only be created when your assignment is completed'
+          );
+        }
+      } else {
+        // For single-worker shifts, check workerId and status
+        if (shift.workerId?.toString() !== workerId) {
+          throw new ApiError(
+            httpStatus.FORBIDDEN, 
+            'You are not assigned to this shift'
+          );
+        }
+        
+        // Check if shift is completed
+        if (shift.status !== ShiftStatus.COMPLETED) {
+          throw new ApiError(
+            httpStatus.BAD_REQUEST, 
+            'Timesheet can only be created for completed shifts'
+          );
+        }
       }
       
-      // Check if shift is completed
-      if (shift.status !== ShiftStatus.COMPLETED) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST, 
-          'Timesheet can only be created for completed shifts'
-        );
-      }
-      
-      // Check if timesheet already exists
-      const existingTimesheet = await Timesheet.findOne({ shiftId: shift._id });
+      // Check if timesheet already exists for this worker and shift
+      const existingTimesheet = await Timesheet.findOne({ 
+        shiftId: shift._id,
+        workerId: new mongoose.Types.ObjectId(workerId)
+      });
       
       if (existingTimesheet) {
         throw new ApiError(
@@ -194,6 +220,7 @@ export const timesheetService = {
         organizationId: shift.organizationId,
         participantId: shift.participantId,
         workerId: new mongoose.Types.ObjectId(workerId),
+        isMultiWorkerShift: shift.isMultiWorkerShift,
         scheduledStartTime: shift.startTime,
         scheduledEndTime: shift.endTime,
         actualStartTime: timesheetData.actualStartTime,

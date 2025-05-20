@@ -89,9 +89,9 @@ import logger from '../utils/logger';
 
 export const shiftController = {
   /**
-   * Create a new shift
-   * @route POST /api/shifts
-   */
+ * Create a new shift
+ * @route POST /api/shifts
+ */
   createShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
@@ -110,7 +110,9 @@ export const shiftController = {
       const participantId = req.user._id.toString();
       const {
         organizationId,
+        isMultiWorkerShift,
         workerId,
+        workerIds,
         serviceType,
         startTime,
         endTime,
@@ -125,7 +127,9 @@ export const shiftController = {
       const shift = await shiftService.createShift({
         organizationId,
         participantId,
-        workerId,
+        isMultiWorkerShift,
+        workerId: isMultiWorkerShift ? undefined : workerId,
+        workerIds: isMultiWorkerShift ? workerIds : undefined,
         serviceType,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
