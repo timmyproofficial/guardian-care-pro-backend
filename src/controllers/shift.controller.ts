@@ -230,9 +230,10 @@ export const shiftController = {
   },
 
   /**
-   * Get shifts for current user (based on role)
-   * @route GET /api/shifts
-   */
+ * Get shifts for current user (based on role)
+ * Updated to handle multi-worker shifts
+ * @route GET /api/shifts
+ */
   getShifts: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
@@ -248,7 +249,8 @@ export const shiftController = {
         endDate,
         workerId,
         participantId,
-        organizationId
+        organizationId,
+        isMultiWorkerShift
       } = req.query;
       
       let shifts;
@@ -264,6 +266,11 @@ export const shiftController = {
             workerId: workerId as string
           }
         );
+        
+        // Additional filter for multi-worker shifts if requested
+        if (isMultiWorkerShift !== undefined) {
+          shifts = shifts.filter(shift => shift.isMultiWorkerShift === (isMultiWorkerShift === 'true'));
+        }
       } else if (req.user.role === UserRole.SUPPORT_WORKER) {
         shifts = await shiftService.getWorkerShifts(
           userId,
@@ -274,6 +281,11 @@ export const shiftController = {
             organizationId: organizationId as string
           }
         );
+        
+        // Additional filter for multi-worker shifts if requested
+        if (isMultiWorkerShift !== undefined) {
+          shifts = shifts.filter(shift => shift.isMultiWorkerShift === (isMultiWorkerShift === 'true'));
+        }
       } else if (req.user.role === UserRole.ADMIN) {
         // Admin can see all shifts with optional filtering
         shifts = await getAllShifts({
@@ -284,6 +296,11 @@ export const shiftController = {
           participantId: participantId as string,
           organizationId: organizationId as string
         });
+        
+        // Additional filter for multi-worker shifts if requested
+        if (isMultiWorkerShift !== undefined) {
+          shifts = shifts.filter(shift => shift.isMultiWorkerShift === (isMultiWorkerShift === 'true'));
+        }
       } else {
         return res.status(httpStatus.FORBIDDEN).json(
           errorResponse('Role not authorized to view shifts', httpStatus.FORBIDDEN)
