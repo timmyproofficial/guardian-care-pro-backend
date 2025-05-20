@@ -20,9 +20,10 @@ import mongoose from 'mongoose';
 import logger from '../utils/logger';
 import { timesheetController } from './timesheet.controller';
 
-/**
-   * Helper function to get all shifts with filtering for admins
-   */
+ /**
+ * Helper function to get all shifts with filtering for admins
+ * Updated to support multi-worker shifts
+ */
   async function getAllShifts(filter: {
     status?: ShiftStatus;
     startDate?: Date;
@@ -30,6 +31,7 @@ import { timesheetController } from './timesheet.controller';
     workerId?: string;
     participantId?: string;
     organizationId?: string;
+    isMultiWorkerShift?: boolean;
   }): Promise<IShift[]> {
     try {
       const query: any = {};
@@ -40,7 +42,11 @@ import { timesheetController } from './timesheet.controller';
       }
       
       if (filter.workerId) {
-        query.workerId = new mongoose.Types.ObjectId(filter.workerId);
+        // Filter by workerId in either single or multi-worker shifts
+        query.$or = [
+          { workerId: new mongoose.Types.ObjectId(filter.workerId) }, // Single worker
+          { 'workerAssignments.workerId': new mongoose.Types.ObjectId(filter.workerId) } // Multi-worker
+        ];
       }
       
       if (filter.participantId) {
@@ -49,6 +55,10 @@ import { timesheetController } from './timesheet.controller';
       
       if (filter.organizationId) {
         query.organizationId = new mongoose.Types.ObjectId(filter.organizationId);
+      }
+      
+      if (filter.isMultiWorkerShift !== undefined) {
+        query.isMultiWorkerShift = filter.isMultiWorkerShift;
       }
       
       if (filter.startDate || filter.endDate) {
@@ -73,6 +83,10 @@ import { timesheetController } from './timesheet.controller';
           },
           {
             path: 'workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerAssignments.workerId',
             select: 'firstName lastName email phone profileImage'
           },
           {

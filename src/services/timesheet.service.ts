@@ -328,6 +328,46 @@ export const timesheetService = {
       throw error;
     }
   },
+
+  /**
+ * Get timesheets by shift ID
+ * Updated to handle multiple timesheets for multi-worker shifts
+ */
+  getTimesheetsByShiftId: async (shiftId: string): Promise<ITimesheet[]> => {
+    try {
+      const timesheets = await Timesheet.find({ shiftId }).populate([
+        {
+          path: 'shiftId',
+          select: 'shiftId serviceType startTime endTime isMultiWorkerShift'
+        },
+        {
+          path: 'participantId',
+          select: 'firstName lastName email phone'
+        },
+        {
+          path: 'workerId',
+          select: 'firstName lastName email phone'
+        },
+        {
+          path: 'organizationId',
+          select: 'name'
+        },
+        {
+          path: 'rateCalculations.rateTimeBandId',
+          select: 'name code baseRateMultiplier isWeekend isPublicHoliday'
+        }
+      ]);
+      
+      if (timesheets.length === 0) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'No timesheets found for this shift');
+      }
+      
+      return timesheets;
+    } catch (error) {
+      logger.error(`Error getting timesheets by shift ID ${shiftId}:`, error);
+      throw error;
+    }
+  },
   
   /**
    * Get timesheets for worker
