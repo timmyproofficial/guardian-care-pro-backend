@@ -641,7 +641,11 @@ export const shiftService = {
       }
       
       if (filter.workerId) {
-        query.workerId = new mongoose.Types.ObjectId(filter.workerId);
+        // query.workerId = new mongoose.Types.ObjectId(filter.workerId);
+        query.$or = [
+          { workerId: new mongoose.Types.ObjectId(filter.workerId) }, // Single worker
+          { 'workerAssignments.workerId': new mongoose.Types.ObjectId(filter.workerId) } // Multi-worker
+        ];
       }
       
       if (filter.startDate || filter.endDate) {
@@ -661,6 +665,10 @@ export const shiftService = {
         .populate([
           {
             path: 'workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerAssignments.workerId',
             select: 'firstName lastName email phone profileImage'
           }
         ]);
