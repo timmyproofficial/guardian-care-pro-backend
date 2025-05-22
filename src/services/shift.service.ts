@@ -620,7 +620,25 @@ export const shiftService = {
    */
   getShiftByShiftId: async (shiftId: string): Promise<IShift> => {
     try {
-      const shift = await Shift.findOne({ shiftId });
+      const shift = await Shift.findOne({ shiftId })
+        .populate([
+          {
+            path: 'participantId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerAssignments.workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'organizationId',
+            select: 'name'
+          }
+        ]);
       
       if (!shift) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
