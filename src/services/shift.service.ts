@@ -1,8 +1,3 @@
-/**
- * Shift service
- * Handles operations related to shift management
- */
-
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import moment from 'moment';
@@ -589,7 +584,25 @@ export const shiftService = {
    */
   getShiftById: async (shiftId: string): Promise<IShift> => {
     try {
-      const shift = await Shift.findById(shiftId);
+      const shift = await Shift.findById(shiftId)
+        .populate([
+          {
+            path: 'participantId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'workerAssignments.workerId',
+            select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'organizationId',
+            select: 'name'
+          }
+        ]);
       
       if (!shift) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
