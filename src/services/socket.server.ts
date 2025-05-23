@@ -7,7 +7,7 @@ import { Server as SocketIOServer } from 'socket.io';
 import { Server as HTTPServer } from 'http';
 import jwt from 'jsonwebtoken';
 import config from '../config/env';
-import { chatService } from '../services/chat.service';
+import { chatService } from './chat.service';
 import { UserPresenceStatus } from '../models/userPresence.model';
 import { UserRole } from '../types/user.types';
 import {
