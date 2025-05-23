@@ -453,6 +453,60 @@ export const timesheetValidation = {
 };
 
 /**
+ * Chat validation schemas
+ */
+export const chatValidation = {
+  // Create conversation
+  createConversation: Joi.object({
+    type: Joi.string().required().valid('direct', 'group'),
+    name: Joi.string().min(1).max(100).when('type', {
+      is: 'group',
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    }),
+    description: Joi.string().max(500),
+    memberIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).max(10).required(),
+    organizationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+  }),
+
+  // Send message
+  sendMessage: Joi.object({
+    type: Joi.string().valid('text', 'image', 'file', 'audio', 'video').default('text'),
+    content: Joi.string().max(4000).when('type', {
+      is: 'text',
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    }),
+    replyTo: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    mentions: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).max(20)
+  }),
+
+  // Mark messages as read
+  markAsRead: Joi.object({
+    messageIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).max(100).required()
+  }),
+
+  // Add reaction
+  addReaction: Joi.object({
+    emoji: Joi.string().required().min(1).max(10)
+  }),
+
+  // Add members
+  addMembers: Joi.object({
+    memberIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).max(10).required()
+  })
+};
+
+
+/**
  * Subscription validation schemas
  */
 export const subscriptionValidation = {
