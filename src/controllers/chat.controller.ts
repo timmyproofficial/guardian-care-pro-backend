@@ -147,10 +147,11 @@ export const chatController = {
 
       const userId = req.user._id.toString();
       const { conversationId } = req.params;
-      const { type, content, replyTo, mentions } = req.body;
+      const { content, replyTo, mentions } = req.body;
+      let  { type } = req.body;
 
       // Handle file attachments
-      let attachments: any[] = [];
+      const attachments: any[] = [];
       if (req.files && Array.isArray(req.files) && req.files.length > 0) {
         // Upload files to cloudinary
         for (const file of req.files) {

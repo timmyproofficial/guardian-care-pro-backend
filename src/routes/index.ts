@@ -11,6 +11,7 @@ import rateTimeBandRoute from './rateTimeBand.route';
 import shiftRoute from './shift.route';
 import timesheetRoute from './timesheet.route';
 import workerRoute from './worker.route';
+import chatRoute from './chat.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -62,6 +63,11 @@ const routes: Route[] = [
     route: workerRoute,
     authRequired: true,
   },
+  {
+    path: '/chat',
+    route: chatRoute,
+    authRequired: true,
+  }
 //   {
 //     path: '/documents',
 //     route: documentRoute,
