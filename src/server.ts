@@ -1,6 +1,6 @@
 /**
- * Server entry point
- * Initializes database connection and starts the HTTP server
+ * Server entry point with WebSocket integration
+ * Initializes database connection, HTTP server, and WebSocket server
  */
 
 import mongoose from 'mongoose';
@@ -8,7 +8,7 @@ import http from 'http';
 import app from './app';
 import config from './config/env';
 import logger from './utils/logger';
-// import { initializeRateTimeBands } from './seed/rateTimeBand.seed';
+import { initializeSocketServer } from './services/socket.server';
 
 /**
  * Normalize port value
@@ -71,7 +71,8 @@ const onError = (error: NodeJS.ErrnoException): void => {
 const onListening = (): void => {
   const addr = server.address();
   const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr?.port}`;
-  logger.info(`Server listening on ${bind} in ${config.env} mode`);
+  logger.info(`HTTP Server listening on ${bind} in ${config.env} mode`);
+  logger.info('WebSocket Server initialized and ready for connections');
 };
 
 // Set port
@@ -81,6 +82,9 @@ app.set('port', port);
 // Create HTTP server
 const server = http.createServer(app);
 
+// Initialize WebSocket server
+initializeSocketServer(server);
+
 // Set up event listeners
 server.on('error', onError);
 server.on('listening', onListening);
@@ -88,7 +92,18 @@ server.on('listening', onListening);
 // Start server
 const startServer = async (): Promise<void> => {
   await connectToDatabase();
-  server.listen(port);
+  
+  server.listen(port, () => {
+    logger.info('='.repeat(50));
+    logger.info('🚀 Guardian Care Pro API Server Started');
+    logger.info('='.repeat(50));
+    logger.info(`📡 HTTP Server: http://localhost:${port}`);
+    logger.info(`🔌 WebSocket Server: ws://localhost:${port}`);
+    logger.info('🗄️  Database: Connected to MongoDB');
+    logger.info('🌍 Environment: ${config.env}');
+    logger.info('💬 Chat System: Enabled with real-time messaging');
+    logger.info('='.repeat(50));
+  });
 };
 
 // Handle unexpected errors
@@ -102,14 +117,66 @@ process.on('unhandledRejection', (error) => {
   process.exit(1);
 });
 
+// Graceful shutdown
+// process.on('SIGTERM', () => {
+//   logger.info('SIGTERM signal received: closing HTTP server');
+//   server.close(() => {
+//     logger.info('HTTP server closed');
+//     mongoose.connection.close(false, () => {
+//       logger.info('MongoDB connection closed');
+//       process.exit(0);
+//     });
+//   });
+// });
+
+process.on('SIGTERM', async () => {
+  logger.info('SIGTERM signal received: closing HTTP server');
+  server.close(async () => {
+    logger.info('HTTP server closed');
+    try {
+      await mongoose.connection.close(false); // false = do not force close
+      logger.info('MongoDB connection closed');
+      process.exit(0);
+    } catch (err) {
+      logger.error('Error closing MongoDB connection', err);
+      process.exit(1);
+    }
+  });
+});
+
+
+// process.on('SIGINT', () => {
+//   logger.info('SIGINT signal received: closing HTTP server');
+//   server.close(() => {
+//     logger.info('HTTP server closed');
+//     mongoose.connection.close(false, () => {
+//       logger.info('MongoDB connection closed');
+//       process.exit(0);
+//     });
+//   });
+// });
+
+process.on('SIGINT', () => {
+  logger.info('SIGINT signal received: closing HTTP server');
+  server.close(() => {
+    logger.info('HTTP server closed');
+    mongoose.connection.close(false).then(() => {
+      logger.info('MongoDB connection closed');
+      process.exit(0);
+    }).catch(err => {
+      logger.error('Error closing MongoDB connection', err);
+      process.exit(1);
+    });
+  });
+});
+
+
 // Start the server
 startServer()
   .catch((error) => {
     logger.error('Failed to start server:', error);
     process.exit(1);
   });
-
-// initializeRateTimeBands();
 
 // For testing purposes
 export default server;
