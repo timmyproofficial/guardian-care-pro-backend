@@ -8,7 +8,7 @@ import httpStatus from 'http-status';
 import User from '../models/user.model';
 import { authService } from '../services/auth.service';
 import { successResponse } from '../utils/api-response';
-import config from '../config/env';
+// import config from '../config/env';
 
 export const authController = {
   /**
@@ -21,17 +21,32 @@ export const authController = {
       const tokens = await authService.generateAuthTokens(user);
       
       // Set HTTP-only cookies for tokens
+      // res.cookie('accessToken', tokens.access.token, {
+      //   httpOnly: true,
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.access.expires
+      // });
+      
+      // res.cookie('refreshToken', tokens.refresh.token, {
+      //   httpOnly: true, 
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.refresh.expires,
+      //   path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
+      // });
+
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
       });
@@ -64,17 +79,32 @@ export const authController = {
       const { user, tokens } = await authService.login(email, password);
       
       // Set HTTP-only cookies for tokens
+      // res.cookie('accessToken', tokens.access.token, {
+      //   httpOnly: true,
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.access.expires
+      // });
+      
+      // res.cookie('refreshToken', tokens.refresh.token, {
+      //   httpOnly: true, 
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.refresh.expires,
+      //   path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
+      // });
+
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
       });
@@ -107,17 +137,32 @@ export const authController = {
       const tokens = await authService.refreshAuth(refreshToken);
       
       // Set new cookies
+      // res.cookie('accessToken', tokens.access.token, {
+      //   httpOnly: true,
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.access.expires
+      // });
+      
+      // res.cookie('refreshToken', tokens.refresh.token, {
+      //   httpOnly: true, 
+      //   secure: config.env === 'production',
+      //   sameSite: 'strict',
+      //   expires: tokens.refresh.expires,
+      //   path: '/api/v1/auth/refresh-token'
+      // });
+
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production',
-        sameSite: 'strict',
+        secure: false,
+        sameSite: 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token'
       });
