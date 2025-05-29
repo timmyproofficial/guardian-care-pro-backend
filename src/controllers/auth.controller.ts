@@ -22,7 +22,7 @@ export const authController = {
       
       // Set HTTP-only cookies for tokens
       res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
+        httpOnly: config.env === 'production',
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
@@ -30,7 +30,7 @@ export const authController = {
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
+        httpOnly: config.env === 'production', 
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
@@ -67,7 +67,7 @@ export const authController = {
       
       // Set HTTP-only cookies for tokens
       res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
+        httpOnly: config.env === 'production',
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
@@ -75,7 +75,7 @@ export const authController = {
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
+        httpOnly: config.env === 'production', 
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
@@ -112,7 +112,7 @@ export const authController = {
       
       // Set new cookies
       res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
+        httpOnly: config.env === 'production',
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
@@ -120,7 +120,7 @@ export const authController = {
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
+        httpOnly: config.env === 'production', 
         secure: config.env === 'production',
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
