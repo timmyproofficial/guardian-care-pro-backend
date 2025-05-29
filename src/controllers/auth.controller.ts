@@ -24,14 +24,16 @@ export const authController = {
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
       });
@@ -67,14 +69,16 @@ export const authController = {
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
       });
@@ -110,14 +114,16 @@ export const authController = {
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
       });
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
         secure: config.env === 'production',
-        sameSite: 'strict',
+        // sameSite: 'strict',
+        sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,
         path: '/api/v1/auth/refresh-token'
       });
