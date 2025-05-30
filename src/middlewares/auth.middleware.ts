@@ -29,7 +29,7 @@ interface JwtPayload {
 /**
  * Middleware to authenticate users by verifying JWT token
  * Takes token from HTTP-only cookie rather than Authorization header
- * Attaches user object to request if authentication is successful
+ * Attaches user object to request if authentication is successful.
  */
 export const authenticate = async (
   req: AuthenticatedRequest,
