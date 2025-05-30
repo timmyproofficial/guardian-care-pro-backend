@@ -23,7 +23,8 @@ export const authController = {
       // Set HTTP-only cookies for tokens
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
@@ -31,7 +32,8 @@ export const authController = {
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,
@@ -68,7 +70,8 @@ export const authController = {
       // Set HTTP-only cookies for tokens
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
@@ -76,7 +79,8 @@ export const authController = {
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,
@@ -113,7 +117,8 @@ export const authController = {
       // Set new cookies
       res.cookie('accessToken', tokens.access.token, {
         httpOnly: true,
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.access.expires
@@ -121,7 +126,8 @@ export const authController = {
       
       res.cookie('refreshToken', tokens.refresh.token, {
         httpOnly: true, 
-        secure: config.env === 'production' ? true : false,
+        secure: false,
+        // secure: config.env === 'production' ? true : false,
         // sameSite: 'strict',
         sameSite: config.env === 'production' ? 'none' : 'lax',
         expires: tokens.refresh.expires,

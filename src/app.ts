@@ -58,6 +58,12 @@ app.use(cors({
   credentials: true, // if using cookies/auth headers
 }));
 
+app.options('*', cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
+
+
 // Request logging in development
 if (config.env !== 'production') {
   app.use(morgan('dev'));
