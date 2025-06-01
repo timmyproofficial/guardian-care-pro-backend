@@ -1,6 +1,6 @@
 /**
  * Authentication controller
- * Handles HTTP requests related to authentication
+ * Handles HTTP requests related to authentication with Authorization header approach
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -8,7 +8,6 @@ import httpStatus from 'http-status';
 import User from '../models/user.model';
 import { authService } from '../services/auth.service';
 import { successResponse } from '../utils/api-response';
-import config from '../config/env';
 
 export const authController = {
   /**
@@ -20,35 +19,23 @@ export const authController = {
       const user = await authService.register(req.body);
       const tokens = await authService.generateAuthTokens(user);
       
-      // Set HTTP-only cookies for tokens
-      res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.access.expires
-      });
-      
-      res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.refresh.expires,
-        path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
-      });
-      
-      // Return user data and indication that verification is needed
+      // Return tokens in response body for client to store
       res.status(httpStatus.CREATED).json(
         successResponse(
           { 
             user, 
+            tokens: {
+              access: {
+                token: tokens.access.token,
+                expires: tokens.access.expires
+              },
+              refresh: {
+                token: tokens.refresh.token,
+                expires: tokens.refresh.expires
+              }
+            },
             verificationRequired: true, 
-            userId: user._id, 
-            access: tokens.access?.token,
-            refresh: tokens.refresh?.token
+            userId: user._id
           }, 
           'User registered successfully. Please verify your email address using the code sent to your email.'
         )
@@ -67,30 +54,19 @@ export const authController = {
       const { email, password } = req.body;
       const { user, tokens } = await authService.login(email, password);
       
-      // Set HTTP-only cookies for tokens
-      res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.access.expires
-      });
-      
-      res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.refresh.expires,
-        path: '/api/v1/auth/refresh-token' // Restrict to refresh endpoint
-      });
-      
+      // Return tokens in response body for client to store
       res.json(successResponse({ 
         user, 
-        access: tokens.access?.token, 
-        refresh: tokens.refresh?.token 
+        tokens: {
+          access: {
+            token: tokens.access.token,
+            expires: tokens.access.expires
+          },
+          refresh: {
+            token: tokens.refresh.token,
+            expires: tokens.refresh.expires
+          }
+        }
       }, 'Login successful'));
     } catch (error) {
       next(error);
@@ -103,38 +79,29 @@ export const authController = {
    */
   refreshToken: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Get refresh token from cookie instead of request body
-      const refreshToken = req.cookies.refreshToken;
+      const { refreshToken } = req.body;
       
       if (!refreshToken) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          successResponse({}, 'Refresh token not found')
+        return res.status(httpStatus.BAD_REQUEST).json(
+          successResponse({}, 'Refresh token is required')
         );
       }
       
       const tokens = await authService.refreshAuth(refreshToken);
       
-      // Set new cookies
-      res.cookie('accessToken', tokens.access.token, {
-        httpOnly: true,
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.access.expires
-      });
-      
-      res.cookie('refreshToken', tokens.refresh.token, {
-        httpOnly: true, 
-        secure: false,
-        // secure: config.env === 'production' ? true : false,
-        // sameSite: 'strict',
-        sameSite: config.env === 'production' ? 'none' : 'lax',
-        expires: tokens.refresh.expires,
-        path: '/api/v1/auth/refresh-token'
-      });
-      
-      return res.json(successResponse({}, 'Token refreshed successfully'));
+      // Return new tokens in response body
+      return res.json(successResponse({
+        tokens: {
+          access: {
+            token: tokens.access.token,
+            expires: tokens.access.expires
+          },
+          refresh: {
+            token: tokens.refresh.token,
+            expires: tokens.refresh.expires
+          }
+        }
+      }, 'Tokens refreshed successfully'));
     } catch (error) {
       return next(error);
     }
@@ -146,16 +113,11 @@ export const authController = {
    */
   logout: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      // Get refresh token from cookie
-      const refreshToken = req.cookies.refreshToken;
+      const { refreshToken } = req.body;
       
       if (refreshToken) {
         await authService.logout(refreshToken);
       }
-      
-      // Clear cookies
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken', { path: '/api/v1/auth/refresh-token' });
       
       res.json(successResponse({}, 'Logged out successfully'));
     } catch (error) {
@@ -213,24 +175,23 @@ export const authController = {
     }
   }, 
 
-/**
- * Resend email verification code
- * @route POST /api/auth/resend-verification
- */
-resendVerification: async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { email } = req.body;
-    const { userId } = await authService.resendVerificationOTP(email);
-    
-    res.json(
-      successResponse(
-        { userId },
-        'Verification code has been sent to your email address.'
-      )
-    );
-  } catch (error) {
-    next(error);
+  /**
+   * Resend email verification code
+   * @route POST /api/auth/resend-verification
+   */
+  resendVerification: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email } = req.body;
+      const { userId } = await authService.resendVerificationOTP(email);
+      
+      res.json(
+        successResponse(
+          { userId },
+          'Verification code has been sent to your email address.'
+        )
+      );
+    } catch (error) {
+      next(error);
+    }
   }
-}
 };
-
