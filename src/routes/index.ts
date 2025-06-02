@@ -6,6 +6,7 @@
 import express, { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
+import adminUserRoute from './admin-user.route';
 import organizationRoute from './organization.route';
 import rateTimeBandRoute from './rateTimeBand.route';
 import shiftRoute from './shift.route';
@@ -36,6 +37,11 @@ const routes: Route[] = [
   {
     path: '/users',
     route: userRoute,
+    authRequired: true,
+  },
+  {
+    path: '/admin', 
+    route: adminUserRoute,
     authRequired: true,
   },
   {
