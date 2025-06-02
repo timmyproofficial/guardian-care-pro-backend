@@ -56,6 +56,8 @@ app.use(cors({
     }
   },
   credentials: true, // if using cookies/auth headers
+  exposedHeaders: ['Authorization'], // Expose Authorization header to frontend
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'] // Allow Authorization header
 }));
 
 app.options('*', cors({
@@ -76,6 +78,7 @@ app.get('/health', (_req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
     environment: config.env,
+    authMethod: 'Authorization Header'
   });
 });
 
