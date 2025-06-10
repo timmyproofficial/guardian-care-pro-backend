@@ -210,8 +210,8 @@ export const timesheetService = {
       // Calculate total amount (service fees + distance travel)
       const totalAmount = subtotal + distanceTravelAmount;
       
-      // Calculate grand total (total amount + expenses)
-      const grandTotal = totalAmount + totalExpenses;
+      // Calculate grand total (total amount)
+      const grandTotal = totalAmount;
       
       // Create timesheet
       const timesheet = await Timesheet.create({
@@ -727,8 +727,8 @@ export const timesheetService = {
       // Calculate total amount (service fees + distance travel)
       const totalAmount = subtotal + distanceTravelAmount;
       
-      // Calculate grand total (total amount + expenses)
-      const grandTotal = totalAmount + totalExpenses;
+      // Calculate grand total (total amount)
+      const grandTotal = totalAmount;
       
       // Update timesheet
       const revisedTimesheet = await Timesheet.findByIdAndUpdate(
