@@ -135,7 +135,7 @@ const verifyEmailWithOTP = async (userId: string, otpCode: string): Promise<IUse
     // Find and update user
     const user = await User.findOneAndUpdate(
       { _id: tokenDoc.userId },
-      { isEmailVerified: true },
+      { isEmailVerified: true, status: UserStatus.ACTIVE },
       { new: true }
     );
     
@@ -324,10 +324,10 @@ export const authService = {
       }
       
       // Generate OTP code for email verification
-      // const otpCode = await generateEmailVerificationOTP(user._id.toString());
+      const otpCode = await generateEmailVerificationOTP(user._id.toString());
       
       // Send verification email with OTP
-      // await emailService.sendVerificationOTP(user.email, user.firstName, otpCode);
+      await emailService.sendVerificationOTP(user.email, user.firstName, otpCode);
       
       return user;
     } catch (error) {
