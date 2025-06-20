@@ -54,10 +54,70 @@ export class SocketServer {
   /**
    * Setup authentication middleware
    */
+  // private setupMiddleware(): void {
+  //   this.io.use(async (socket: any, next) => {
+  //     try {
+  //       const token = socket.handshake.auth.token || socket.handshake.query.token;
+        
+  //       if (!token) {
+  //         return next(new Error('Authentication token required'));
+  //       }
+
+  //       // Verify JWT token
+  //       const payload = jwt.verify(token, config.jwt.secret) as { sub: string; role: UserRole };
+        
+  //       // Get user details
+  //       const user = await User.findById(payload.sub);
+  //       if (!user) {
+  //         return next(new Error('User not found'));
+  //       }
+
+  //       // Get user's organizations
+  //       let organizationIds: string[] = [];
+        
+  //       if (user.role === UserRole.PARTICIPANT) {
+  //         const participantOrgs = await Organization.find({ participantId: user._id });
+  //         organizationIds = participantOrgs.map(org => (org._id as mongoose.Types.ObjectId).toString());
+  //       } else if (user.role === UserRole.SUPPORT_WORKER) {
+  //         const workerOrgs = await Organization.find({ 'workers.workerId': user._id });
+  //         organizationIds = workerOrgs.map(org => (org._id as mongoose.Types.ObjectId).toString());
+  //       } else if (user.role === UserRole.ADMIN) {
+  //         // Admin has access to all organizations
+  //         const allOrgs = await Organization.find({});
+  //         organizationIds = allOrgs.map(org => (org._id as mongoose.Types.ObjectId).toString());
+  //       }
+
+  //       // Attach user info to socket
+  //       socket.user = {
+  //         userId: user._id.toString(),
+  //         role: user.role as UserRole,
+  //         organizationIds,
+  //         socketId: socket.id
+  //       };
+
+  //       next();
+  //     } catch (error) {
+  //       logger.error('Socket authentication error:', error);
+  //       next(new Error('Authentication failed'));
+  //     }
+  //   });
+  // }
+
+  /**
+   * Setup authentication middleware
+   */
   private setupMiddleware(): void {
     this.io.use(async (socket: any, next) => {
       try {
-        const token = socket.handshake.auth.token || socket.handshake.query.token;
+        // Get token from multiple sources for flexibility
+        let token = socket.handshake.auth.token || 
+                   socket.handshake.query.token ||
+                   socket.handshake.headers.authorization;
+        
+        // Handle Bearer token format
+        if (token && token.startsWith('Bearer ')) {
+          token = token.substring(7);
+        }
         
         if (!token) {
           return next(new Error('Authentication token required'));

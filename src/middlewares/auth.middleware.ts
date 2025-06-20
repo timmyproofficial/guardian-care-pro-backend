@@ -1,6 +1,6 @@
 /**
  * Authentication middleware for securing API routes
- * Verifies JWT tokens and attaches user to request object
+ * Verifies JWT tokens from Authorization header and attaches user to request object
  */
 
 import { Request, Response, NextFunction } from 'express';
@@ -10,7 +10,7 @@ import config from '../config/env';
 import { UserRole } from '../types/user.types';
 import { userService } from '../services/user.service';
 import ApiError from '../utils/api-error';
-import { IUser } from '@/models/user.model'; // or your actual path
+import { IUser } from '@/models/user.model';
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -27,9 +27,31 @@ interface JwtPayload {
 }
 
 /**
- * Middleware to authenticate users by verifying JWT token
- * Takes token from HTTP-only cookie rather than Authorization header
- * Attaches user object to request if authentication is successful.
+ * Extract token from Authorization header
+ */
+const extractTokenFromHeader = (authHeader: string | undefined): string | null => {
+  if (!authHeader) {
+    return null;
+  }
+
+  // Support both "Bearer <token>" and just "<token>" formats
+  const parts = authHeader.split(' ');
+  
+  if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') {
+    return parts[1];
+  }
+  
+  // Fallback: treat the entire header as token (for backward compatibility)
+  if (parts.length === 1) {
+    return parts[0];
+  }
+  
+  return null;
+};
+
+/**
+ * Middleware to authenticate users by verifying JWT token from Authorization header
+ * Attaches user object to request if authentication is successful
  */
 export const authenticate = async (
   req: AuthenticatedRequest,
@@ -37,11 +59,14 @@ export const authenticate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Get token from cookie instead of Authorization header
-    const token = req.cookies.accessToken;
+    // Get token from Authorization header
+    const authHeader = req.headers.authorization;
+    const token = extractTokenFromHeader(authHeader);
     
     if (!token) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+      throw new ApiError(
+        httpStatus.UNAUTHORIZED, 
+        'Access token required. Please include Authorization header with Bearer token.');
     }
     
     // Verify token

@@ -202,7 +202,7 @@ export const timesheetService = {
       const { rateCalculations, subtotal } = await calculateRateBreakdown(
         timesheetData.actualStartTime,
         timesheetData.actualEndTime,
-        extraTimeMinutes,
+        // extraTimeMinutes,
         workerAgreement.serviceAgreement.baseHourlyRate,
         workerAgreement.serviceAgreement.shiftRates
       );
@@ -210,8 +210,8 @@ export const timesheetService = {
       // Calculate total amount (service fees + distance travel)
       const totalAmount = subtotal + distanceTravelAmount;
       
-      // Calculate grand total (total amount + expenses)
-      const grandTotal = totalAmount + totalExpenses;
+      // Calculate grand total (total amount)
+      const grandTotal = totalAmount;
       
       // Create timesheet
       const timesheet = await Timesheet.create({
@@ -715,7 +715,7 @@ export const timesheetService = {
         const result = await calculateRateBreakdown(
           actualStartTime,
           actualEndTime,
-          extraTimeMinutes,
+          // extraTimeMinutes,
           workerAgreement.serviceAgreement.baseHourlyRate,
           workerAgreement.serviceAgreement.shiftRates
         );
@@ -727,8 +727,8 @@ export const timesheetService = {
       // Calculate total amount (service fees + distance travel)
       const totalAmount = subtotal + distanceTravelAmount;
       
-      // Calculate grand total (total amount + expenses)
-      const grandTotal = totalAmount + totalExpenses;
+      // Calculate grand total (total amount)
+      const grandTotal = totalAmount;
       
       // Update timesheet
       const revisedTimesheet = await Timesheet.findByIdAndUpdate(
@@ -777,7 +777,7 @@ export const timesheetService = {
 async function calculateRateBreakdown(
   startTime: Date,
   endTime: Date,
-  extraTimeMinutes: number,
+  // extraTimeMinutes: number,
   baseHourlyRate: number,
   shiftRates: ServiceAgreementRate[]
 ): Promise<{ rateCalculations: RateCalculation[], subtotal: number }> {
@@ -793,7 +793,8 @@ async function calculateRateBreakdown(
     
     // Calculate total shift duration including extra time (in minutes)
     const scheduledDuration = moment(endTime).diff(moment(startTime), 'minutes');
-    const totalDuration = scheduledDuration + extraTimeMinutes;
+    const totalDuration = scheduledDuration;
+    // const totalDuration = scheduledDuration + extraTimeMinutes;
     
     // Convert to hours for rate calculation
     const totalHours = totalDuration / 60;

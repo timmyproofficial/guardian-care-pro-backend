@@ -6,6 +6,7 @@
 import express, { Router } from 'express';
 import authRoute from './auth.route';
 import userRoute from './user.route';
+import adminUserRoute from './admin-user.route';
 import organizationRoute from './organization.route';
 import rateTimeBandRoute from './rateTimeBand.route';
 import shiftRoute from './shift.route';
@@ -13,6 +14,7 @@ import timesheetRoute from './timesheet.route';
 import workerRoute from './worker.route';
 import chatRoute from './chat.route';
 import incidentRoute from './incident.route';
+import analyticsRoute from './analytics.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -37,6 +39,11 @@ const routes: Route[] = [
   {
     path: '/users',
     route: userRoute,
+    authRequired: true,
+  },
+  {
+    path: '/admin', 
+    route: adminUserRoute,
     authRequired: true,
   },
   {
@@ -67,6 +74,11 @@ const routes: Route[] = [
   {
     path: '/chat',
     route: chatRoute,
+    authRequired: true,
+  },
+  {
+    path: '/analytics',
+    route: analyticsRoute,
     authRequired: true,
   }
   //   {

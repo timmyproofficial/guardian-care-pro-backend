@@ -182,7 +182,7 @@ export const shiftController = {
       // Check permissions to view shift
       if (
         req.user.role === UserRole.PARTICIPANT && 
-        shift.participantId.toString() !== req.user._id.toString()
+        shift.participantId._id.toString() !== req.user._id.toString()
       ) {
         return res.status(httpStatus.FORBIDDEN).json(
           errorResponse('You do not have permission to view this shift', httpStatus.FORBIDDEN)
@@ -191,7 +191,7 @@ export const shiftController = {
       
       if (
         req.user.role === UserRole.SUPPORT_WORKER && 
-        shift.workerId?.toString() !== req.user._id.toString()
+        shift.workerId?._id?.toString() !== req.user._id.toString()
       ) {
         return res.status(httpStatus.FORBIDDEN).json(
           errorResponse('You do not have permission to view this shift', httpStatus.FORBIDDEN)

@@ -49,6 +49,11 @@ export const authValidation = {
     refreshToken: Joi.string().required(),
   }),
 
+  // Logout - now expects token in request body
+  logout: Joi.object({
+    refreshToken: Joi.string().required(),
+  }),
+
   // Forgot password
   forgotPassword: Joi.object({
     email: Joi.string().required().email(),
@@ -504,6 +509,9 @@ export const chatValidation = {
     ).min(1).max(10).required()
   })
 };
+
+
+
 
 
 /**

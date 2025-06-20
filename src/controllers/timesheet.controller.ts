@@ -208,7 +208,7 @@ export const timesheetController = {
       // Check permissions to view timesheet (admins can view any timesheet)
       if (
         req.user.role === UserRole.PARTICIPANT && 
-        timesheet.participantId.toString() !== req.user._id.toString()
+        timesheet.participantId._id.toString() !== req.user._id.toString()
       ) {
         return res.status(httpStatus.FORBIDDEN).json(
           errorResponse('You do not have permission to view this timesheet', httpStatus.FORBIDDEN)
@@ -217,7 +217,7 @@ export const timesheetController = {
       
       if (
         req.user.role === UserRole.SUPPORT_WORKER && 
-        timesheet.workerId.toString() !== req.user._id.toString()
+        timesheet.workerId._id.toString() !== req.user._id.toString()
       ) {
         return res.status(httpStatus.FORBIDDEN).json(
           errorResponse('You do not have permission to view this timesheet', httpStatus.FORBIDDEN)
