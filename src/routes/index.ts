@@ -14,6 +14,7 @@ import timesheetRoute from './timesheet.route';
 import workerRoute from './worker.route';
 import chatRoute from './chat.route';
 import invoiceRoute from './invoice.route';
+import batchInvoiceRoute from './batchInvoice.route';
 import analyticsRoute from './analytics.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
@@ -86,6 +87,11 @@ const routes: Route[] = [
     route: invoiceRoute,
     authRequired: true,
   },
+  {
+    path: '/batch-invoices',
+    route: batchInvoiceRoute,
+    authRequired: true,
+  }
 //   {
 //     path: '/documents',
 //     route: documentRoute,
