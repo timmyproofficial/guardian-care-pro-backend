@@ -510,6 +510,19 @@ export const chatValidation = {
   })
 };
 
+/**
+ * Invoice validation schemas
+ */
+export const invoiceValidation = {
+  // Send batch invoices
+  sendBatchInvoices: Joi.object({
+    participantId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+    invoiceIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).required(),
+  }),
+};
+
 
 
 

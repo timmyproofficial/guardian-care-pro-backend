@@ -13,6 +13,7 @@ import shiftRoute from './shift.route';
 import timesheetRoute from './timesheet.route';
 import workerRoute from './worker.route';
 import chatRoute from './chat.route';
+import invoiceRoute from './invoice.route';
 import analyticsRoute from './analytics.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
@@ -79,7 +80,12 @@ const routes: Route[] = [
     path: '/analytics',
     route: analyticsRoute,
     authRequired: true,
-  }
+  },
+  {
+    path: '/invoices',
+    route: invoiceRoute,
+    authRequired: true,
+  },
 //   {
 //     path: '/documents',
 //     route: documentRoute,
