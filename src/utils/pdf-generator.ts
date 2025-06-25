@@ -7,6 +7,7 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 import { generateInvoiceHtml } from '../templates/invoice.template';
+import { generateBatchInvoiceHtml } from '@/templates/batchInvoice.template';
 import { IInvoice } from '../models/invoice.model';
 import logger from './logger';
 // import config from '../config/env';
@@ -87,6 +88,43 @@ export const generateInvoicePdf = async (invoice: IInvoice): Promise<string> => 
     return pdfPath;
   } catch (error) {
     logger.error(`Error generating invoice PDF for ${invoice.invoiceNumber}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Generate batch invoice PDF
+ * @param templateData - Data for the batch invoice template
+ * @param filename - Name to save the file as
+ * @returns Path to the generated PDF file
+ */
+export const generateBatchInvoicePdf = async (
+  templateData: any,
+  filename: string
+): Promise<string> => {
+  try {
+    // Generate HTML from batch invoice template
+    const html = generateBatchInvoiceHtml(templateData);
+    
+    // Generate PDF
+    const pdfPath = await generatePdf(html, filename, {
+      // Optionally add special options for batch invoices
+      format: 'A4',
+      margin: {
+        top: '1cm',
+        right: '1cm',
+        bottom: '1cm',
+        left: '1cm'
+      },
+      headerTemplate: '',
+      footerTemplate: '',
+      displayHeaderFooter: false,
+      printBackground: true
+    });
+    
+    return pdfPath;
+  } catch (error) {
+    logger.error(`Error generating batch invoice PDF for ${filename}:`, error);
     throw error;
   }
 };
