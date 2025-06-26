@@ -186,7 +186,7 @@ createIncident: async (incidentData: CreateIncidentInput) => {
   getIncidentsByShift: async (shiftId: string) => {
     try {
       // Validate shift exists
-      const shift = await Shift.findOne({shiftId});
+      const shift = await Shift.findOne({ shiftId });
       if (!shift) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
       }
