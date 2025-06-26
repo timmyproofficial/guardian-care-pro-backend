@@ -587,3 +587,112 @@ export const subscriptionValidation = {
     }),
   }),
 };
+
+/**
+ * Incident validation schemas
+ */
+export const incidentValidation = {
+  // Create incident
+  createIncident: Joi.object({
+    shiftId: Joi.string().required().regex(/^SHIFT-[A-Z0-9]{10}$/),
+    // reportedAgainst: Joi.string().regex(/^[0-9a-fA-F]{24}$/), b 
+    title: Joi.string().required().trim().min(5).max(200),
+    description: Joi.string().required().min(10).max(2000),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').default('LOW'),
+    urlLinks: Joi.array().items(
+      Joi.string().uri({ scheme: ['http', 'https'] })
+    ).max(10)
+  }),
+
+  // Update incident (for reporters to modify before review)
+  updateIncident: Joi.object({
+    title: Joi.string().trim().min(5).max(200),
+    description: Joi.string().min(10).max(2000),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH'),
+    urlLinks: Joi.array().items(
+      Joi.string().uri({ scheme: ['http', 'https'] })
+    ).max(10)
+  }).custom((value, helpers) => {
+    // Ensure at least one field is being updated
+    if (!value.title && !value.description && !value.severity && !value.urlLinks) {
+      return helpers.error('At least one field must be updated');
+    }
+    return value;
+  }),
+
+  // Resolve incident
+  resolveIncident: Joi.object({
+    resolutionNote: Joi.string().required().min(10).max(1000),
+    resolvedBy: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/) 
+  }),
+
+  // Admin review incident
+  reviewIncident: Joi.object({
+    status: Joi.string().required().valid('IN_REVIEW', 'RESOLVED', 'REJECTED'),
+    resolutionNote: Joi.string().min(10).max(1000).when('status', {
+      is: Joi.valid('RESOLVED', 'REJECTED'),
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    })
+  }),
+
+  // Admin update incident status
+ updateIncidentStatus: Joi.object({
+  status: Joi.string().required().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
+  updatedBy: Joi.string().regex(/^[0-9a-fA-F]{24}$/).optional(), // Add this line
+  resolutionNote: Joi.string().min(10).max(1000).when('status', {
+    is: Joi.valid('RESOLVED', 'REJECTED'),
+    then: Joi.required(),
+    otherwise: Joi.optional()
+  })
+}),
+
+  // Query incidents (for filtering/searching)
+  queryIncidents: Joi.object({
+    shiftId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    reportedBy: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    reportedAgainst: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH'),
+    status: Joi.string().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
+    resolvedBy: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    startDate: Joi.date(),
+    endDate: Joi.date().greater(Joi.ref('startDate')),
+    page: Joi.number().integer().min(1).default(1),
+    limit: Joi.number().integer().min(1).max(100).default(20),
+    sortBy: Joi.string().valid('createdAt', 'updatedAt', 'severity', 'status').default('createdAt'),
+    sortOrder: Joi.string().valid('asc', 'desc').default('desc')
+  }),
+
+  // Bulk update incidents (admin only)
+  bulkUpdateIncidents: Joi.object({
+    incidentIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).max(50).required(),
+    status: Joi.string().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
+    resolutionNote: Joi.string().min(10).max(1000).when('status', {
+      is: Joi.valid('RESOLVED', 'REJECTED'),
+      then: Joi.required(),
+      otherwise: Joi.optional()
+    })
+  }).custom((value, helpers) => {
+    // Ensure at least status is being updated
+    if (!value.status) {
+      return helpers.error('Status must be provided for bulk update');
+    }
+    return value;
+  }),
+
+  // Add comment/note to incident
+  addIncidentComment: Joi.object({
+    comment: Joi.string().required().min(5).max(1000),
+    isInternal: Joi.boolean().default(false) // Internal comments only visible to admins
+  }),
+
+  // Get incident statistics
+  getIncidentStats: Joi.object({
+    organizationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    startDate: Joi.date(),
+    endDate: Joi.date().greater(Joi.ref('startDate')),
+    groupBy: Joi.string().valid('day', 'week', 'month', 'severity', 'status').default('status')
+  })
+};

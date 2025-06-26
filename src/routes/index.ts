@@ -15,6 +15,7 @@ import workerRoute from './worker.route';
 import chatRoute from './chat.route';
 import invoiceRoute from './invoice.route';
 import batchInvoiceRoute from './batchInvoice.route';
+import incidentRoute from './incident.route';
 import analyticsRoute from './analytics.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
@@ -60,7 +61,7 @@ const routes: Route[] = [
   {
     path: '/shifts',
     route: shiftRoute,
-    authRequired: true,
+    // authRequired: true,
   },
   {
     path: '/timesheets',
@@ -92,11 +93,17 @@ const routes: Route[] = [
     route: batchInvoiceRoute,
     authRequired: true,
   }
-//   {
-//     path: '/documents',
-//     route: documentRoute,
-//     authRequired: true,
-//   },
+  //   {
+  //     path: '/documents',
+  //     route: documentRoute,
+  //     authRequired: true,
+  //   },
+  ,
+  {
+    path: '/incidents',
+    route: incidentRoute,
+    authRequired: true,
+  }
 ];
 
 // Register all routes
