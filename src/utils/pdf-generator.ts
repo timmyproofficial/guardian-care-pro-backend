@@ -7,7 +7,7 @@ import puppeteer from 'puppeteer';
 import fs from 'fs';
 import path from 'path';
 import { generateInvoiceHtml } from '../templates/invoice.template';
-import { generateBatchInvoiceHtml } from '@/templates/batchInvoice.template';
+import { generateBatchInvoiceHtml } from '../templates/batchInvoice.template';
 import { IInvoice } from '../models/invoice.model';
 import logger from './logger';
 // import config from '../config/env';

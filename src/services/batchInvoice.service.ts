@@ -21,6 +21,7 @@ import { emailService } from './email.service';
 import { generateInvoiceNumber } from '../utils/generators';
 // import { generateInvoicePdf } from '../utils/pdf-generator';
 import { NotificationService } from './notification.service';
+import { generateBatchInvoicePdf } from '../utils/pdf-generator';
 
 /**
  * Interface for batch generation options
@@ -748,10 +749,10 @@ export const batchInvoiceService = {
           startTime: moment(ts.actualStartTime).format('HH:mm'),
           endTime: moment(ts.actualEndTime).format('HH:mm'),
           hours: moment(ts.actualEndTime).diff(moment(ts.actualStartTime), 'hours', true).toFixed(2),
-          serviceType: ts.shiftId?.serviceType || 'Support Service',
+          serviceType: (ts.shiftId as { serviceType?: string })?.serviceType || 'Support Service',
           rateItems: ts.rateCalculations.map(rate => ({
-            name: rate.rateTimeBandId?.name || 'Standard Rate',
-            code: rate.rateTimeBandId?.code || 'STD',
+            name: (rate.rateTimeBandId as { name?: string })?.name || 'Standard Rate',
+            code: (rate.rateTimeBandId as { code?: string })?.code || 'STD',
             hourlyRate: rate.hourlyRate,
             hours: rate.hours,
             amount: rate.amount
@@ -890,7 +891,7 @@ export const batchInvoiceService = {
       }
       
       // Calculate date range based on configuration
-      const now = moment().tz(config.timezone);
+    //   const now = moment().tz(config.timezone);
       let startDate: Date;
       let endDate: Date;
       
