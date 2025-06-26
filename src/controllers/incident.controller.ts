@@ -50,8 +50,10 @@ import { successResponse } from '../utils/api-response';
       const allowedSeverities = ['LOW', 'MEDIUM', 'HIGH'] as const;
       const severityQuery = req.query.severity as string | undefined;
       const filters = {
-        status: allowedStatuses.includes(statusQuery as any) ? statusQuery as typeof allowedStatuses[number] : undefined,
-        severity: allowedSeverities.includes(severityQuery as any) ? severityQuery as typeof allowedSeverities[number] : undefined,
+        status: allowedStatuses.includes(statusQuery as any) 
+        ? statusQuery as typeof allowedStatuses[number] : undefined,
+        severity: allowedSeverities.includes(severityQuery as any) 
+        ? severityQuery as typeof allowedSeverities[number] : undefined,
         shiftId: req.query.shiftId as string,
         reportedBy: req.query.reportedBy as string,
         reportedAgainst: req.query.reportedAgainst as string,
@@ -153,7 +155,7 @@ import { successResponse } from '../utils/api-response';
       const { id } = req.params;
       const { status,updatedBy } = req.body;
 
-      const incident = await incidentService.updateIncidentStatus(id,{ status, updatedBy});
+      const incident = await incidentService.updateIncidentStatus(id,{ status, updatedBy });
 
       res.json(
         successResponse(incident, 'Incident status updated successfully')

@@ -83,7 +83,7 @@ const incidentSchema = new Schema<IIncident>(
   { timestamps: true }
 );
 
-incidentSchema.index({shiftId:1});
+incidentSchema.index({ shiftId:1 });
 
 const Incident = mongoose.model<IIncident>('Incident', incidentSchema);
 export default Incident;
