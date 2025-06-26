@@ -88,6 +88,9 @@ export interface ITimesheet extends Document {
   // Invoice tracking
   invoiceId?: mongoose.Types.ObjectId;        // Reference to invoice if included in one
   isPaid: boolean;                            // Whether the timesheet has been paid
+
+  batchInvoiceId?: mongoose.Types.ObjectId; // Reference to batch invoice if included in one
+  includedInBatch: boolean; // Whether this timesheet has been included in a batch
   
   // Timestamps
   createdAt: Date;
@@ -270,6 +273,14 @@ const timesheetSchema = new Schema<ITimesheet>(
     invoiceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Invoice'
+    },
+    batchInvoiceId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'BatchInvoice'
+    },
+    includedInBatch: {
+      type: Boolean,
+      default: false
     },
     isPaid: {
       type: Boolean,

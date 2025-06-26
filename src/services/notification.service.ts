@@ -9,6 +9,7 @@ import { ITimesheet } from '../models/timesheet.model';
 import User from '../models/user.model';
 import logger from '../utils/logger';
 import { WorkerAssignment } from '@/types/shift.types';
+import moment from 'moment';
 
 // This is a placeholder for an actual notification system
 // In a real implementation, this would connect to a notification provider
@@ -392,4 +393,153 @@ export class NotificationService {
       logger.error('Error sending participant notification:', error);
     }
   }
+
+  /**
+ * Notify worker that invoice has been sent to participant
+ */
+static async notifyWorkerOfInvoiceSent(
+  workerId: string,
+  participantId: string,
+  invoiceNumber: string
+): Promise<void> {
+  try {
+    const worker = await User.findById(workerId);
+    if (!worker) return;
+    
+    const participant = await User.findById(participantId);
+    const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
+    
+    // Create notification message
+    const message = `Invoice ${invoiceNumber} has been sent to ${participantName}.`;
+    
+    // Log notification for now
+    logger.info(`Notification to worker ${worker._id}: ${message}`);
+    
+    // TODO: Implement actual notification sending
+  } catch (error) {
+    logger.error('Error sending worker notification:', error);
+  }
+}
+
+/**
+ * Notify worker that batch invoices have been sent to participant
+ */
+static async notifyWorkerOfBatchInvoicesSent(
+  workerId: string,
+  participantId: string,
+  invoiceNumbers: string[]
+): Promise<void> {
+  try {
+    const worker = await User.findById(workerId);
+    if (!worker) return;
+    
+    const participant = await User.findById(participantId);
+    const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
+    
+    // Create notification message
+    const message = `${invoiceNumbers.length} invoices (${invoiceNumbers.join(', ')}) 
+    have been sent to ${participantName}.`;
+    
+    // Log notification for now
+    logger.info(`Notification to worker ${worker._id}: ${message}`);
+    
+    // TODO: Implement actual notification sending
+  } catch (error) {
+    logger.error('Error sending worker notification:', error);
+  }
+}
+
+/**
+ * Notify participant that a new invoice has been generated
+ */
+static async notifyParticipantOfInvoiceGenerated(
+  participantId: string,
+  workerId: string,
+  invoiceNumber: string,
+  amount: number
+): Promise<void> {
+  try {
+    const participant = await User.findById(participantId);
+    if (!participant) return;
+    
+    const worker = await User.findById(workerId);
+    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
+    
+    // Format amount
+    const formattedAmount = amount.toFixed(2);
+    
+    // Create notification message
+    const message = `A new invoice (${invoiceNumber}) for 
+    $${formattedAmount} has been generated for services provided by ${workerName}.`;
+    
+    // Log notification for now
+    logger.info(`Notification to participant ${participant._id}: ${message}`);
+    
+    // TODO: Implement actual notification sending
+  } catch (error) {
+    logger.error('Error sending participant notification:', error);
+  }
+}
+
+/**
+ * Notify worker that a batch invoice has been sent to participant
+ */
+static async notifyWorkerOfBatchInvoiceSent(
+  workerId: string,
+  participantId: string,
+  invoiceNumber: string
+): Promise<void> {
+  try {
+    const worker = await User.findById(workerId);
+    if (!worker) return;
+    
+    const participant = await User.findById(participantId);
+    const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
+    
+    // Create notification message
+    const message = `Your consolidated invoice ${invoiceNumber} has been sent to ${participantName}.`;
+    
+    // Log notification for now
+    logger.info(`Notification to worker ${worker._id}: ${message}`);
+    
+    // TODO: Implement actual notification sending
+  } catch (error) {
+    logger.error('Error sending worker notification:', error);
+  }
+}
+
+/**
+ * Notify participant that a batch invoice has been generated
+ */
+static async notifyParticipantOfBatchInvoiceGenerated(
+  participantId: string,
+  workerId: string,
+  batchInvoiceNumber: string,
+  startDate: Date,
+  endDate: Date,
+  amount: number
+): Promise<void> {
+  try {
+    const participant = await User.findById(participantId);
+    if (!participant) return;
+    
+    const worker = await User.findById(workerId);
+    const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
+    
+    // Format dates and amount
+    const startDateFormatted = moment(startDate).format('MMM D, YYYY');
+    const endDateFormatted = moment(endDate).format('MMM D, YYYY');
+    const formattedAmount = amount.toFixed(2);
+    
+    // Create notification message
+    const message = `A new consolidated invoice (${batchInvoiceNumber}) for services from ${startDateFormatted} to ${endDateFormatted} has been generated by ${workerName} for $${formattedAmount}.`;
+    
+    // Log notification for now
+    logger.info(`Notification to participant ${participant._id}: ${message}`);
+    
+    // TODO: Implement actual notification sending
+  } catch (error) {
+    logger.error('Error sending participant notification:', error);
+  }
+}
 }

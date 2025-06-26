@@ -16,6 +16,7 @@ import {
 } from '../types/shift.types';
 import { SubscriptionTier } from '../types/payment.types';
 import { password } from './custom-validators';
+import { BatchFrequency } from '../models/batchInvoiceConfig.model';
 
 /**
  * Authentication validation schemas
@@ -507,6 +508,62 @@ export const chatValidation = {
     memberIds: Joi.array().items(
       Joi.string().regex(/^[0-9a-fA-F]{24}$/)
     ).min(1).max(10).required()
+  })
+};
+
+/**
+ * Invoice validation schemas
+ */
+export const invoiceValidation = {
+  // Send batch invoices
+  sendBatchInvoices: Joi.object({
+    participantId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+    invoiceIds: Joi.array().items(
+      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
+    ).min(1).required(),
+  }),
+};
+
+/**
+ * Batch Invoice validation schemas
+ */
+export const batchInvoiceValidation = {
+  // Update batch configuration
+  updateBatchConfig: Joi.object({
+    isEnabled: Joi.boolean(),
+    frequency: Joi.string().valid(...Object.values(BatchFrequency)),
+    dayOfWeek: Joi.number().min(0).max(6),
+    timeOfDay: Joi.string().pattern(/^([01]\d|2[0-3]):([0-5]\d)$/),
+    timezone: Joi.string(),
+    periodStartDay: Joi.number().min(0).max(6),
+    periodEndDay: Joi.number().min(0).max(6),
+    monthlyStartDate: Joi.number().min(1).max(31),
+    monthlyEndDate: Joi.alternatives().try(
+      Joi.number().min(1).max(31),
+      Joi.string().valid('last')
+    ),
+    automaticEmailParticipant: Joi.boolean(),
+    automaticEmailWorker: Joi.boolean()
+  }),
+
+  // Trigger batch generation
+  triggerBatch: Joi.object({
+    startDate: Joi.date().required(),
+    endDate: Joi.date().required().min(Joi.ref('startDate')),
+    workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    participantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    sendEmails: Joi.boolean()
+  }),
+
+  // Send batch invoice
+  sendBatchInvoice: Joi.object({
+    sendToParticipant: Joi.boolean(),
+    sendToWorker: Joi.boolean()
+  }).custom((value, helpers) => {
+    if (!value.sendToParticipant && !value.sendToWorker) {
+      return helpers.error('At least one recipient (participant or worker) must be specified');
+    }
+    return value;
   })
 };
 

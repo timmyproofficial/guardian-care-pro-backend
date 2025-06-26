@@ -8,6 +8,7 @@ import http from 'http';
 import app from './app';
 import config from './config/env';
 import logger from './utils/logger';
+import scheduler from './services/scheduler.service';
 import { initializeSocketServer } from './services/socket.server';
 
 /**
@@ -92,6 +93,14 @@ server.on('listening', onListening);
 // Start server
 const startServer = async (): Promise<void> => {
   await connectToDatabase();
+
+  // Initialize scheduler service
+  try {
+    await scheduler.initialize();
+    logger.info('Scheduler service initialized successfully');
+  } catch (error) {
+    logger.error('Error initializing scheduler service:', error);
+  }
   
   server.listen(port, () => {
     logger.info('='.repeat(50));
@@ -101,6 +110,7 @@ const startServer = async (): Promise<void> => {
     logger.info(`🔌 WebSocket Server: ws://localhost:${port}`);
     logger.info('🗄️  Database: Connected to MongoDB');
     logger.info('🌍 Environment: ${config.env}');
+    logger.info('📅 Batch Scheduler: Initialized and running');
     logger.info('💬 Chat System: Enabled with real-time messaging');
     logger.info('='.repeat(50));
   });
@@ -131,6 +141,15 @@ process.on('unhandledRejection', (error) => {
 
 process.on('SIGTERM', async () => {
   logger.info('SIGTERM signal received: closing HTTP server');
+
+  // Stop all scheduled jobs
+  try {
+    scheduler.stopAllJobs();
+    logger.info('Scheduler jobs stopped successfully');
+  } catch (error) {
+    logger.error('Error stopping scheduler jobs:', error);
+  }
+
   server.close(async () => {
     logger.info('HTTP server closed');
     try {

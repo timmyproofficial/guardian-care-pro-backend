@@ -386,4 +386,212 @@ export const emailService = {
     
     await emailService.sendEmail(to, subject, text, html);
   },
+
+/**
+ * Send invoice email
+ */
+sendInvoiceEmail: async (
+  to: string,
+  name: string,
+  invoiceDetails: {
+    invoiceNumber: string;
+    invoiceDate: string;
+    dueDate: string;
+    workerName: string;
+    amount: string;
+  }
+): Promise<void> => {
+  const subject = `Invoice ${invoiceDetails.invoiceNumber} - Guardian Care Pro`;
+  
+  const text = `
+    Hello ${name},
+    
+    Please find your invoice ${invoiceDetails.invoiceNumber} from ${invoiceDetails.workerName}.
+    
+    Invoice Number: ${invoiceDetails.invoiceNumber}
+    Date: ${invoiceDetails.invoiceDate}
+    Due Date: ${invoiceDetails.dueDate}
+    Amount: $${invoiceDetails.amount}
+    
+    You can view and download the invoice from your Guardian Care Pro dashboard.
+    
+    Thank you for using Guardian Care Pro,
+    Guardian Care Pro Team
+  `;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2>Invoice from Guardian Care Pro</h2>
+      <p>Hello ${name},</p>
+      <p>Please find your invoice 
+        <strong>${invoiceDetails.invoiceNumber}</strong> 
+        from <strong>${invoiceDetails.workerName}</strong>.</p>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
+        <p><strong>Date:</strong> ${invoiceDetails.invoiceDate}</p>
+        <p><strong>Due Date:</strong> ${invoiceDetails.dueDate}</p>
+        <p><strong>Amount:</strong> $${invoiceDetails.amount}</p>
+      </div>
+      <p>You can 
+      <a href="${config.clientUrl}/dashboard/invoices">view and download the invoice</a> 
+      from your Guardian Care Pro dashboard.</p>
+      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+    </div>
+  `;
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send batch invoice email to participant
+ */
+sendBatchInvoiceEmail: async (
+  to: string,
+  name: string,
+  invoiceDetails: {
+    invoiceNumber: string;
+    workerName: string;
+    startDate: string;
+    endDate: string;
+    totalAmount: string;
+    batchNumber: string;
+  }
+): Promise<void> => {
+  const subject = `Invoice ${invoiceDetails.invoiceNumber} for period ${invoiceDetails.startDate} - ${invoiceDetails.endDate}`;
+  
+  const text = `
+    Hello ${name},
+    
+    Please find your consolidated invoice ${invoiceDetails.invoiceNumber} from ${invoiceDetails.workerName} for services provided between ${invoiceDetails.startDate} and ${invoiceDetails.endDate}.
+    
+    Invoice Number: ${invoiceDetails.invoiceNumber}
+    Batch Number: ${invoiceDetails.batchNumber}
+    Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
+    Total Amount: $${invoiceDetails.totalAmount}
+    
+    You can view and download the detailed invoice from your Guardian Care Pro dashboard.
+    
+    Thank you for using Guardian Care Pro,
+    Guardian Care Pro Team
+  `;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2>Weekly Invoice Summary</h2>
+      <p>Hello ${name},</p>
+      <p>Please find your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> from <strong>${invoiceDetails.workerName}</strong> for services provided between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong>.</p>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
+        <p><strong>Batch Number:</strong> ${invoiceDetails.batchNumber}</p>
+        <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
+        <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
+      </div>
+      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view and download the detailed invoice</a> from your Guardian Care Pro dashboard.</p>
+      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+    </div>
+  `;
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send batch invoice email to worker
+ */
+sendWorkerBatchInvoiceEmail: async (
+  to: string,
+  name: string,
+  invoiceDetails: {
+    invoiceNumber: string;
+    participantName: string;
+    startDate: string;
+    endDate: string;
+    totalAmount: string;
+    batchNumber: string;
+  }
+): Promise<void> => {
+  const subject = `Your Invoice ${invoiceDetails.invoiceNumber} for ${invoiceDetails.participantName}`;
+  
+  const text = `
+    Hello ${name},
+    
+    Your consolidated invoice ${invoiceDetails.invoiceNumber} for services provided to ${invoiceDetails.participantName} between ${invoiceDetails.startDate} and ${invoiceDetails.endDate} has been generated.
+    
+    Invoice Number: ${invoiceDetails.invoiceNumber}
+    Batch Number: ${invoiceDetails.batchNumber}
+    Participant: ${invoiceDetails.participantName}
+    Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
+    Total Amount: $${invoiceDetails.totalAmount}
+    
+    You can view, download, and send this invoice to the participant from your Guardian Care Pro dashboard.
+    
+    Thank you for using Guardian Care Pro,
+    Guardian Care Pro Team
+  `;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2>Weekly Invoice Generated</h2>
+      <p>Hello ${name},</p>
+      <p>Your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> for services provided to <strong>${invoiceDetails.participantName}</strong> between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong> has been generated.</p>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
+        <p><strong>Batch Number:</strong> ${invoiceDetails.batchNumber}</p>
+        <p><strong>Participant:</strong> ${invoiceDetails.participantName}</p>
+        <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
+        <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
+      </div>
+      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view, download, and send this invoice</a> to the participant from your Guardian Care Pro dashboard.</p>
+      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+    </div>
+  `;
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send batch invoices email
+ */
+sendBatchInvoicesEmail: async (
+  to: string,
+  name: string,
+  batchDetails: {
+    invoiceCount: number;
+    invoiceNumbers: string;
+    totalAmount: string;
+    startDate: string;
+    endDate: string;
+  }
+): Promise<void> => {
+  const subject = `Batch Invoices (${batchDetails.invoiceCount}) - Guardian Care Pro`;
+  
+  const text = `
+    Hello ${name},
+    
+    Please find attached ${batchDetails.invoiceCount} invoices for services between ${batchDetails.startDate} and ${batchDetails.endDate}.
+    
+    Invoice Numbers: ${batchDetails.invoiceNumbers}
+    Total Amount: $${batchDetails.totalAmount}
+    
+    You can view and download these invoices from your Guardian Care Pro dashboard.
+    
+    Thank you for using Guardian Care Pro,
+    Guardian Care Pro Team
+  `;
+  
+  const html = `
+    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+      <h2>Batch Invoices from Guardian Care Pro</h2>
+      <p>Hello ${name},</p>
+      <p>Please find ${batchDetails.invoiceCount} invoices for services between <strong>${batchDetails.startDate}</strong> and <strong>${batchDetails.endDate}</strong>.</p>
+      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
+        <p><strong>Invoice Numbers:</strong> ${batchDetails.invoiceNumbers}</p>
+        <p><strong>Total Amount:</strong> $${batchDetails.totalAmount}</p>
+      </div>
+      <p>You can <a href="${config.clientUrl}/dashboard/invoices">view and download these invoices</a> from your Guardian Care Pro dashboard.</p>
+      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+    </div>
+  `;
+  
+  await emailService.sendEmail(to, subject, text, html);
+}
 };

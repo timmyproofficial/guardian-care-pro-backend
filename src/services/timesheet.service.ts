@@ -15,6 +15,7 @@ import { UserRole } from '../types/user.types';
 import { ShiftStatus, TimesheetStatus } from '../types/shift.types';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
+import { invoiceService } from './invoice.service';
 import { NotificationService } from './notification.service';
 import { uploadReceiptImage } from '../utils/cloudinary';
 
@@ -486,83 +487,112 @@ export const timesheetService = {
   },
   
   /**
-   * Update timesheet status
-   */
-  updateTimesheetStatus: async (
-    timesheetId: string,
-    userId: string,
-    status: TimesheetStatus,
-    rejectionReason?: string
-  ): Promise<ITimesheet> => {
-    try {
-      // Get the timesheet
-      const timesheet = await Timesheet.findById(timesheetId);
-      
-      if (!timesheet) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Timesheet not found');
-      }
-      
-      // Get user to check role
-      const user = await User.findById(userId);
-      
-      if (!user) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-      }
-      
-      // Only participant can approve/reject
-      if (
-        user.role === UserRole.PARTICIPANT && 
-        timesheet.participantId.toString() !== userId
-      ) {
-        throw new ApiError(
-          httpStatus.FORBIDDEN, 
-          'You do not have permission to update this timesheet'
-        );
-      }
-      
-      // Validate status update
-      if (timesheet.status !== TimesheetStatus.PENDING && timesheet.status !== TimesheetStatus.REVISED) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST, 
-          `Timesheet cannot be updated from ${timesheet.status} status`
-        );
-      }
-      
-      // For rejection, ensure reason is provided
-      if (status === TimesheetStatus.REJECTED && !rejectionReason) {
-        throw new ApiError(
-          httpStatus.BAD_REQUEST, 
-          'Rejection reason is required'
-        );
-      }
-      
-      // Update timesheet
-      timesheet.status = status;
-      
-      if (status === TimesheetStatus.REJECTED) {
-        timesheet.rejectionReason = rejectionReason;
-      }
-      
-      if (status === TimesheetStatus.APPROVED) {
-        timesheet.approvedBy = new mongoose.Types.ObjectId(userId);
-        timesheet.approvedAt = new Date();
-      }
-      
-      await timesheet.save();
-      
-      // Send notifications
-      if (status === TimesheetStatus.APPROVED) {
-        await NotificationService.notifyWorkerOfTimesheetApproval(timesheet);
-      } else if (status === TimesheetStatus.REJECTED) {
-        await NotificationService.notifyWorkerOfTimesheetRejection(timesheet, rejectionReason);
-      }
-      
-      return timesheet;
-    } catch (error) {
-      logger.error(`Error updating timesheet status ${timesheetId}:`, error);
-      throw error;
+ * Modify the updateTimesheetStatus method in your timesheet.service.ts file
+ * to auto-generate invoices when timesheets are approved
+ */
+
+/**
+ * Update timesheet status
+ */
+updateTimesheetStatus: async (
+  timesheetId: string,
+  userId: string,
+  status: TimesheetStatus,
+  rejectionReason?: string
+): Promise<ITimesheet> => {
+  try {
+    // Get the timesheet
+    const timesheet = await Timesheet.findById(timesheetId);
+    
+    if (!timesheet) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'Timesheet not found');
     }
-  },
+    
+    // Get user to check role
+    const user = await User.findById(userId);
+    
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+    
+    // Only participant can approve/reject
+    if (
+      user.role === UserRole.PARTICIPANT && 
+      timesheet.participantId.toString() !== userId
+    ) {
+      throw new ApiError(
+        httpStatus.FORBIDDEN, 
+        'You do not have permission to update this timesheet'
+      );
+    }
+    
+    // Validate status update
+    if (timesheet.status !== TimesheetStatus.PENDING && timesheet.status !== TimesheetStatus.REVISED) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST, 
+        `Timesheet cannot be updated from ${timesheet.status} status`
+      );
+    }
+    
+    // For rejection, ensure reason is provided
+    if (status === TimesheetStatus.REJECTED && !rejectionReason) {
+      throw new ApiError(
+        httpStatus.BAD_REQUEST, 
+        'Rejection reason is required'
+      );
+    }
+    
+    // Update timesheet
+    timesheet.status = status;
+    
+    if (status === TimesheetStatus.REJECTED) {
+      timesheet.rejectionReason = rejectionReason;
+    }
+    
+    if (status === TimesheetStatus.APPROVED) {
+      timesheet.approvedBy = new mongoose.Types.ObjectId(userId);
+      timesheet.approvedAt = new Date();
+    }
+    
+    await timesheet.save();
+    
+    // Send notifications
+    if (status === TimesheetStatus.APPROVED) {
+      await NotificationService.notifyWorkerOfTimesheetApproval(timesheet);
+      
+      // Generate invoice automatically when timesheet is approved
+      try {
+        // Import the invoice service only when needed to avoid circular dependencies
+        // const { invoiceService } = require('./invoice.service');
+        
+        // Generate invoice
+        const invoice = await invoiceService.generateInvoice(timesheetId);
+        
+        // Notify participant of new invoice
+        await NotificationService.notifyParticipantOfInvoiceGenerated(
+          timesheet.participantId.toString(),
+          timesheet.workerId.toString(),
+          invoice.invoiceNumber,
+          invoice.totalAmount
+        );
+        
+        // Optionally auto-send invoice to participant
+        await invoiceService.sendInvoiceToParticipant(invoice._id.toString());
+        
+      } catch (error) {
+        // Log error but don't fail the timesheet approval
+        logger.error(`Error generating invoice for timesheet ${timesheetId}:`, error);
+      }
+    } else if (status === TimesheetStatus.REJECTED) {
+      await NotificationService.notifyWorkerOfTimesheetRejection(timesheet, rejectionReason);
+    }
+    
+    return timesheet;
+  } catch (error) {
+    logger.error(`Error updating timesheet status ${timesheetId}:`, error);
+    throw error;
+  }
+},
   
   /**
    * Revise timesheet (after rejection)
