@@ -14,6 +14,7 @@ import httpStatus from 'http-status';
 import config from './config/env';
 import routes from './routes';
 import { errorConverter, errorHandler, notFoundHandler } from './middlewares/error.middleware';
+import { getSocketServer } from './services/socket.server';
 // import logger from './utils/logger';
 
 /**
@@ -79,6 +80,17 @@ app.get('/health', (_req, res) => {
     timestamp: new Date().toISOString(),
     environment: config.env,
     authMethod: 'Authorization Header'
+  });
+});
+
+// Add to your app.ts or routes
+app.get('/socket-health', (_req, res) => {
+  const socketServer = getSocketServer();
+  
+  res.json({
+      status: 'running',
+      connectedUsers: socketServer?.getConnectedUsersCount() || 0,
+      timestamp: new Date().toISOString()
   });
 });
 

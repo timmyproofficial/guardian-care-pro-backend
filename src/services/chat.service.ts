@@ -634,6 +634,11 @@ export const chatService = {
    */
   async setTypingStatus(userId: string, conversationId: string, isTyping: boolean): Promise<void> {
     try {
+      // Skip if no valid conversationId provided
+      if (!conversationId || conversationId.trim() === '') {
+        return;
+      }
+
       if (isTyping) {
         await UserPresence.updateOne(
           { userId: userId },

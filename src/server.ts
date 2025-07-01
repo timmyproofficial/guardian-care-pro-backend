@@ -9,7 +9,7 @@ import app from './app';
 import config from './config/env';
 import logger from './utils/logger';
 import scheduler from './services/scheduler.service';
-// import { initializeSocketServer } from './services/socket.server';
+import { initializeSocketServer } from './services/socket.server';
 
 /**
  * Normalize port value
@@ -84,7 +84,7 @@ app.set('port', port);
 const server = http.createServer(app);
 
 // Initialize WebSocket server
-// initializeSocketServer(server);
+initializeSocketServer(server);
 
 // Set up event listeners
 server.on('error', onError);
@@ -107,7 +107,7 @@ const startServer = async (): Promise<void> => {
     logger.info('🚀 Guardian Care Pro API Server Started');
     logger.info('='.repeat(50));
     logger.info(`📡 HTTP Server: http://localhost:${port}`);
-    // logger.info(`🔌 WebSocket Server: ws://localhost:${port}`);
+    logger.info(`🔌 WebSocket Server: ws://localhost:${port}`);
     logger.info('🗄️  Database: Connected to MongoDB');
     logger.info('🌍 Environment: ${config.env}');
     logger.info('📅 Batch Scheduler: Initialized and running');
