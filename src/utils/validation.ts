@@ -696,3 +696,28 @@ export const incidentValidation = {
     groupBy: Joi.string().valid('day', 'week', 'month', 'severity', 'status').default('status')
   })
 };
+
+/**
+ * Service Type validation schemas
+ */
+export const serviceTypeValidation = {
+  // Create service type
+  createServiceType: Joi.object({
+    name: Joi.string().required().trim().min(2).max(100),
+    code: Joi.string().required().trim().min(2).max(50).uppercase(),
+    status: Joi.string().valid('active', 'inactive').default('active'),
+  }),
+
+  // Update service type
+  updateServiceType: Joi.object({
+    name: Joi.string().trim().min(2).max(100),
+    code: Joi.string().trim().min(2).max(50).uppercase(),
+    status: Joi.string().valid('active', 'inactive'),
+  }).custom((value, helpers) => {
+    // Ensure at least one field is being updated
+    if (!value.name && !value.code && !value.status) {
+      return helpers.error('At least one field must be updated');
+    }
+    return value;
+  }),
+};
