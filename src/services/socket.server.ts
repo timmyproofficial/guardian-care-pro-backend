@@ -24,6 +24,7 @@ import User from '../models/user.model';
 import Organization from '../models/organization.model';
 import logger from '../utils/logger';
 import mongoose from 'mongoose';
+import UserPresence from '../models/userPresence.model';
 
 export interface AuthenticatedSocket extends SocketIOServer {
   user?: SocketUser;
@@ -547,8 +548,8 @@ export class SocketServer {
         this.connectedUsers.delete(socket.id);
         this.userSockets.delete(user.userId);
         
-        // Clear typing status
-        await chatService.setTypingStatus(user.userId, '', false);
+        // Clear typing status - removed problematic call with empty conversationId
+        // The periodic cleanup will handle typing indicators cleanup
         
         // Broadcast user offline status
         this.broadcastUserPresence(user.userId, UserPresenceStatus.OFFLINE);
@@ -628,14 +629,28 @@ export class SocketServer {
    */
   public async cleanupTypingIndicators(): Promise<void> {
     try {
-      // Remove typing indicators older than 10 seconds
-    //   const cutoffTime = new Date(Date.now() - 10 * 1000);
+      // Clean up typing indicators older than 10 seconds
+      const cutoffTime = new Date(Date.now() - 10 * 1000);
       
-      // This would be implemented in the database cleanup
-      // For now, we'll emit stop typing for all active typing users
-      this.connectedUsers.forEach(user => {
-        chatService.setTypingStatus(user.userId, '', false);
-      });
+      // Direct database cleanup instead of calling setTypingStatus with empty conversationId
+      if (this.connectedUsers.size > 0) {
+        const connectedUserIds = Array.from(this.connectedUsers.values()).map(u => u.userId);
+        
+        // Clean up old typing indicators
+        await UserPresence.updateMany(
+          { 
+            userId: { $in: connectedUserIds },
+            'isTyping.startedAt': { $lt: cutoffTime }
+          },
+          {
+            $pull: {
+              isTyping: { startedAt: { $lt: cutoffTime } }
+            }
+          }
+        );
+        
+        logger.debug(`Cleaned up typing indicators for ${connectedUserIds.length} users`);
+      }
     } catch (error) {
       logger.error('Error cleaning up typing indicators:', error);
     }
