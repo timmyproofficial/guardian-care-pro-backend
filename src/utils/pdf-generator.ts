@@ -30,11 +30,43 @@ export const generatePdf = async (
   options = {}
 ): Promise<string> => {
   try {
-    // Launch puppeteer browser
-    const browser = await puppeteer.launch({
+    // Configure Puppeteer for production (Heroku) vs development
+    const isProduction = process.env.NODE_ENV === 'production';
+    
+    const browserOptions = {
       headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--disable-gpu',
+        '--memory-pressure-off',
+        '--max_old_space_size=4096'
+      ]
+    };
+
+    // Add single-process flag only on Linux (Heroku)
+    if (process.platform === 'linux') {
+      browserOptions.args.push('--single-process');
+    }
+
+    // Add production-specific options for Heroku
+    if (isProduction) {
+      browserOptions.args.push('--disable-background-timer-throttling');
+      browserOptions.args.push('--disable-backgrounding-occluded-windows');
+      browserOptions.args.push('--disable-renderer-backgrounding');
+      
+      // Use Chrome executable from buildpack on Heroku
+      if (process.env.GOOGLE_CHROME_BIN) {
+        (browserOptions as any).executablePath = process.env.GOOGLE_CHROME_BIN;
+      }
+    }
+
+    // Launch puppeteer browser
+    const browser = await puppeteer.launch(browserOptions);
     
     // Create a new page
     const page = await browser.newPage();

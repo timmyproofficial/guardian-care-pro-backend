@@ -1,0 +1,34 @@
+{
+  "name": "Guardian Care Pro API",
+  "description": "Backend API for Guardian Care Pro platform",
+  "repository": "https://github.com/your-org/guardian-care-pro-api",
+  "keywords": [
+    "nodejs",
+    "express",
+    "mongodb",
+    "puppeteer",
+    "pdf-generation"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-google-chrome"
+    },
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "env": {
+    "NODE_ENV": {
+      "description": "Environment mode",
+      "value": "production"
+    },
+    "GOOGLE_CHROME_BIN": {
+      "description": "Path to Chrome binary (set automatically by buildpack)",
+      "required": false
+    },
+    "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD": {
+      "description": "Skip Puppeteer's Chromium download since we use Chrome from buildpack",
+      "value": "true"
+    }
+  }
+} 
