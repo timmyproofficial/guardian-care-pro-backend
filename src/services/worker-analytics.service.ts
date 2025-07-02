@@ -19,7 +19,7 @@ import {
   ComparisonData,
   AnalyticsFilters
 } from '../types/analytics.types';
-import { ShiftStatus, ServiceType, TimesheetStatus } from '../types/shift.types';
+import { ShiftStatus, TimesheetStatus } from '../types/shift.types';
 import logger from '../utils/logger';
 
 export class WorkerAnalyticsService {
@@ -154,7 +154,15 @@ export class WorkerAnalyticsService {
         clientName: shift.participantId ? 
           `${(shift.participantId as any).firstName} ${(shift.participantId as any).lastName}` : 
           'Unknown Client',
-        serviceType: shift.serviceType,
+        serviceType: shift.serviceTypeId ? {
+          id: (shift.serviceTypeId as any)._id?.toString() || '',
+          name: (shift.serviceTypeId as any).name || 'Unknown Service',
+          code: (shift.serviceTypeId as any).code || 'UNKNOWN'
+        } : {
+          id: '',
+          name: 'Unknown Service',
+          code: 'UNKNOWN'
+        },
         location: shift.address || 'Location TBD'
       }));
 
@@ -336,12 +344,10 @@ export class WorkerAnalyticsService {
 
       const totalShifts = workerShifts.reduce((sum, shift) => sum + shift.count, 0);
       const acceptedShifts = workerShifts.find(s => s._id === ShiftStatus.CONFIRMED)?.count || 0;
-      const completedShifts = workerShifts.find(s => s._id === ShiftStatus.COMPLETED)?.count || 0;
       const pendingShifts = workerShifts.find(s => s._id === ShiftStatus.PENDING)?.count || 0;
 
       // Calculate rates
       const acceptanceRate = totalShifts > 0 ? (acceptedShifts / (totalShifts - pendingShifts)) * 100 : 0;
-      const completionRate = acceptedShifts > 0 ? (completedShifts / acceptedShifts) * 100 : 0;
 
       // Calculate on-time performance (simplified - could be enhanced with actual time tracking)
       const onTimeRate = 95; // Placeholder - would need actual time tracking data
@@ -353,7 +359,6 @@ export class WorkerAnalyticsService {
 
       return {
         acceptanceRate: Math.round(acceptanceRate),
-        completionRate: Math.round(completionRate),
         onTimeRate,
         averageRating,
         totalReviews
@@ -783,8 +788,19 @@ export class WorkerAnalyticsService {
           $unwind: '$shift'
         },
         {
+          $lookup: {
+            from: 'servicetypes',
+            localField: 'shift.serviceTypeId',
+            foreignField: '_id',
+            as: 'serviceType'
+          }
+        },
+        {
+          $unwind: '$serviceType'
+        },
+        {
           $group: {
-            _id: '$shift.serviceType',
+            _id: '$serviceType.code',
             earnings: { $sum: '$grandTotal' }
           }
         },
@@ -796,9 +812,9 @@ export class WorkerAnalyticsService {
         }
       ]);
 
-      const highestPayingService = serviceTypeEarnings.length > 0 ? 
-        serviceTypeEarnings[0]._id as ServiceType : 
-        ServiceType.PERSONAL_CARE; // Default fallback
+            const highestPayingService = serviceTypeEarnings.length > 0 ?
+        serviceTypeEarnings[0]._id as string :
+        'PERSONAL_CARE'; // Default fallback
 
       return {
         monthlyProjected: Number(monthlyProjected.toFixed(2)),
@@ -896,17 +912,28 @@ export class WorkerAnalyticsService {
           }
         },
         {
+          $lookup: {
+            from: 'servicetypes',
+            localField: 'serviceTypeId',
+            foreignField: '_id',
+            as: 'serviceType'
+          }
+        },
+        {
+          $unwind: '$serviceType'
+        },
+        {
           $group: {
-            _id: '$serviceType',
+            _id: '$serviceType.code',
             count: { $sum: 1 }
           }
         }
       ]);
 
       const byServiceType = byServiceTypeData.reduce((acc, item) => {
-        acc[item._id as ServiceType] = item.count;
+        acc[item._id as string] = item.count;
         return acc;
-      }, {} as Record<ServiceType, number>);
+      }, {} as Record<string, number>);
 
       // By day of week
       const byDayData = await Shift.aggregate([
@@ -1065,7 +1092,7 @@ export class WorkerAnalyticsService {
        // This would require additional queries with organization filter
      }
      
-     if (filters.serviceType) {
+     if (filters.serviceTypeId) {
        // Filter by service type
        // This would require additional queries with service type filter
      }

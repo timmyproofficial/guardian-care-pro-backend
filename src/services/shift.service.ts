@@ -4,13 +4,13 @@ import moment from 'moment';
 import Shift, { IShift } from '../models/shift.model';
 import Organization from '../models/organization.model';
 import User, { IUser } from '../models/user.model';
+import ServiceType from '../models/serviceType.model';
 import { UserRole } from '../types/user.types';
 import { 
   ShiftStatus, 
   ShiftType, 
   RecurrencePattern, 
   CancellationReason, 
-  ServiceType,
   LocationType
 } from '../types/shift.types';
 import ApiError from '../utils/api-error';
@@ -26,7 +26,7 @@ interface CreateShiftInput {
   isMultiWorkerShift: boolean;
   workerId?: string;
   workerIds?: string[];
-  serviceType: ServiceType;
+  serviceTypeId: string;
   startTime: Date;
   endTime: Date;
   locationType: LocationType;
@@ -47,7 +47,7 @@ interface CreateShiftInput {
 interface UpdateShiftInput {
   workerId?: string;
   workerIds?: string[];
-  serviceType?: ServiceType;
+  serviceTypeId?: string;
   startTime?: Date;
   endTime?: Date;
   locationType?: LocationType;
@@ -241,6 +241,16 @@ export const shiftService = {
         );
       }
       
+      // Verify service type exists and is active
+      const serviceType = await ServiceType.findOne({
+        _id: shiftData.serviceTypeId,
+        status: 'active'
+      });
+      
+      if (!serviceType) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found or inactive');
+      }
+      
       // Handle single worker or multi-worker setup
       if (shiftData.isMultiWorkerShift) {
         // Validate worker count limit (maximum 3)
@@ -284,7 +294,7 @@ export const shiftService = {
           participantId: new mongoose.Types.ObjectId(shiftData.participantId),
           isMultiWorkerShift: true,
           workerAssignments,
-          serviceType: shiftData.serviceType,
+          serviceTypeId: new mongoose.Types.ObjectId(shiftData.serviceTypeId),
           startTime: shiftData.startTime,
           endTime: shiftData.endTime,
           locationType: shiftData.locationType,
@@ -445,7 +455,7 @@ export const shiftService = {
           participantId: new mongoose.Types.ObjectId(shiftData.participantId),
           isMultiWorkerShift: false,
           workerId: shiftData.workerId ? new mongoose.Types.ObjectId(shiftData.workerId) : undefined,
-          serviceType: shiftData.serviceType,
+          serviceTypeId: new mongoose.Types.ObjectId(shiftData.serviceTypeId),
           startTime: shiftData.startTime,
           endTime: shiftData.endTime,
           locationType: shiftData.locationType,
@@ -601,6 +611,10 @@ export const shiftService = {
           {
             path: 'organizationId',
             select: 'name'
+          },
+          {
+            path: 'serviceTypeId',
+            select: 'name code status'
           }
         ]);
       
@@ -637,6 +651,10 @@ export const shiftService = {
           {
             path: 'organizationId',
             select: 'name'
+          },
+          {
+            path: 'serviceTypeId',
+            select: 'name code status'
           }
         ]);
       
@@ -701,6 +719,10 @@ export const shiftService = {
           {
             path: 'workerAssignments.workerId',
             select: 'firstName lastName email phone profileImage'
+          },
+          {
+            path: 'serviceTypeId',
+            select: 'name code status'
           }
         ]);
       
@@ -724,7 +746,13 @@ export const shiftService = {
     } = {}
   ): Promise<IShift[]> => {
     try {
-      const query: any = { workerId: new mongoose.Types.ObjectId(workerId) };
+      // Query for both single-worker and multi-worker shifts
+      const query: any = {
+        $or: [
+          { workerId: new mongoose.Types.ObjectId(workerId) }, // Single worker
+          { 'workerAssignments.workerId': new mongoose.Types.ObjectId(workerId) } // Multi-worker
+        ]
+      };
       
       // Apply filters
       if (filter.status) {
@@ -757,6 +785,10 @@ export const shiftService = {
           {
             path: 'organizationId',
             select: 'name'
+          },
+          {
+            path: 'serviceTypeId',
+            select: 'name code status'
           }
         ]);
       
@@ -823,6 +855,18 @@ export const shiftService = {
             httpStatus.FORBIDDEN, 
             'You do not have permission to update this shift'
           );
+        }
+      }
+      
+      // Validate service type if being updated
+      if (updateData.serviceTypeId) {
+        const serviceType = await ServiceType.findOne({
+          _id: updateData.serviceTypeId,
+          status: 'active'
+        });
+        
+        if (!serviceType) {
+          throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found or inactive');
         }
       }
       

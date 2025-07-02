@@ -8,7 +8,6 @@ import {
   ShiftStatus, 
   ShiftType, 
   RecurrencePattern, 
-  ServiceType, 
   LocationType, 
   CancellationReason, 
   WorkerAssignment
@@ -27,7 +26,7 @@ export interface IShift extends Document {
   isMultiWorkerShift: boolean;               // Whether shift requires multiple workers
   workerId?: mongoose.Types.ObjectId;        // Support worker assigned to the shift (single-worker mode)
   workerAssignments?: WorkerAssignment[];    // Support workers assigned to the shift (multi-worker mode)
-  serviceType: ServiceType;                  // Type of service requested
+  serviceTypeId: mongoose.Types.ObjectId;    // Reference to ServiceType model
   startTime: Date;                           // Scheduled start time
   endTime: Date;                             // Scheduled end time
   
@@ -118,9 +117,9 @@ const shiftSchema = new Schema<IShift>(
         type: String
       }
     }],
-    serviceType: {
-      type: String,
-      enum: Object.values(ServiceType),
+    serviceTypeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceType',
       required: true
     },
     startTime: {
@@ -210,9 +209,52 @@ shiftSchema.index({ participantId: 1 });
 shiftSchema.index({ workerId: 1 });
 shiftSchema.index({ 'workerAssignments.workerId': 1 }); // Add index for worker assignments
 shiftSchema.index({ organizationId: 1 });
+shiftSchema.index({ serviceTypeId: 1 }); // Add index for service type
 shiftSchema.index({ status: 1 });
 shiftSchema.index({ startTime: 1 });
 shiftSchema.index({ 'recurrence.parentShiftId': 1 });
+
+// Compound indexes for analytics and reporting
+shiftSchema.index({ 
+  workerId: 1, 
+  status: 1, 
+  endTime: -1 
+}, { 
+  name: 'idx_worker_status_endtime_analytics' 
+});
+
+shiftSchema.index({ 
+  'workerAssignments.workerId': 1, 
+  status: 1, 
+  endTime: -1 
+}, { 
+  name: 'idx_multiworker_status_endtime_analytics' 
+});
+
+shiftSchema.index({ 
+  participantId: 1, 
+  status: 1, 
+  startTime: -1 
+}, { 
+  name: 'idx_participant_status_starttime' 
+});
+
+shiftSchema.index({ 
+  serviceTypeId: 1, 
+  status: 1, 
+  endTime: -1 
+}, { 
+  name: 'idx_servicetype_status_endtime' 
+});
+
+shiftSchema.index({ 
+  organizationId: 1, 
+  serviceTypeId: 1, 
+  status: 1, 
+  startTime: -1 
+}, { 
+  name: 'idx_org_servicetype_status_starttime' 
+});
 
 /**
  * Create and export the Shift model

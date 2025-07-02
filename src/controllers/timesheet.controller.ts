@@ -75,7 +75,11 @@ export const timesheetController = {
         .populate([
           {
             path: 'shiftId',
-            select: 'shiftId serviceType isMultiWorkerShift'
+            select: 'shiftId serviceTypeId isMultiWorkerShift',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code status'
+            }
           },
           {
             path: 'participantId',

@@ -4,7 +4,6 @@
  */
 
 import { UserRole, UserStatus } from './user.types';
-import { ServiceType } from './shift.types';
 
 /**
  * Common date range options
@@ -44,6 +43,15 @@ export interface ComparisonData {
   previous: number;
   percentageChange: number;
   trend: 'up' | 'down' | 'stable';
+}
+
+/**
+ * Service type reference interface for analytics
+ */
+export interface ServiceTypeReference {
+  id: string;
+  name: string;
+  code: string;
 }
 
 /**
@@ -107,7 +115,7 @@ export interface AdminFinancialAnalytics {
       name: string;
       revenue: number;
     }>;
-    byServiceType: Record<ServiceType, number>;
+    byServiceType: Record<string, number>; // Key is service type code/name
   };
   payments: {
     processed: number;
@@ -132,7 +140,7 @@ export interface ParticipantOverviewAnalytics {
       shiftId: string;
       date: Date;
       workerName: string;
-      serviceType: ServiceType;
+      serviceType: ServiceTypeReference;
     }>;
     completedShiftsThisMonth: number;
     totalCareHours: ComparisonData;
@@ -162,7 +170,7 @@ export interface ParticipantOverviewAnalytics {
 
 export interface ParticipantServiceAnalytics {
   serviceDistribution: Array<{
-    serviceType: ServiceType;
+    serviceType: ServiceTypeReference;
     hours: number;
     percentage: number;
   }>;
@@ -189,7 +197,7 @@ export interface WorkerOverviewAnalytics {
       shiftId: string;
       date: Date;
       clientName: string;
-      serviceType: ServiceType;
+      serviceType: ServiceTypeReference;
       location: string;
     }>;
     completedThisPeriod: number;
@@ -198,7 +206,6 @@ export interface WorkerOverviewAnalytics {
   };
   performanceMetrics: {
     acceptanceRate: number;
-    completionRate: number;
     onTimeRate: number;
     averageRating: number;
     totalReviews: number;
@@ -230,14 +237,14 @@ export interface WorkerFinancialAnalytics {
   projections: {
     monthlyProjected: number;
     averageHourlyRate: number;
-    highestPayingService: ServiceType;
+    highestPayingService: string; // Service type code/name
   };
 }
 
 export interface WorkerScheduleAnalytics {
   weeklyHours: TrendDataPoint[];
   shiftDistribution: {
-    byServiceType: Record<ServiceType, number>;
+    byServiceType: Record<string, number>; // Key is service type code/name
     byDayOfWeek: Array<{
       day: string;
       hours: number;
@@ -255,19 +262,19 @@ export interface WorkerScheduleAnalytics {
 }
 
 /**
- * Analytics filter options
+ * Analytics filters
  */
 export interface AnalyticsFilters {
   dateRange: DateRange;
   organizationId?: string;
   workerId?: string;
   participantId?: string;
-  serviceType?: ServiceType;
+  serviceTypeId?: string; // ObjectId of service type
   comparison?: boolean; // Include comparison with previous period
 }
 
 /**
- * Analytics response wrapper
+ * Generic analytics response wrapper
  */
 export interface AnalyticsResponse<T> {
   data: T;

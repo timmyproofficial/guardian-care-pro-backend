@@ -9,6 +9,7 @@ import userRoute from './user.route';
 import adminUserRoute from './admin-user.route';
 import organizationRoute from './organization.route';
 import rateTimeBandRoute from './rateTimeBand.route';
+import serviceTypeRoute from './serviceType.route';
 import shiftRoute from './shift.route';
 import timesheetRoute from './timesheet.route';
 import workerRoute from './worker.route';
@@ -56,6 +57,11 @@ const routes: Route[] = [
   {
     path: '/rate-time-band',
     route: rateTimeBandRoute,
+    authRequired: true,
+  },
+  {
+    path: '/service-types',
+    route: serviceTypeRoute,
     authRequired: true,
   },
   {

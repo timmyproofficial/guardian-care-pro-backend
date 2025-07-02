@@ -305,6 +305,39 @@ timesheetSchema.index({ invoiceId: 1 });
 timesheetSchema.index({ isPaid: 1 });
 timesheetSchema.index({ actualStartTime: 1 });
 
+// Compound indexes for financial analytics and reporting
+timesheetSchema.index({ 
+  workerId: 1, 
+  status: 1, 
+  actualStartTime: -1 
+}, { 
+  name: 'idx_worker_status_actualstart_financial' 
+});
+
+timesheetSchema.index({ 
+  participantId: 1, 
+  status: 1, 
+  actualStartTime: -1 
+}, { 
+  name: 'idx_participant_status_actualstart' 
+});
+
+timesheetSchema.index({ 
+  status: 1, 
+  isPaid: 1, 
+  actualStartTime: -1 
+}, { 
+  name: 'idx_status_paid_actualstart_payment' 
+});
+
+timesheetSchema.index({ 
+  organizationId: 1, 
+  status: 1, 
+  actualStartTime: -1 
+}, { 
+  name: 'idx_org_status_actualstart' 
+});
+
 /**
  * Create and export the Timesheet model
  */
