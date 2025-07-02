@@ -4,7 +4,7 @@
  */
 
 import httpStatus from 'http-status';
-import mongoose from 'mongoose';
+// import mongoose from 'mongoose';
 import ServiceType, { IServiceType, ServiceTypeStatus } from '../models/serviceType.model';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';

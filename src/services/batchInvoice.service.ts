@@ -302,6 +302,18 @@ export const batchInvoiceService = {
           {
             path: 'participantId',
             select: 'firstName lastName email phone'
+          },
+          {
+            path: 'timesheetIds',
+            select: 'shiftId actualStartTime actualEndTime subtotal distanceTravelAmount',
+            populate: {
+              path: 'shiftId',
+              select: 'shiftId serviceTypeId',
+              populate: {
+                path: 'serviceTypeId',
+                select: 'name code status'
+              }
+            }
           }
         ]);
       
@@ -338,7 +350,15 @@ export const batchInvoiceService = {
           },
           {
             path: 'timesheetIds',
-            select: 'shiftId actualStartTime actualEndTime subtotal distanceTravelAmount'
+            select: 'shiftId actualStartTime actualEndTime subtotal distanceTravelAmount',
+            populate: {
+              path: 'shiftId',
+              select: 'shiftId serviceTypeId',
+              populate: {
+                path: 'serviceTypeId',
+                select: 'name code status'
+              }
+            }
           }
         ]);
       

@@ -411,7 +411,11 @@ export const timesheetService = {
         .populate([
           {
             path: 'shiftId',
-            select: 'shiftId serviceType'
+            select: 'shiftId serviceTypeId isMultiWorkerShift',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code status'
+            }
           },
           {
             path: 'participantId',
@@ -471,7 +475,11 @@ export const timesheetService = {
         .populate([
           {
             path: 'shiftId',
-            select: 'shiftId serviceType'
+            select: 'shiftId serviceTypeId isMultiWorkerShift',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code status'
+            }
           },
           {
             path: 'workerId',

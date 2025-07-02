@@ -34,20 +34,28 @@ const validate = (
   location: ValidateLocation = 'body',
   options: ValidationOptions = { abortEarly: false }
 ) => {
-  return (req: Request, _res: Response, next: NextFunction) => {
-    const data = req[location];
-    const { error, value } = schema.validate(data, options);
-    
-    if (error) {
-      const errorMessage = error.details
-        .map((detail) => detail.message)
-        .join(', ');
+  return async (req: Request, _res: Response, next: NextFunction) => {
+    try {
+      const data = req[location];
+      
+      // Use validateAsync to handle external validation rules
+      const value = await schema.validateAsync(data, options);
+      
+      // Replace request data with validated data
+      req[location] = value;
+      return next();
+    } catch (error) {
+      if (error instanceof Joi.ValidationError) {
+        const errorMessage = error.details
+          .map((detail) => detail.message)
+          .join(', ');
+        return next(new ApiError(httpStatus.BAD_REQUEST, errorMessage));
+      }
+      
+      // Handle external validation errors
+      const errorMessage = error instanceof Error ? error.message : 'Validation error';
       return next(new ApiError(httpStatus.BAD_REQUEST, errorMessage));
     }
-    
-    // Replace request data with validated data
-    req[location] = value;
-    return next();
   };
 };
 

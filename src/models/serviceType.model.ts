@@ -63,6 +63,22 @@ serviceTypeSchema.index({ code: 1 }, { unique: true });
 serviceTypeSchema.index({ status: 1 });
 serviceTypeSchema.index({ name: 1 });
 
+// Compound indexes for optimized queries
+serviceTypeSchema.index({ 
+  status: 1, 
+  name: 1 
+}, { 
+  name: 'idx_status_name_search',
+  partialFilterExpression: { status: 'active' }
+});
+
+serviceTypeSchema.index({ 
+  status: 1, 
+  createdAt: -1 
+}, { 
+  name: 'idx_status_created_pagination' 
+});
+
 /**
  * Create and export the ServiceType model
  */

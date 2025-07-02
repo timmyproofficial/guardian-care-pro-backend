@@ -42,23 +42,6 @@ export enum ShiftStatus {
   }
   
   /**
-   * Service type enumeration
-   * Types of services that can be requested in a shift
-   */
-  export enum ServiceType {
-    PERSONAL_CARE = 'personalCare',
-    HOUSEHOLD_TASKS = 'householdTasks',
-    SOCIAL_SUPPORT = 'socialSupport',
-    TRANSPORT = 'transport',
-    MEAL_PREPARATION = 'mealPreparation',
-    MEDICATION_SUPPORT = 'medicationSupport',
-    MOBILITY_ASSISTANCE = 'mobilityAssistance',
-    THERAPY_SUPPORT = 'therapySupport',
-    BEHAVIOR_SUPPORT = 'behaviorSupport',
-    COMMUNITY_ACCESS = 'communityAccess'
-  }
-  
-  /**
    * Cancellation reason enumeration
    * Reasons for shift cancellation
    */
@@ -102,7 +85,7 @@ export interface WorkerAssignment {
   isMultiWorkerShift: boolean;       // Flag to indicate if shift requires multiple workers
   workerId?: string;                  // Used for single-worker shifts
   workerIds?: string[];              // Used for multi-worker shifts (up to 3)
-  serviceType: ServiceType;
+  serviceTypeId: string;             // Reference to ServiceType model
   startTime: Date;
   endTime: Date;
   

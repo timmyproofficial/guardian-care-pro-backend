@@ -19,7 +19,7 @@ import {
   ComparisonData,
   AnalyticsFilters
 } from '../types/analytics.types';
-import { ShiftStatus, ServiceType, TimesheetStatus } from '../types/shift.types';
+import { ShiftStatus, TimesheetStatus } from '../types/shift.types';
 import logger from '../utils/logger';
 
 export class ParticipantAnalyticsService {
@@ -124,6 +124,7 @@ export class ParticipantAnalyticsService {
       .sort({ startTime: 1 })
       .limit(5)
       .populate('workerId', 'firstName lastName')
+      .populate('serviceTypeId', 'name code')
       .lean();
       
       // Format upcoming shifts
@@ -133,7 +134,11 @@ export class ParticipantAnalyticsService {
         workerName: shift.workerId ? 
           `${(shift.workerId as any).firstName} ${(shift.workerId as any).lastName}` : 
           'Unassigned',
-        serviceType: shift.serviceType
+        serviceType: {
+          id: (shift.serviceTypeId as any)?._id?.toString() || '',
+          name: (shift.serviceTypeId as any)?.name || 'Unknown',
+          code: (shift.serviceTypeId as any)?.code || 'UNKNOWN'
+        }
       }));
       
       // Count completed shifts this month
@@ -439,8 +444,21 @@ export class ParticipantAnalyticsService {
           }
         },
         {
+          $lookup: {
+            from: 'servicetypes',
+            localField: 'serviceTypeId',
+            foreignField: '_id',
+            as: 'serviceTypeData'
+          }
+        },
+        {
+          $unwind: '$serviceTypeData'
+        },
+        {
           $project: {
-            serviceType: 1,
+            serviceTypeId: '$serviceTypeData._id',
+            serviceTypeName: '$serviceTypeData.name',
+            serviceTypeCode: '$serviceTypeData.code',
             durationHours: {
               $divide: [
                 { $subtract: ['$endTime', '$startTime'] },
@@ -451,7 +469,11 @@ export class ParticipantAnalyticsService {
         },
         {
           $group: {
-            _id: '$serviceType',
+            _id: {
+              id: '$serviceTypeId',
+              name: '$serviceTypeName',
+              code: '$serviceTypeCode'
+            },
             hours: { $sum: '$durationHours' }
           }
         }
@@ -462,7 +484,11 @@ export class ParticipantAnalyticsService {
       
       // Format the result with percentages
       const serviceDistribution = serviceAggregation.map(service => ({
-        serviceType: service._id as ServiceType,
+        serviceType: {
+          id: service._id.id.toString(),
+          name: service._id.name,
+          code: service._id.code
+        },
         hours: Math.round(service.hours * 10) / 10, // Round to 1 decimal
         percentage: totalHours > 0 ? Math.round((service.hours / totalHours) * 100) : 0
       }));
@@ -669,7 +695,7 @@ export class ParticipantAnalyticsService {
         // This would require additional queries with worker filter
       }
       
-      if (filters.serviceType) {
+      if (filters.serviceTypeId) {
         // Filter by service type
         // This would require additional queries with service type filter
       }

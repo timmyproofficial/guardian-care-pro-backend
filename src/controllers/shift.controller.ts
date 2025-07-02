@@ -92,6 +92,10 @@ import { timesheetController } from './timesheet.controller';
           {
             path: 'organizationId',
             select: 'name'
+          },
+          {
+            path: 'serviceTypeId',
+            select: 'name code status'
           }
         ]);
       
@@ -128,7 +132,7 @@ export const shiftController = {
         isMultiWorkerShift,
         workerId,
         workerIds,
-        serviceType,
+        serviceTypeId,
         startTime,
         endTime,
         locationType,
@@ -145,7 +149,7 @@ export const shiftController = {
         isMultiWorkerShift,
         workerId: isMultiWorkerShift ? undefined : workerId,
         workerIds: isMultiWorkerShift ? workerIds : undefined,
-        serviceType,
+        serviceTypeId,
         startTime: new Date(startTime),
         endTime: new Date(endTime),
         locationType,
@@ -430,7 +434,7 @@ export const shiftController = {
       
       const updateData = {
         workerId: req.body.workerId,
-        serviceType: req.body.serviceType,
+        serviceTypeId: req.body.serviceTypeId,
         startTime: req.body.startTime ? new Date(req.body.startTime) : undefined,
         endTime: req.body.endTime ? new Date(req.body.endTime) : undefined,
         locationType: req.body.locationType,

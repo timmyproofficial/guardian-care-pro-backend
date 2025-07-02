@@ -10,13 +10,14 @@ import {
   ShiftType, 
   RecurrencePattern, 
   CancellationReason,
-  ServiceType,
   LocationType,
   TimesheetStatus
 } from '../types/shift.types';
 import { SubscriptionTier } from '../types/payment.types';
 import { password } from './custom-validators';
 import { BatchFrequency } from '../models/batchInvoiceConfig.model';
+// import mongoose from 'mongoose';
+import ServiceTypeModel from '../models/serviceType.model';
 
 /**
  * Authentication validation schemas
@@ -289,104 +290,114 @@ export const rateTimeBandValidation = {
 };
 
 /**
+ * Custom Joi validation for MongoDB ObjectId
+ */
+const objectId = Joi.string().regex(/^[0-9a-fA-F]{24}$/).message('Invalid ObjectId format');
+
+/**
+ * Custom Joi validation for ServiceType ObjectId
+ * Validates that the serviceTypeId exists and is active in the database
+ */
+const serviceTypeId = Joi.string()
+  .regex(/^[0-9a-fA-F]{24}$/)
+  .message('Invalid ServiceType ID format')
+  .external(async (value) => {
+    // Skip external validation if value is not provided, empty, or invalid
+    if (!value || typeof value !== 'string' || value.trim() === '' || value.length !== 24) {
+      return value;
+    }
+    
+    try {
+      const serviceType = await ServiceTypeModel.findOne({
+        _id: value.trim(),
+        status: 'active'
+      });
+      
+      if (!serviceType) {
+        throw new Error('Service type not found or inactive');
+      }
+      
+      return value;
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Service type not found or inactive') {
+        throw error;
+      }
+      // Handle any database connection or other errors gracefully
+      throw new Error('Error validating service type');
+    }
+  });
+
+/**
  * Shift validation schemas
  */
 export const shiftValidation = {
   // Create shift
   createShift: Joi.object({
-    organizationId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
-    isMultiWorkerShift: Joi.boolean().required(),
-    workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/).when('isMultiWorkerShift', {
+    organizationId: objectId.required(),
+    isMultiWorkerShift: Joi.boolean().default(false),
+    workerId: Joi.when('isMultiWorkerShift', {
       is: false,
-      then: Joi.optional(),
+      then: objectId,
       otherwise: Joi.forbidden()
     }),
-    workerIds: Joi.array()
-    .items(Joi.string().regex(/^[0-9a-fA-F]{24}$/))
-    .min(1)
-    .max(3)
-    .when('isMultiWorkerShift', {
+    workerIds: Joi.when('isMultiWorkerShift', {
       is: true,
-      then: Joi.required(),
-      otherwise: Joi.forbidden(),
+      then: Joi.array().items(objectId).min(1).max(3).required(),
+      otherwise: Joi.forbidden()
     }),
-    serviceType: Joi.string().required().valid(...Object.values(ServiceType)),
+    serviceTypeId: serviceTypeId.required(),
     startTime: Joi.date().required(),
-    endTime: Joi.date().required().greater(Joi.ref('startTime')),
-    locationType: Joi.string().required().valid(...Object.values(LocationType)),
-    address: Joi.string().when('locationType', {
+    endTime: Joi.date().greater(Joi.ref('startTime')).required(),
+    locationType: Joi.string().valid(...Object.values(LocationType)).required(),
+    address: Joi.when('locationType', {
       is: LocationType.IN_PERSON,
-      then: Joi.required(),
-      otherwise: Joi.optional(),
+      then: Joi.string().required(),
+      otherwise: Joi.string().optional()
     }),
-    shiftType: Joi.string().required().valid(...Object.values(ShiftType)),
-    requiresSupervision: Joi.boolean(),
-    specialInstructions: Joi.string(),
+    shiftType: Joi.string().valid(...Object.values(ShiftType)).required(),
+    requiresSupervision: Joi.boolean().default(false),
+    specialInstructions: Joi.string().optional(),
     recurrence: Joi.object({
-      pattern: Joi.string().required().valid(...Object.values(RecurrencePattern)),
-      occurrences: Joi.number().integer().min(1).max(50),
-      endDate: Joi.date().greater(Joi.ref('...startTime')),
-    }).custom((value, helpers) => {
-      if (value.pattern !== RecurrencePattern.NONE && !value.occurrences && !value.endDate) {
-        return helpers.error('Recurrence must include either occurrences or endDate');
-      }
-      return value;
-    }),
+      pattern: Joi.string().valid(...Object.values(RecurrencePattern)).required(),
+      occurrences: Joi.number().integer().min(1).max(100),
+      endDate: Joi.date().greater(Joi.ref('....startTime'))
+    }).optional()
   }),
 
-  // Update shift validation schema updates
+  // Update shift
   updateShift: Joi.object({
-    workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-    workerIds: Joi.array().items(
-      Joi.string().regex(/^[0-9a-fA-F]{24}$/)
-    ).max(3),
-    serviceType: Joi.string().valid(...Object.values(ServiceType)),
-    startTime: Joi.date(),
-    endTime: Joi.date(),
-    locationType: Joi.string().valid(...Object.values(LocationType)),
-    address: Joi.string(),
-    requiresSupervision: Joi.boolean(),
-    specialInstructions: Joi.string(),
-    status: Joi.string().valid(...Object.values(ShiftStatus)),
-    updateRecurring: Joi.boolean(),
-  }).custom((value, helpers) => {
-    if (value.endTime && value.startTime && new Date(value.endTime) <= new Date(value.startTime)) {
-      return helpers.error('End time must be after start time');
-    }
-    
-    // Prevent updating both workerId and workerIds
-    if (value.workerId && value.workerIds) {
-      return helpers.error('Cannot update both workerId and workerIds');
-    }
-    
-    return value;
-  }),
-
-  // Add new validation for multi-worker specific operations
-  respondToWorkerAssignment: Joi.object({
-    accept: Joi.boolean().required(),
-    declineReason: Joi.string().when('accept', {
-      is: false,
-      then: Joi.required(),
-      otherwise: Joi.optional(),
-    }),
+    workerId: objectId.optional(),
+    workerIds: Joi.array().items(objectId).min(1).max(3).optional(),
+    serviceTypeId: serviceTypeId.optional(),
+    startTime: Joi.date().optional(),
+    endTime: Joi.date().when('startTime', {
+      is: Joi.exist(),
+      then: Joi.date().greater(Joi.ref('startTime')),
+      otherwise: Joi.date()
+    }).optional(),
+    locationType: Joi.string().valid(...Object.values(LocationType)).optional(),
+    address: Joi.string().optional(),
+    requiresSupervision: Joi.boolean().optional(),
+    specialInstructions: Joi.string().optional(),
+    status: Joi.string().valid(...Object.values(ShiftStatus)).optional(),
+    updateRecurring: Joi.boolean().default(false)
   }),
 
   // Respond to shift
   respondToShift: Joi.object({
     accept: Joi.boolean().required(),
-    declineReason: Joi.string().when('accept', {
+    declineReason: Joi.when('accept', {
       is: false,
-      then: Joi.required(),
-      otherwise: Joi.optional(),
-    }),
+      then: Joi.string().required(),
+      otherwise: Joi.forbidden()
+    })
   }),
 
   // Cancel shift
   cancelShift: Joi.object({
-    reason: Joi.string().required().valid(...Object.values(CancellationReason)),
-    note: Joi.string(),
-  }),
+    reason: Joi.string().valid(...Object.values(CancellationReason)).required(),
+    note: Joi.string().optional()
+  })
 };
 
 /**
@@ -566,10 +577,6 @@ export const batchInvoiceValidation = {
     return value;
   })
 };
-
-
-
-
 
 /**
  * Subscription validation schemas

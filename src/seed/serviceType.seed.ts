@@ -5,7 +5,6 @@
 
 import mongoose from 'mongoose';
 import ServiceType, { ServiceTypeStatus } from '../models/serviceType.model';
-import { ServiceType as ServiceTypeEnum } from '../types/shift.types';
 import logger from '../utils/logger';
 
 /**
@@ -160,35 +159,28 @@ export const createServiceTypeMapping = async (): Promise<Map<string, mongoose.T
 };
 
 /**
- * Verify enum values match database (for validation)
+ * Verify expected service types exist in database (for validation)
  */
 export const verifyServiceTypeSync = async (): Promise<boolean> => {
   try {
-    const enumValues = Object.values(ServiceTypeEnum);
+    const expectedCodes = serviceTypeSeedData.map(st => st.code);
     const dbServiceTypes = await ServiceType.find({ status: ServiceTypeStatus.ACTIVE });
     
     const dbCodes = dbServiceTypes.map(st => st.code);
     
-    // Check if all enum values exist in database
-    const missingInDb = enumValues.filter(enumValue => !dbCodes.includes(enumValue));
-    
-    // Check if there are extra codes in database
-    const extraInDb = dbCodes.filter(dbCode => !enumValues.includes(dbCode as ServiceTypeEnum));
+    // Check if all expected codes exist in database
+    const missingInDb = expectedCodes.filter(expectedCode => !dbCodes.includes(expectedCode));
     
     if (missingInDb.length > 0) {
       logger.warn('Service types missing in database:', missingInDb);
     }
     
-    if (extraInDb.length > 0) {
-      logger.warn('Extra service types in database:', extraInDb);
-    }
-    
-    const isSync = missingInDb.length === 0 && extraInDb.length === 0;
+    const isSync = missingInDb.length === 0;
     
     if (isSync) {
-      logger.info('Service types are in sync between enum and database');
+      logger.info('All expected service types exist in database');
     } else {
-      logger.warn('Service types are NOT in sync between enum and database');
+      logger.warn('Some expected service types are missing in database');
     }
     
     return isSync;

@@ -24,7 +24,7 @@ import {
   AnalyticsFilters
 } from '../types/analytics.types';
 import { UserRole, UserStatus } from '../types/user.types';
-import { ShiftStatus, TimesheetStatus, ServiceType } from '../types/shift.types';
+import { ShiftStatus, TimesheetStatus } from '../types/shift.types';
 import { InviteStatus } from '../models/organization.model';
 import logger from '../utils/logger';
 
@@ -825,9 +825,9 @@ export class AdminAnalyticsService {
     ]);
 
     const byServiceType = byServiceTypeData.reduce((acc, item) => {
-      acc[item._id as ServiceType] = item.revenue;
+      acc[item._id as string] = item.revenue;
       return acc;
-    }, {} as Record<ServiceType, number>);
+    }, {} as Record<string, number>);
 
     return {
       total,
@@ -968,7 +968,7 @@ export class AdminAnalyticsService {
         // This would require additional queries with organization filter
       }
       
-      if (filters.serviceType) {
+      if (filters.serviceTypeId) {
         // Filter by service type
         // This would require additional queries with service type filter
       }

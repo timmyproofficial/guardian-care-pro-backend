@@ -18,7 +18,6 @@ import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 import { emailService } from './email.service';
 import { NotificationService } from './notification.service';
-import { ServiceType } from '../types/shift.types';
 import { generateInvoicePdf } from '../utils/pdf-generator';
 
 /**
@@ -102,9 +101,9 @@ export const invoiceService = {
       
       // Get service type from related shift
       const serviceType = timesheet.shiftId && 
-                         (timesheet.shiftId as any).serviceType ? 
-                         (timesheet.shiftId as any).serviceType : 
-                         ServiceType.PERSONAL_CARE; // Default if not available
+                         (timesheet.shiftId as any).serviceTypeId ? 
+                         (timesheet.shiftId as any).serviceTypeId.name || 'Personal Care' : 
+                         'Personal Care'; // Default if not available
       
       // Format work items from rate calculations
       const workItems: WorkItem[] = timesheet.rateCalculations.map(calc => ({
@@ -271,7 +270,25 @@ export const invoiceService = {
       }
       
       const invoices = await Invoice.find(query)
-        .sort({ invoiceDate: -1 });
+        .sort({ invoiceDate: -1 })
+        .populate([
+          {
+            path: 'shiftId',
+            select: 'shiftId serviceTypeId',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code status'
+            }
+          },
+          {
+            path: 'workerId',
+            select: 'firstName lastName email'
+          },
+          {
+            path: 'organizationId',
+            select: 'name'
+          }
+        ]);
       
       return invoices;
     } catch (error) {
@@ -319,7 +336,25 @@ export const invoiceService = {
       }
       
       const invoices = await Invoice.find(query)
-        .sort({ invoiceDate: -1 });
+        .sort({ invoiceDate: -1 })
+        .populate([
+          {
+            path: 'shiftId',
+            select: 'shiftId serviceTypeId',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code status'
+            }
+          },
+          {
+            path: 'participantId',
+            select: 'firstName lastName email'
+          },
+          {
+            path: 'organizationId',
+            select: 'name'
+          }
+        ]);
       
       return invoices;
     } catch (error) {
