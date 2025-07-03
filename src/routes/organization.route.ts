@@ -70,6 +70,14 @@ router.get(
   (req: Request, res, next) => organizationController.getMyOrganizationId(req as any, res, next)
 );
 
+// Get support workers for the authenticated participant's organization
+router.get(
+  '/my-support-workers',
+  authenticate,
+  authorize([UserRole.PARTICIPANT]),
+  (req: Request, res, next) => organizationController.getMySupportWorkers(req as any, res, next)
+);
+
 // Get organization ID for a specified participant (admin only)
 router.get(
   '/participant/:participantId/organization-id',

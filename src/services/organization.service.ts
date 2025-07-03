@@ -116,9 +116,6 @@ export const organizationService = {
   /**
  * Get organization ID for a participant
  */
-  /**
- * Get organization ID for a participant
- */
   getOrganizationIdForParticipant: async (participantId: string): Promise<string> => {
     try {
       // Find the organization for this participant
@@ -133,6 +130,48 @@ export const organizationService = {
       return organization._id.toString();
     } catch (error) {
       logger.error(`Error getting organization ID for participant ${participantId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get support workers for a participant's organization
+   */
+  getParticipantSupportWorkers: async (participantId: string): Promise<{
+    _id: string;
+    firstName: string;
+    lastName: string;
+    profileImage?: string;
+    joinedDate: Date;
+  }[]> => {
+    try {
+      // Find the organization for this participant
+      const organization = await Organization.findOne({ 
+        participantId: new mongoose.Types.ObjectId(participantId) 
+      }).populate({
+        path: 'workers.workerId',
+        select: 'firstName lastName profileImage _id'
+      });
+      
+      if (!organization) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Organization not found for this participant');
+      }
+      
+      // Extract and format the support workers
+      const supportWorkers = organization.workers.map(worker => {
+        const workerData = worker.workerId as any; // Cast to any to handle populated field
+        return {
+          _id: workerData._id.toString(),
+          firstName: workerData.firstName,
+          lastName: workerData.lastName,
+          profileImage: workerData.profileImage,
+          joinedDate: worker.joinedDate
+        };
+      });
+      
+      return supportWorkers;
+    } catch (error) {
+      logger.error(`Error getting support workers for participant ${participantId}:`, error);
       throw error;
     }
   },
