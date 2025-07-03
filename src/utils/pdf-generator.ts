@@ -33,7 +33,7 @@ export const generatePdf = async (
     // Configure Puppeteer for production (Heroku) vs development
     const isProduction = process.env.NODE_ENV === 'production';
     
-    const browserOptions = {
+    const browserOptions: any = {
       headless: true,
       args: [
         '--no-sandbox',
@@ -59,9 +59,30 @@ export const generatePdf = async (
       browserOptions.args.push('--disable-backgrounding-occluded-windows');
       browserOptions.args.push('--disable-renderer-backgrounding');
       
-      // Use Chrome executable from buildpack on Heroku
-      if (process.env.GOOGLE_CHROME_BIN) {
-        (browserOptions as any).executablePath = process.env.GOOGLE_CHROME_BIN;
+      // Use Chrome executable from Chrome for Testing buildpack on Heroku
+      // The new buildpack installs Chrome at this location
+      const chromeForTestingPath = '/app/.chrome-for-testing/chrome-linux64/chrome';
+      let chromeExecutablePath = null;
+      
+      try {
+        // Check if the Chrome for Testing path exists
+        if (fs.existsSync(chromeForTestingPath)) {
+          chromeExecutablePath = chromeForTestingPath;
+          logger.info('Using Chrome for Testing executable:', chromeForTestingPath);
+        }
+      } catch (error) {
+        logger.warn('Could not access Chrome for Testing path:', error);
+      }
+      
+      // Fallback: Use legacy GOOGLE_CHROME_BIN if Chrome for Testing not found
+      if (!chromeExecutablePath && process.env.GOOGLE_CHROME_BIN) {
+        chromeExecutablePath = process.env.GOOGLE_CHROME_BIN;
+        logger.info('Using legacy Chrome path:', process.env.GOOGLE_CHROME_BIN);
+      }
+      
+      // Set the executable path if found
+      if (chromeExecutablePath) {
+        browserOptions.executablePath = chromeExecutablePath;
       }
     }
 
