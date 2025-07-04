@@ -367,7 +367,15 @@ export const authService = {
       user.lastLogin = new Date();
       await user.save();
       
-      return { user, tokens };
+      // Get populated user data if it's a worker
+      let populatedUser = user;
+      if (user.role === UserRole.SUPPORT_WORKER) {
+        populatedUser = await Worker.findById(user._id)
+          .populate('skills', 'name code')
+          .populate('shiftRates.rateTimeBandId', 'name code startTime endTime') || user;
+      }
+      
+      return { user: populatedUser, tokens };
     } catch (error) {
       logger.error('Error during login:', error);
       throw error;

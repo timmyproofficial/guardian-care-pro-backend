@@ -10,6 +10,7 @@ import Worker from '../models/worker.model';
 import Admin from '../models/admin.model';
 import { UserRole, UserStatus } from '../types/user.types';
 import logger from '../utils/logger';
+import mongoose from 'mongoose';
 
 /**
  * Common filter interface for all user types
@@ -623,13 +624,14 @@ export const adminUserService = {
   }> => {
     try {
       const [
-        skills,
+        serviceTypes,
         serviceAreas,
         languages,
         subscriptionTiers,
         adminTypes
       ] = await Promise.all([
-        Worker.distinct('skills'),
+        // Get all active ServiceTypes for skills
+        mongoose.model('ServiceType').find({ status: 'active' }).select('name').lean(),
         Worker.distinct('serviceAreas'),
         Worker.distinct('languages'),
         Participant.distinct('subscription.tier'),
@@ -637,7 +639,7 @@ export const adminUserService = {
       ]);
 
       return {
-        skills: skills.filter(Boolean),
+        skills: serviceTypes.map((st: any) => st.name).filter(Boolean),
         serviceAreas: serviceAreas.filter(Boolean),
         languages: languages.filter(Boolean),
         subscriptionTiers: subscriptionTiers.filter(Boolean),
