@@ -82,5 +82,4 @@ router.post(
   authorize([UserRole.ADMIN]),
   batchInvoiceController.runScheduledBatch
 );
-
 export default router;
