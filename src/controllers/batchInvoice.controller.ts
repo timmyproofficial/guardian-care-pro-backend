@@ -444,8 +444,8 @@ export const batchInvoiceController = {
           'Scheduled batch generation triggered successfully. Processing in background.'
         )
       );
-    } catch (error) {
-      return next(error);
-    }
+          } catch (error) {
+        return next(error);
+      }
   }
 };
