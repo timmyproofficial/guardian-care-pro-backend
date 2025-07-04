@@ -15,6 +15,8 @@ export interface WorkItem {
   rateTimeBandName: string;
   rateTimeBandCode: string;
   serviceType: string;
+  serviceTypeName?: string;
+  serviceTypeCode?: string;
   hourlyRate: number;
   hours: number;
   amount: number;
@@ -217,6 +219,12 @@ const invoiceSchema = new Schema<IInvoice>(
       serviceType: {
         type: String,
         required: true
+      },
+      serviceTypeName: {
+        type: String
+      },
+      serviceTypeCode: {
+        type: String
       },
       hourlyRate: {
         type: Number,

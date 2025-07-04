@@ -100,11 +100,12 @@ export const generatePdf = async (
       format: 'A4',
       printBackground: true,
       margin: {
-        top: '1cm',
-        right: '1cm',
-        bottom: '1cm',
-        left: '1cm'
+        top: '2cm',
+        right: '2cm',
+        bottom: '2cm',
+        left: '2cm'
       },
+      preferCSSPageSize: true,
       ...options
     });
     
