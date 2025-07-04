@@ -65,99 +65,195 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
       <meta charset="utf-8">
       <title>Invoice ${invoice.invoiceNumber}</title>
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         body {
-          font-family: Arial, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           margin: 0;
           padding: 0;
           color: #333;
-          font-size: 12px;
+          font-size: 13px;
+          line-height: 1.6;
+          background: #ffffff;
         }
         .invoice-container {
           width: 100%;
-          max-width: 800px;
+          max-width: 750px;
           margin: 0 auto;
-          padding: 30px;
+          padding: 20px;
+          box-sizing: border-box;
         }
         .invoice-header {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
-          padding-bottom: 20px;
+          align-items: flex-start;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #e5e7eb;
+          padding-bottom: 25px;
         }
         .logo {
           max-width: 200px;
         }
         .invoice-title {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          font-size: 28px;
+          font-weight: 700;
+          margin-bottom: 12px;
+          color: #1f2937;
+          letter-spacing: -0.5px;
+        }
+        .company-info {
+          font-size: 13px;
+          line-height: 1.4;
+          color: #6b7280;
+        }
+        .invoice-meta {
+          text-align: right;
+          font-size: 13px;
+          color: #374151;
+        }
+        .invoice-meta div {
+          margin-bottom: 5px;
         }
         .invoice-details {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 30px;
+          margin-bottom: 35px;
+          gap: 30px;
         }
         .invoice-details-col {
           flex: 1;
+          min-width: 0;
         }
         .invoice-details-col h3 {
           font-size: 16px;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          font-weight: 600;
+          margin-bottom: 12px;
+          color: #1f2937;
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 5px;
+        }
+        .invoice-details-col div {
+          margin-bottom: 4px;
+          font-size: 13px;
+          color: #374151;
         }
         .invoice-table {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
+          font-size: 12px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+          border-radius: 6px;
+          overflow: hidden;
         }
         .invoice-table th, .invoice-table td {
-          padding: 10px;
+          padding: 12px 8px;
           text-align: left;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid #f3f4f6;
+          vertical-align: top;
         }
         .invoice-table th {
-          background-color: #f8f9fa;
-          font-weight: bold;
-          color: #2c3e50;
+          background-color: #f9fafb;
+          font-weight: 600;
+          color: #374151;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+        .invoice-table td {
+          word-wrap: break-word;
+          max-width: 0;
         }
         .invoice-table tr:last-child td {
           border-bottom: none;
+        }
+        .invoice-table tr:hover {
+          background-color: #fafafa;
+        }
+        .description-col {
+          width: 35%;
+        }
+        .rate-type-col {
+          width: 20%;
+        }
+        .rate-col, .quantity-col, .amount-col {
+          width: 15%;
+          text-align: right;
         }
         .invoice-totals {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
+          max-width: 300px;
+          margin-left: auto;
         }
         .invoice-totals th, .invoice-totals td {
-          padding: 10px;
+          padding: 10px 12px;
           text-align: right;
           border: none;
+          font-size: 13px;
+        }
+        .invoice-totals th {
+          font-weight: 500;
+          color: #6b7280;
         }
         .invoice-totals .total-row {
-          font-weight: bold;
+          font-weight: 600;
           font-size: 16px;
-          border-top: 2px solid #333;
+          border-top: 2px solid #1f2937;
+          background-color: #f9fafb;
+        }
+        .invoice-totals .total-row th,
+        .invoice-totals .total-row td {
+          color: #1f2937;
+          padding: 15px 12px;
         }
         .invoice-footer {
-          margin-top: 30px;
-          border-top: 1px solid #ddd;
-          padding-top: 20px;
+          margin-top: 40px;
+          border-top: 1px solid #e5e7eb;
+          padding-top: 25px;
           text-align: center;
           font-size: 12px;
-          color: #777;
+          color: #6b7280;
+          line-height: 1.5;
         }
         .payment-details {
           margin-top: 30px;
-          background-color: #f8f9fa;
-          padding: 15px;
-          border-radius: 4px;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
         .payment-details h3 {
           margin-top: 0;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          margin-bottom: 15px;
+          color: #1f2937;
+          font-weight: 600;
+          font-size: 15px;
+        }
+        .payment-details div {
+          margin-bottom: 5px;
+          font-size: 13px;
+          color: #374151;
+        }
+        .notes {
+          margin-bottom: 25px;
+          padding: 15px;
+          background-color: #fef3c7;
+          border-left: 4px solid #f59e0b;
+          border-radius: 4px;
+        }
+        .notes h3 {
+          margin-top: 0;
+          margin-bottom: 8px;
+          color: #92400e;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        .notes p {
+          margin: 0;
+          color: #92400e;
+          font-size: 13px;
         }
       </style>
     </head>
@@ -166,24 +262,26 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
         <div class="invoice-header">
           <div>
             <div class="invoice-title">INVOICE</div>
-            <div>Guardian Care Pro</div>
-            <div>123 Support Street</div>
-            <div>Sydney, NSW 2000</div>
-            <div>ABN: 12 345 678 901</div>
-            <div>Phone: (02) 1234 5678</div>
-            <div>Email: billing@guardiancapro.com</div>
+            <div class="company-info">
+              <div>Guardian Care Pro</div>
+              <div>123 Support Street</div>
+              <div>Sydney, NSW 2000</div>
+              <div>ABN: 12 345 678 901</div>
+              <div>Phone: (02) 1234 5678</div>
+              <div>Email: billing@guardiancapro.com</div>
+            </div>
           </div>
-          <div>
-            <div class="invoice-number">Invoice #: ${invoice.invoiceNumber}</div>
-            <div>Date: ${formatDate(invoice.invoiceDate)}</div>
-            <div>Due Date: ${invoice.dueDate ? formatDate(invoice.dueDate) : 'N/A'}</div>
+          <div class="invoice-meta">
+            <div><strong>Invoice #:</strong> ${invoice.invoiceNumber}</div>
+            <div><strong>Date:</strong> ${formatDate(invoice.invoiceDate)}</div>
+            <div><strong>Due Date:</strong> ${invoice.dueDate ? formatDate(invoice.dueDate) : 'N/A'}</div>
           </div>
         </div>
         
         <div class="invoice-details">
           <div class="invoice-details-col">
             <h3>Bill To:</h3>
-            <div>${invoice.participantDetails.name}</div>
+            <div><strong>${invoice.participantDetails.name}</strong></div>
             <div>Email: ${invoice.participantDetails.email}</div>
             <div>Phone: ${invoice.participantDetails.phone}</div>
             ${invoice.participantDetails.ndisNumber ? `<div>NDIS #: ${invoice.participantDetails.ndisNumber}</div>` : ''}
@@ -196,7 +294,7 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
           
           <div class="invoice-details-col">
             <h3>From:</h3>
-            <div>${invoice.workerDetails.name}</div>
+            <div><strong>${invoice.workerDetails.name}</strong></div>
             <div>Email: ${invoice.workerDetails.email}</div>
             <div>Phone: ${invoice.workerDetails.phone}</div>
             ${invoice.workerDetails.abn ? `<div>ABN: ${invoice.workerDetails.abn}</div>` : ''}
@@ -206,11 +304,11 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
         <table class="invoice-table">
           <thead>
             <tr>
-              <th>Description</th>
-              <th>Rate Type</th>
-              <th>Rate</th>
-              <th>Quantity</th>
-              <th>Amount</th>
+              <th class="description-col">Description</th>
+              <th class="rate-type-col">Rate Type</th>
+              <th class="rate-col">Rate</th>
+              <th class="quantity-col">Hours</th>
+              <th class="amount-col">Amount</th>
             </tr>
           </thead>
           <tbody>
@@ -239,10 +337,10 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
         
         <div class="payment-details">
           <h3>Payment Details:</h3>
-          <div>Account Name: ${invoice?.workerDetails?.bankDetails?.accountName ?? ''}</div>
-          <div>BSB: ${invoice?.workerDetails?.bankDetails?.bsb ?? ''}</div>
-          <div>Account Number: ${invoice?.workerDetails?.bankDetails?.accountNumber ?? ''}</div>
-          <div>Please include the invoice number ${invoice.invoiceNumber} as reference</div>
+          <div><strong>Account Name:</strong> ${invoice?.workerDetails?.bankDetails?.accountName ?? 'N/A'}</div>
+          <div><strong>BSB:</strong> ${invoice?.workerDetails?.bankDetails?.bsb ?? 'N/A'}</div>
+          <div><strong>Account Number:</strong> ${invoice?.workerDetails?.bankDetails?.accountNumber ?? 'N/A'}</div>
+          <div>Please include the invoice number <strong>${invoice.invoiceNumber}</strong> as reference</div>
         </div>
         
         <div class="invoice-footer">

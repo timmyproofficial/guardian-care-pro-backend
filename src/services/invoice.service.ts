@@ -42,7 +42,11 @@ export const invoiceService = {
         .populate([
           {
             path: 'shiftId',
-            select: 'serviceType isMultiWorkerShift'
+            select: 'serviceTypeId isMultiWorkerShift',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code'
+            }
           },
           {
             path: 'rateCalculations.rateTimeBandId',
@@ -100,18 +104,21 @@ export const invoiceService = {
       };
       
       // Get service type from related shift
-      const serviceType = timesheet.shiftId && 
-                         (timesheet.shiftId as any).serviceTypeId ? 
-                         (timesheet.shiftId as any).serviceTypeId.name || 'Personal Care' : 
-                         'Personal Care'; // Default if not available
+      const shift = timesheet.shiftId as any;
+      const serviceTypeData = shift?.serviceTypeId;
+      const serviceType = serviceTypeData?.name || 'Personal Care';
+      const serviceTypeName = serviceTypeData?.name || 'Personal Care';
+      const serviceTypeCode = serviceTypeData?.code || 'PC';
       
       // Format work items from rate calculations
       const workItems: WorkItem[] = timesheet.rateCalculations.map(calc => ({
-        description: `Support services - ${(calc.rateTimeBandId as any)?.name || 'Standard Rate'}`,
+        description: `${serviceTypeName} (${serviceTypeCode}) - ${(calc.rateTimeBandId as any)?.name || 'Standard Rate'}`,
         rateTimeBandId: calc.rateTimeBandId,
         rateTimeBandName: (calc.rateTimeBandId as any)?.name || 'Standard Rate',
         rateTimeBandCode: (calc.rateTimeBandId as any)?.code || 'STD',
         serviceType,
+        serviceTypeName,
+        serviceTypeCode,
         hourlyRate: calc.hourlyRate,
         hours: calc.hours,
         amount: calc.amount

@@ -143,133 +143,208 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
       <meta charset="utf-8">
       <title>Batch Invoice ${data.invoiceNumber}</title>
       <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
         body {
-          font-family: Arial, sans-serif;
+          font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           margin: 0;
           padding: 0;
           color: #333;
-          font-size: 12px;
+          font-size: 13px;
+          line-height: 1.6;
+          background: #ffffff;
         }
         .invoice-container {
           width: 100%;
-          max-width: 800px;
+          max-width: 750px;
           margin: 0 auto;
-          padding: 30px;
+          padding: 20px;
+          box-sizing: border-box;
         }
         .invoice-header {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 20px;
-          border-bottom: 1px solid #ddd;
-          padding-bottom: 20px;
+          align-items: flex-start;
+          margin-bottom: 30px;
+          border-bottom: 2px solid #e5e7eb;
+          padding-bottom: 25px;
         }
         .logo {
           max-width: 200px;
         }
         .invoice-title {
-          font-size: 24px;
-          font-weight: bold;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          font-size: 28px;
+          font-weight: 700;
+          margin-bottom: 8px;
+          color: #1f2937;
+          letter-spacing: -0.5px;
         }
         .invoice-subtitle {
           font-size: 16px;
-          margin-bottom: 10px;
-          color: #7f8c8d;
+          font-weight: 500;
+          margin-bottom: 12px;
+          color: #6b7280;
+          font-style: italic;
+        }
+        .company-info {
+          font-size: 13px;
+          line-height: 1.4;
+          color: #6b7280;
+        }
+        .invoice-meta {
+          text-align: right;
+          font-size: 13px;
+          color: #374151;
+        }
+        .invoice-meta div {
+          margin-bottom: 5px;
         }
         .invoice-details {
           display: flex;
           justify-content: space-between;
-          margin-bottom: 30px;
+          margin-bottom: 35px;
+          gap: 30px;
         }
         .invoice-details-col {
           flex: 1;
+          min-width: 0;
         }
         .invoice-details-col h3 {
           font-size: 16px;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          font-weight: 600;
+          margin-bottom: 12px;
+          color: #1f2937;
+          border-bottom: 1px solid #e5e7eb;
+          padding-bottom: 5px;
+        }
+        .invoice-details-col div {
+          margin-bottom: 4px;
+          font-size: 13px;
+          color: #374151;
         }
         .invoice-table {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
+          font-size: 12px;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+          border-radius: 6px;
+          overflow: hidden;
         }
         .invoice-table th, .invoice-table td {
-          padding: 10px;
+          padding: 12px 8px;
           text-align: left;
-          border-bottom: 1px solid #ddd;
+          border-bottom: 1px solid #f3f4f6;
+          vertical-align: top;
         }
         .invoice-table th {
-          background-color: #f8f9fa;
-          font-weight: bold;
-          color: #2c3e50;
+          background-color: #f9fafb;
+          font-weight: 600;
+          color: #374151;
+          font-size: 12px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
         }
         .timesheet-row td {
-          background-color: #f8f9fa;
-          font-weight: bold;
+          background-color: #fef3c7;
+          font-weight: 600;
+          color: #92400e;
+          border-bottom: 1px solid #fbbf24;
         }
         .rate-item-row td, .travel-row td, .expense-row td {
           border-bottom: none;
+          background-color: #fefffe;
         }
         .indent {
-          padding-left: 30px;
+          padding-left: 25px;
+          font-style: italic;
+          color: #6b7280;
         }
         .timesheet-divider td {
-          border-bottom: 1px solid #2c3e50;
-          padding: 5px;
+          border-bottom: 2px solid #d1d5db;
+          padding: 8px;
+          background-color: transparent;
         }
         .expense-header td {
           font-style: italic;
           color: #7f8c8d;
           border-bottom: none;
+          background-color: #fef2f2;
         }
         .expense-note {
-          font-weight: bold;
-          color: #e74c3c;
+          font-weight: 600;
+          color: #dc2626;
         }
         .invoice-totals {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 30px;
+          max-width: 350px;
+          margin-left: auto;
         }
         .invoice-totals th, .invoice-totals td {
-          padding: 10px;
+          padding: 10px 12px;
           text-align: right;
           border: none;
+          font-size: 13px;
+        }
+        .invoice-totals th {
+          font-weight: 500;
+          color: #6b7280;
         }
         .invoice-totals .total-row {
-          font-weight: bold;
+          font-weight: 600;
           font-size: 16px;
-          border-top: 2px solid #333;
+          border-top: 2px solid #1f2937;
+          background-color: #f9fafb;
+        }
+        .invoice-totals .total-row th,
+        .invoice-totals .total-row td {
+          color: #1f2937;
+          padding: 15px 12px;
         }
         .expenses-total-row {
-          color: #e74c3c;
+          color: #dc2626;
           font-style: italic;
+          background-color: #fef2f2;
         }
         .invoice-footer {
-          margin-top: 30px;
-          border-top: 1px solid #ddd;
-          padding-top: 20px;
+          margin-top: 40px;
+          border-top: 1px solid #e5e7eb;
+          padding-top: 25px;
           text-align: center;
           font-size: 12px;
-          color: #777;
+          color: #6b7280;
+          line-height: 1.5;
         }
         .payment-details {
           margin-top: 30px;
-          background-color: #f8f9fa;
-          padding: 15px;
-          border-radius: 4px;
+          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+          padding: 20px;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
         }
         .payment-details h3 {
           margin-top: 0;
-          margin-bottom: 10px;
-          color: #2c3e50;
+          margin-bottom: 15px;
+          color: #1f2937;
+          font-weight: 600;
+          font-size: 15px;
+        }
+        .payment-details div {
+          margin-bottom: 5px;
+          font-size: 13px;
+          color: #374151;
         }
         .period-note {
           font-style: italic;
-          color: #7f8c8d;
-          margin-bottom: 20px;
+          color: #6b7280;
+          margin-bottom: 25px;
+          padding: 15px;
+          background-color: #eff6ff;
+          border-left: 4px solid #3b82f6;
+          border-radius: 4px;
+          font-size: 13px;
         }
       </style>
     </head>
@@ -279,14 +354,16 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
           <div>
             <div class="invoice-title">CONSOLIDATED INVOICE</div>
             <div class="invoice-subtitle">Weekly Service Summary</div>
-            <div>Guardian Care Pro</div>
-            <div>123 Support Street</div>
-            <div>Sydney, NSW 2000</div>
-            <div>ABN: 12 345 678 901</div>
-            <div>Phone: (02) 1234 5678</div>
-            <div>Email: billing@guardiancapro.com</div>
+            <div class="company-info">
+              <div>Guardian Care Pro</div>
+              <div>123 Support Street</div>
+              <div>Sydney, NSW 2000</div>
+              <div>ABN: 12 345 678 901</div>
+              <div>Phone: (02) 1234 5678</div>
+              <div>Email: billing@guardiancapro.com</div>
+            </div>
           </div>
-          <div>
+          <div class="invoice-meta">
             <div><strong>Invoice #:</strong> ${data.invoiceNumber}</div>
             <div><strong>Batch #:</strong> ${data.batchNumber}</div>
             <div><strong>Date:</strong> ${moment().format('DD/MM/YYYY')}</div>
@@ -295,13 +372,13 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
         </div>
         
         <div class="period-note">
-          This is a consolidated invoice for services provided between ${data.dateRange.start} and ${data.dateRange.end}.
+          This is a consolidated invoice for services provided between <strong>${data.dateRange.start}</strong> and <strong>${data.dateRange.end}</strong>.
         </div>
         
         <div class="invoice-details">
           <div class="invoice-details-col">
             <h3>Bill To:</h3>
-            <div>${data.participant.name}</div>
+            <div><strong>${data.participant.name}</strong></div>
             <div>Email: ${data.participant.email}</div>
             <div>Phone: ${data.participant.phone}</div>
             ${data.participant.ndisNumber ? `<div>NDIS #: ${data.participant.ndisNumber}</div>` : ''}
@@ -314,7 +391,7 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
           
           <div class="invoice-details-col">
             <h3>From:</h3>
-            <div>${data.worker.name}</div>
+            <div><strong>${data.worker.name}</strong></div>
             <div>Email: ${data.worker.email}</div>
             <div>Phone: ${data.worker.phone}</div>
             ${data.worker.abn ? `<div>ABN: ${data.worker.abn}</div>` : ''}
@@ -360,16 +437,16 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
         ${data.worker.bankDetails ? `
         <div class="payment-details">
           <h3>Payment Details:</h3>
-          <div>Account Name: ${data.worker.bankDetails.accountName}</div>
-          <div>BSB: ${data.worker.bankDetails.bsb}</div>
-          <div>Account Number: ${data.worker.bankDetails.accountNumber}</div>
-          <div>Please include the invoice number ${data.invoiceNumber} as reference</div>
+          <div><strong>Account Name:</strong> ${data.worker.bankDetails.accountName}</div>
+          <div><strong>BSB:</strong> ${data.worker.bankDetails.bsb}</div>
+          <div><strong>Account Number:</strong> ${data.worker.bankDetails.accountNumber}</div>
+          <div>Please include the invoice number <strong>${data.invoiceNumber}</strong> as reference</div>
         </div>
         ` : ''}
         
         <div class="invoice-footer">
           <p>This consolidated invoice includes multiple service periods. See line items for details.</p>
-          <p>Additional expenses are listed for reference only and are not included in the invoice total.</p>
+          <p><strong>Note:</strong> Additional expenses are listed for reference only and are not included in the invoice total.</p>
           <p>Thank you for your business. If you have any questions about this invoice, please contact us.</p>
           <p>&copy; ${new Date().getFullYear()} Guardian Care Pro. All rights reserved.</p>
         </div>

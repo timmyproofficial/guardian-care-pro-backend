@@ -482,7 +482,11 @@ export const batchInvoiceService = {
         .populate([
           {
             path: 'shiftId',
-            select: 'serviceType'
+            select: 'serviceTypeId',
+            populate: {
+              path: 'serviceTypeId',
+              select: 'name code'
+            }
           },
           {
             path: 'rateCalculations.rateTimeBandId',
@@ -723,7 +727,11 @@ export const batchInvoiceService = {
       }).populate([
         {
           path: 'shiftId',
-          select: 'serviceType'
+          select: 'serviceTypeId',
+          populate: {
+            path: 'serviceTypeId',
+            select: 'name code'
+          }
         },
         {
           path: 'rateCalculations.rateTimeBandId',
@@ -764,27 +772,34 @@ export const batchInvoiceService = {
           phone: participant.phone || '',
           // Add other participant details as needed
         },
-        timesheets: timesheets.map(ts => ({
-          date: moment(ts.actualStartTime).format('DD/MM/YYYY'),
-          startTime: moment(ts.actualStartTime).format('HH:mm'),
-          endTime: moment(ts.actualEndTime).format('HH:mm'),
-          hours: moment(ts.actualEndTime).diff(moment(ts.actualStartTime), 'hours', true).toFixed(2),
-          serviceType: (ts.shiftId as { serviceType?: string })?.serviceType || 'Support Service',
-          rateItems: ts.rateCalculations.map(rate => ({
-            name: (rate.rateTimeBandId as { name?: string })?.name || 'Standard Rate',
-            code: (rate.rateTimeBandId as { code?: string })?.code || 'STD',
-            hourlyRate: rate.hourlyRate,
-            hours: rate.hours,
-            amount: rate.amount
-          })),
-          travel: {
-            km: ts.distanceTravelKm || 0,
-            rate: ts.distanceTravelRate || 0,
-            amount: ts.distanceTravelAmount || 0
-          },
-          expenses: ts.expenses || [],
-          subtotal: ts.subtotal || 0
-        })),
+        timesheets: timesheets.map(ts => {
+          const shift = ts.shiftId as any;
+          const serviceTypeData = shift?.serviceTypeId;
+          const serviceTypeName = serviceTypeData?.name || 'Support Service';
+          const serviceTypeCode = serviceTypeData?.code || 'SS';
+          
+          return {
+            date: moment(ts.actualStartTime).format('DD/MM/YYYY'),
+            startTime: moment(ts.actualStartTime).format('HH:mm'),
+            endTime: moment(ts.actualEndTime).format('HH:mm'),
+            hours: moment(ts.actualEndTime).diff(moment(ts.actualStartTime), 'hours', true).toFixed(2),
+            serviceType: `${serviceTypeName} (${serviceTypeCode})`,
+            rateItems: ts.rateCalculations.map(rate => ({
+              name: (rate.rateTimeBandId as { name?: string })?.name || 'Standard Rate',
+              code: (rate.rateTimeBandId as { code?: string })?.code || 'STD',
+              hourlyRate: rate.hourlyRate,
+              hours: rate.hours,
+              amount: rate.amount
+            })),
+            travel: {
+              km: ts.distanceTravelKm || 0,
+              rate: ts.distanceTravelRate || 0,
+              amount: ts.distanceTravelAmount || 0
+            },
+            expenses: ts.expenses || [],
+            subtotal: ts.subtotal || 0
+          };
+        }),
         totals: {
           subtotal: batchInvoice.subtotal,
           travelExpenseTotal: batchInvoice.travelExpenseTotal,
