@@ -6,7 +6,7 @@ import express from 'express';
 import { userController } from '../controllers/user.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import validate from '../middlewares/validate.middleware';
-import { userValidation } from '../utils/validation';
+import { userValidation, workerValidation } from '../utils/validation';
 import { profileUpload } from '../utils/cloudinary';
 import { UserRole } from '../types/user.types';
 
@@ -109,6 +109,15 @@ router.get(
   '/coordinators/:coordinatorId',
   authenticate,
   userController.getCoordinatorById
+);
+
+// Worker onboarding route
+router.post(
+  '/workers/onboarding',
+  authenticate,
+  authorize([UserRole.SUPPORT_WORKER]),
+  validate(workerValidation.onboarding),
+  userController.completeWorkerOnboarding
 );
 
 // Guardian-participant relationship routes

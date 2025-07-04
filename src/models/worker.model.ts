@@ -5,14 +5,13 @@
 
 import mongoose, { Schema } from 'mongoose';
 import User, { IUser } from './user.model';
-import { SupportWorkerSkill } from '../types/user.types';
 
 /**
  * Support Worker document interface
  * Extends the base User interface with worker-specific properties
  */
 export interface IWorker extends IUser {
-  skills?: SupportWorkerSkill[];
+  skills?: mongoose.Types.ObjectId[];
   bio?: string;
   qualifications: {
     title: string;
@@ -26,7 +25,7 @@ export interface IWorker extends IUser {
     organization: string;
     startDate: Date;
     endDate?: Date;
-    description: string;
+    description?: string;
   }[];
   hourlyRate?: {
     baseRate: number;
@@ -47,7 +46,7 @@ export interface IWorker extends IUser {
         end: string;
       }[];
     }[];
-    unavailableDates: Date[];
+    unavailableDates?: Date[];
   };
   serviceAreas: string[]; // Postcodes/regions
   languages: string[];
@@ -79,13 +78,10 @@ export interface IWorker extends IUser {
 const workerSchema = new Schema<IWorker>(
   {
     // Skills and services offered
-    skills: {
-      type: [{
-        type: String,
-        enum: Object.values(SupportWorkerSkill),
-      }],
-      // required: true,
-    },
+    skills: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceType',
+    }],
 
     bio: {
       type: String,

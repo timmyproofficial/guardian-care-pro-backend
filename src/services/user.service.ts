@@ -104,6 +104,13 @@ export const userService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Worker not found');
       }
 
+      // Process skills if provided - convert strings to ObjectIds
+      if (updateData.skills) {
+        updateData.skills = (updateData.skills as any[]).map(skillId => 
+          new mongoose.Types.ObjectId(skillId)
+        );
+      }
+
       // Update worker with role-specific fields
       const updatedWorker = await Worker.findByIdAndUpdate(
         workerId,
@@ -114,6 +121,104 @@ export const userService = {
       return updatedWorker;
     } catch (error) {
       logger.error(`Error updating worker ${workerId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Complete worker onboarding
+   */
+  completeWorkerOnboarding: async (
+    workerId: string,
+    onboardingData: {
+      bio: string;
+      skills: string[];
+      languages: string[];
+      experience?: {
+        title: string;
+        organization: string;
+        startDate: Date;
+        endDate?: Date;
+        description?: string;
+      }[];
+      shiftRates: {
+        rateTimeBandId: string;
+        hourlyRate: number;
+      }[];
+      availability: {
+        weekdays: {
+          day: string;
+          available: boolean;
+          slots?: {
+            start: string;
+            end: string;
+          }[];
+        }[];
+        unavailableDates?: Date[];
+      };
+    }
+  ): Promise<IWorker | null> => {
+    try {
+      // Validate workerId
+      if (!mongoose.Types.ObjectId.isValid(workerId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid workerId');
+      }
+
+      // Check if user exists and is a worker
+      const worker = await Worker.findById(workerId);
+      if (!worker) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Worker not found');
+      }
+
+      // Check if user's email is verified
+      if (!worker.isEmailVerified) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email must be verified before onboarding');
+      }
+
+      // Check if onboarding is already complete
+      if (worker.verificationStatus.onboardingComplete) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Onboarding already completed');
+      }
+
+      // Convert rateTimeBandId strings to ObjectIds
+      const shiftRates = onboardingData.shiftRates.map(rate => ({
+        rateTimeBandId: new mongoose.Types.ObjectId(rate.rateTimeBandId),
+        hourlyRate: rate.hourlyRate
+      }));
+
+      // Convert skill strings to ObjectIds
+      const skills = onboardingData.skills.map(skillId => new mongoose.Types.ObjectId(skillId));
+
+      // Prepare update data
+      const updateData: Partial<IWorker> = {
+        bio: onboardingData.bio,
+        skills,
+        languages: onboardingData.languages,
+        experience: onboardingData.experience || [],
+        shiftRates,
+        availability: {
+          ...onboardingData.availability,
+          unavailableDates: onboardingData.availability.unavailableDates || []
+        },
+        verificationStatus: {
+          ...worker.verificationStatus,
+          profileSetupComplete: true,
+          onboardingComplete: true
+        }
+      };
+
+      // Update worker with onboarding data
+      const updatedWorker = await Worker.findByIdAndUpdate(
+        workerId,
+        updateData,
+        { new: true, runValidators: true }
+      )
+      .populate('skills', 'name code')
+      .populate('shiftRates.rateTimeBandId', 'name code startTime endTime');
+
+      return updatedWorker;
+    } catch (error) {
+      logger.error(`Error completing worker onboarding ${workerId}:`, error);
       throw error;
     }
   },
@@ -296,7 +401,9 @@ export const userService = {
    */
   getWorkerById: async (workerId: string): Promise<IUser | null> => {
     try{
-      const worker = await Worker.findById(workerId);
+      const worker = await Worker.findById(workerId)
+        .populate('skills', 'name code')
+        .populate('shiftRates.rateTimeBandId', 'name code startTime endTime');
       return worker;
     } catch (error) {
       logger.error(`Error getting worker ${workerId}:`, error);

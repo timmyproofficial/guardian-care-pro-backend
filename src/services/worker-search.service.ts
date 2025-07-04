@@ -7,12 +7,11 @@ import mongoose from 'mongoose';
 import Worker from '../models/worker.model';
 import Organization from '../models/organization.model';
 // import User from '../models/user.model';
-import { SupportWorkerSkill } from '../types/user.types';
 import logger from '../utils/logger';
 
 // Interface for worker search filters
 export interface WorkerSearchFilters {
-  skills?: SupportWorkerSkill[];
+  skills?: string[]; // ServiceType ObjectId strings
   serviceAreas?: string[];
   languages?: string[];
   availability?: {
@@ -43,7 +42,7 @@ export interface WorkerSummary {
   firstName: string;
   lastName: string;
   profileImage?: string;
-  skills: SupportWorkerSkill[];
+  skills: { _id: mongoose.Types.ObjectId; name: string; code: string; }[];
   hourlyRate: {
     baseRate: number;
   };
@@ -82,7 +81,9 @@ export const searchWorkers = async (
 
     // Apply filters
     if (filters.skills && filters.skills.length > 0) {
-      query.skills = { $in: filters.skills };
+      // Convert string ObjectIds to actual ObjectIds
+      const skillObjectIds = filters.skills.map(skillId => new mongoose.Types.ObjectId(skillId));
+      query.skills = { $in: skillObjectIds };
     }
 
     if (filters.serviceAreas && filters.serviceAreas.length > 0) {
@@ -136,14 +137,13 @@ export const searchWorkers = async (
       }
     }
 
-    // Keyword search in name, bio, and skills
+    // Keyword search in name and bio (removed skills since they're ObjectIds now)
     if (filters.keyword) {
       const keywordRegex = new RegExp(filters.keyword, 'i');
       query.$or = [
         { firstName: keywordRegex },
         { lastName: keywordRegex },
-        { bio: keywordRegex },
-        { skills: keywordRegex }
+        { bio: keywordRegex }
       ];
     }
 
@@ -181,6 +181,7 @@ export const searchWorkers = async (
         'verificationStatus.policeCheckVerified': 1,
         'verificationStatus.ndisWorkerScreeningVerified': 1
       })
+      .populate('skills', 'name code')
       .sort({ 'ratings.average': -1, 'hourlyRate.baseRate': 1 })
       .skip(skip)
       .limit(limit)
@@ -192,7 +193,11 @@ export const searchWorkers = async (
         firstName: worker.firstName,
         lastName: worker.lastName,
         profileImage: worker.profileImage,
-        skills: worker.skills ?? [], // fallback to empty array
+        skills: (worker.skills as any[] ?? []).map((skill: any) => ({
+            _id: skill._id,
+            name: skill.name,
+            code: skill.code
+        })),
         hourlyRate: {
             baseRate: worker.hourlyRate?.baseRate ?? 0
         },
@@ -246,6 +251,8 @@ export const getWorkerDetail = async (
         passwordResetToken: 0,
         passwordResetExpires: 0
       })
+      .populate('skills', 'name code')
+      .populate('shiftRates.rateTimeBandId', 'name code startTime endTime')
       .lean();
 
     if (!worker) {
@@ -274,8 +281,9 @@ export const getWorkerDetail = async (
 export const getWorkerFilterOptions = async (): Promise<any> => {
   try {
     // Use aggregation to get unique values efficiently
-    const [skills, languages, serviceAreas] = await Promise.all([
-      Worker.distinct('skills').lean(),
+    const [serviceTypes, languages, serviceAreas] = await Promise.all([
+      // Get all active ServiceTypes for skills
+      mongoose.model('ServiceType').find({ status: 'active' }).select('_id name').lean(),
       Worker.distinct('languages').lean(),
       Worker.distinct('serviceAreas').lean()
     ]);
@@ -296,7 +304,7 @@ export const getWorkerFilterOptions = async (): Promise<any> => {
       : { min: 0, max: 100 };
 
     return {
-      skills,
+      skills: serviceTypes.map((st: any) => ({ _id: st._id, name: st.name })),
       languages,
       serviceAreas,
       hourlyRateRange,

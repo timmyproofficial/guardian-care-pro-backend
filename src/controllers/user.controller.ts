@@ -430,5 +430,36 @@ export const userController = {
     } catch (error) {
       next(error);
     }
+  },
+
+  /**
+   * Complete worker onboarding
+   * @route POST /api/users/workers/onboarding
+   */
+  completeWorkerOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Check if user is a support worker
+      if (req.user.role !== UserRole.SUPPORT_WORKER) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only support workers can complete onboarding', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const workerId = req.user._id.toString();
+      const onboardingData = req.body;
+
+      const updatedWorker = await userService.completeWorkerOnboarding(workerId, onboardingData);
+
+      return res.json(successResponse({ worker: updatedWorker }, 'Worker onboarding completed successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
   }
 };

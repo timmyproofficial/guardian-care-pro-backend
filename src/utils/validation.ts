@@ -145,7 +145,7 @@ export const participantValidation = {
 export const workerValidation = {
   // Update worker profile
   updateWorker: Joi.object({
-    skills: Joi.array().items(Joi.string()),
+    skills: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)),
     bio: Joi.string().max(500),
     qualifications: Joi.array().items(
       Joi.object({
@@ -161,7 +161,7 @@ export const workerValidation = {
         title: Joi.string().required(),
         organization: Joi.string().required(),
         startDate: Joi.date().required(),
-        endDate: Joi.date(),
+        endDate: Joi.date().allow(null),
         description: Joi.string(),
       })
     ),
@@ -179,6 +179,45 @@ export const workerValidation = {
       bsb: Joi.string().required(),
       accountNumber: Joi.string().required(),
     }),
+  }),
+
+  // Worker onboarding
+  onboarding: Joi.object({
+    bio: Joi.string().max(500).required(),
+    skills: Joi.array().items(Joi.string().required().regex(/^[0-9a-fA-F]{24}$/)).required().min(1),
+    languages: Joi.array().items(Joi.string().required()).required().min(1),
+    experience: Joi.array().items(
+      Joi.object({
+        title: Joi.string().required(),
+        organization: Joi.string().required(),
+        startDate: Joi.date().required(),
+        endDate: Joi.date().allow(null),
+        description: Joi.string(),
+      })
+    ).optional(),
+    shiftRates: Joi.array().items(
+      Joi.object({
+        rateTimeBandId: Joi.string().required().regex(/^[0-9a-fA-F]{24}$/),
+        hourlyRate: Joi.number().required().min(0),
+      })
+    ).required().min(1),
+    availability: Joi.object({
+      weekdays: Joi.array().items(
+        Joi.object({
+          day: Joi.string()
+            .required()
+            .valid('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'),
+          available: Joi.boolean().required(),
+          slots: Joi.array().items(
+            Joi.object({
+              start: Joi.string().required().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+              end: Joi.string().required().pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+            })
+          ),
+        })
+      ).required(),
+      unavailableDates: Joi.array().items(Joi.date()),
+    }).required(),
   }),
 
   // Update availability
