@@ -11,7 +11,8 @@
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest --coverage",
     "test:watch": "jest --watch",
-    "seed": "ts-node src/utils/seeder.ts"
+    "seed": "ts-node src/utils/seeder.ts",
+    "heroku-postbuild": "npm run build"
   },
   "keywords": [
     "guardian-care",
