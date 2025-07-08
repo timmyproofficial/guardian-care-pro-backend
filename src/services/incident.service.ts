@@ -11,7 +11,7 @@ import User from "../models/user.model";
 // import { UserRole } from '../types/user.types';
 import ApiError from "../utils/api-error";
 import logger from "../utils/logger";
-import { UserRole } from "@/types/user.types";
+import { UserRole } from "../types/user.types";
 import checkIncidentPermissions from "@/utils/incident-permissions";
 
 /**
