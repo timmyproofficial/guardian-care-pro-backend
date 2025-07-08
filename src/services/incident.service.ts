@@ -12,7 +12,7 @@ import User from "../models/user.model";
 import ApiError from "../utils/api-error";
 import logger from "../utils/logger";
 import { UserRole } from "../types/user.types";
-import checkIncidentPermissions from "@/utils/incident-permissions";
+import checkIncidentPermissions from "../utils/incident-permissions";
 
 /**
  * Interface for incident creation input
