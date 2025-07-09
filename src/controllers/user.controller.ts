@@ -22,8 +22,8 @@ export const userController = {
         return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Unauthorized: User not found on request' });
       }
   
-      const userId = req.user._id;
-      const user = await userService.getUserById(userId.toString());
+      // No need to fetch user again - req.user is already populated by auth middleware
+      const user = req.user;
       return res.json(successResponse({ user }, 'User profile retrieved successfully'));
     } catch (error) {
       next(error);
