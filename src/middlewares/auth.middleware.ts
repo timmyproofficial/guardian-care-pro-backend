@@ -6,11 +6,13 @@
 import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
 import config from '../config/env';
 import { UserRole } from '../types/user.types';
 import { userService } from '../services/user.service';
 import ApiError from '../utils/api-error';
 import { IUser } from '@/models/user.model';
+import logger from '../utils/logger';
 
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
@@ -72,10 +74,17 @@ export const authenticate = async (
     // Verify token
     const payload = jwt.verify(token, config.jwt.secret) as JwtPayload;
     
+    // Validate user ID format before querying database
+    if (!payload.sub || !mongoose.Types.ObjectId.isValid(payload.sub)) {
+      logger.error(`Invalid user ID in JWT payload: ${payload.sub}`);
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Invalid token payload');
+    }
+    
     // Get user from database
     const user = await userService.getUserById(payload.sub);
     
     if (!user) {
+      logger.error(`User not found for ID: ${payload.sub}`);
       throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
     }
     
@@ -85,9 +94,13 @@ export const authenticate = async (
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
+      logger.error('JWT verification failed:', error.message);
       next(new ApiError(httpStatus.UNAUTHORIZED, 'Invalid or expired token'));
-    } else {
+    } else if (error instanceof ApiError) {
       next(error);
+    } else {
+      logger.error('Authentication error:', error);
+      next(new ApiError(httpStatus.UNAUTHORIZED, 'Authentication failed'));
     }
   }
 };
