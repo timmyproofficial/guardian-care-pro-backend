@@ -22,8 +22,34 @@ export const userController = {
         return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Unauthorized: User not found on request' });
       }
   
-      // No need to fetch user again - req.user is already populated by auth middleware
-      const user = req.user;
+      const userId = req.user._id.toString();
+      const userRole = req.user.role;
+      let user;
+      
+      // Get user data with appropriate population based on role
+      switch (userRole) {
+        case UserRole.SUPPORT_WORKER:
+          user = await userService.getWorkerById(userId);
+          break;
+        case UserRole.PARTICIPANT:
+          user = await userService.getParticipantById(userId);
+          break;
+        case UserRole.ADMIN:
+          // Admin might have additional populated fields in the future
+          user = await userService.getUserById(userId);
+          break;
+        case UserRole.GUARDIAN:
+          // Guardian might have additional populated fields in the future
+          user = await userService.getUserById(userId);
+          break;
+        default:
+          user = await userService.getUserById(userId);
+      }
+      
+      if (!user) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
+      }
+      
       return res.json(successResponse({ user }, 'User profile retrieved successfully'));
     } catch (error) {
       next(error);
