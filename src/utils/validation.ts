@@ -114,7 +114,7 @@ export const userValidation = {
 export const participantValidation = {
   // Create/update participant profile
   updateParticipant: Joi.object({
-    supportNeeds: Joi.array().items(Joi.string()),
+    supportNeeds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)),
     emergencyContact: Joi.object({
       name: Joi.string().required(),
       relationship: Joi.string().required(),
@@ -125,6 +125,29 @@ export const participantValidation = {
     notes: Joi.string(),
     ndisNumber: Joi.string().pattern(/^\d{9}$/),
     requiresSupervision: Joi.boolean(),
+  }),
+
+  // Participant onboarding
+  onboarding: Joi.object({
+    supportNeeds: Joi.array().items(Joi.string().required().regex(/^[0-9a-fA-F]{24}$/)).required().min(1),
+    emergencyContact: Joi.object({
+      name: Joi.string().required(),
+      relationship: Joi.string().required(),
+      phone: Joi.string().required(),
+    }),
+    planManager: Joi.object({
+      name: Joi.string().required(),
+      email: Joi.string().required().email(),
+    }),
+    preferredLanguages: Joi.array().items(Joi.string()),
+    preferredGenders: Joi.array().items(Joi.string()),
+    notes: Joi.string(),
+    ndisNumber: Joi.string().pattern(/^\d{9}$/),
+    requiresSupervision: Joi.boolean(),
+    subscription: Joi.object({
+      tier: Joi.string().valid(...Object.values(SubscriptionTier)).required(),
+      paymentMethod: Joi.string(),
+    }),
   }),
 
   // Link guardian

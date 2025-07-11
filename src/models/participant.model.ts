@@ -12,11 +12,15 @@ import { SubscriptionTier } from '../types/payment.types';
  * Extends the base User interface with participant-specific properties
  */
 export interface IParticipant extends IUser {
-  supportNeeds: string[];
+  supportNeeds: mongoose.Types.ObjectId[];
   emergencyContact?: {
     name: string;
     relationship: string;
     phone: string;
+  };
+  planManager?: {
+    name: string;
+    email: string;
   };
   guardianId?: mongoose.Types.ObjectId;
   subscription: {
@@ -33,6 +37,7 @@ export interface IParticipant extends IUser {
   notes?: string;
   ndisNumber?: string;
   requiresSupervision: boolean;
+  onboardingComplete: boolean;
 }
 
 /**
@@ -41,14 +46,28 @@ export interface IParticipant extends IUser {
  */
 const participantSchema = new Schema<IParticipant>(
   {
-    supportNeeds: {
-      type: [String],
-      // required: true,
-    },
+    supportNeeds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceType',
+      required: true
+    }],
     emergencyContact: {
       name: { type: String },
       relationship: { type: String },
       phone: { type: String }
+    },
+    planManager: {
+      name: { type: String },
+      email: { 
+        type: String,
+        validate: {
+          validator: function(value: string) {
+            // Email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+          },
+          message: 'Please provide a valid email address for plan manager'
+        }
+      }
     },
     guardianId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -101,6 +120,10 @@ const participantSchema = new Schema<IParticipant>(
     requiresSupervision: {
       type: Boolean,
       default: false,
+    },
+    onboardingComplete: {
+      type: Boolean,
+      default: false,
     }
   }
 );
@@ -110,6 +133,7 @@ const participantSchema = new Schema<IParticipant>(
  */
 participantSchema.index({ guardianId: 1 });
 participantSchema.index({ supportCoordinators: 1 });
+participantSchema.index({ supportNeeds: 1 });
 participantSchema.index({ 'subscription.isActive': 1 });
 
 /**

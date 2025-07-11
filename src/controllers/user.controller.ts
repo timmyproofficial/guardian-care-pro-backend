@@ -459,6 +459,37 @@ export const userController = {
   },
 
   /**
+   * Complete participant onboarding
+   * @route POST /api/users/participants/onboarding
+   */
+  completeParticipantOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Check if user is a participant
+      if (req.user.role !== UserRole.PARTICIPANT) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only participants can complete onboarding', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const participantId = req.user._id.toString();
+      const onboardingData = req.body;
+
+      const updatedParticipant = await userService.completeParticipantOnboarding(participantId, onboardingData);
+
+      return res.json(successResponse({ participant: updatedParticipant }, 'Participant onboarding completed successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
    * Complete worker onboarding
    * @route POST /api/users/workers/onboarding
    */
