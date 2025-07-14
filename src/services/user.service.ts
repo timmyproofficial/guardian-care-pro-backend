@@ -239,15 +239,12 @@ export const userService = {
         name: string;
         email: string;
       };
-      preferredLanguages?: string[];
-      preferredGenders?: string[];
-      notes?: string;
-      ndisNumber?: string;
-      requiresSupervision?: boolean;
-      subscription?: {
-        tier: string;
-        paymentMethod?: string;
+      coordinator?: {
+        name: string;
+        email: string;
       };
+      preferredLanguages?: string[];
+      ndisNumber?: string;
     }
   ): Promise<IParticipant | null> => {
     try {
@@ -282,23 +279,11 @@ export const userService = {
         supportNeeds,
         emergencyContact: onboardingData.emergencyContact,
         planManager: onboardingData.planManager,
+        coordinator: onboardingData.coordinator,
         preferredLanguages: onboardingData.preferredLanguages || [],
-        preferredGenders: onboardingData.preferredGenders || [],
-        notes: onboardingData.notes,
         ndisNumber: onboardingData.ndisNumber,
-        requiresSupervision: onboardingData.requiresSupervision || false,
         onboardingComplete: true
       };
-
-      // Update subscription if provided
-      if (onboardingData.subscription) {
-        updateData.subscription = {
-          ...participant.subscription,
-          tier: onboardingData.subscription.tier as any,
-          paymentMethod: onboardingData.subscription.paymentMethod,
-          isActive: true
-        };
-      }
 
       // Update participant with onboarding data
       const updatedParticipant = await Participant.findByIdAndUpdate(
