@@ -22,8 +22,34 @@ export const userController = {
         return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Unauthorized: User not found on request' });
       }
   
-      const userId = req.user._id;
-      const user = await userService.getUserById(userId.toString());
+      const userId = req.user._id.toString();
+      const userRole = req.user.role;
+      let user;
+      
+      // Get user data with appropriate population based on role
+      switch (userRole) {
+        case UserRole.SUPPORT_WORKER:
+          user = await userService.getWorkerById(userId);
+          break;
+        case UserRole.PARTICIPANT:
+          user = await userService.getParticipantById(userId);
+          break;
+        case UserRole.ADMIN:
+          // Admin might have additional populated fields in the future
+          user = await userService.getUserById(userId);
+          break;
+        case UserRole.GUARDIAN:
+          // Guardian might have additional populated fields in the future
+          user = await userService.getUserById(userId);
+          break;
+        default:
+          user = await userService.getUserById(userId);
+      }
+      
+      if (!user) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
+      }
+      
       return res.json(successResponse({ user }, 'User profile retrieved successfully'));
     } catch (error) {
       next(error);
@@ -429,6 +455,37 @@ export const userController = {
       res.json(successResponse({}, 'Guardian unlinked from participant successfully'));
     } catch (error) {
       next(error);
+    }
+  },
+
+  /**
+   * Complete participant onboarding
+   * @route POST /api/users/participants/onboarding
+   */
+  completeParticipantOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Check if user is a participant
+      if (req.user.role !== UserRole.PARTICIPANT) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only participants can complete onboarding', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const participantId = req.user._id.toString();
+      const onboardingData = req.body;
+
+      const updatedParticipant = await userService.completeParticipantOnboarding(participantId, onboardingData);
+
+      return res.json(successResponse({ participant: updatedParticipant }, 'Participant onboarding completed successfully'));
+    } catch (error) {
+      next(error);
+      return;
     }
   },
 

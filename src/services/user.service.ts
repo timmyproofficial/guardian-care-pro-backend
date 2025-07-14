@@ -224,6 +224,83 @@ export const userService = {
   },
 
   /**
+   * Complete participant onboarding
+   */
+  completeParticipantOnboarding: async (
+    participantId: string,
+    onboardingData: {
+      supportNeeds: string[];
+      emergencyContact?: {
+        name: string;
+        relationship: string;
+        phone: string;
+      };
+      planManager?: {
+        name: string;
+        email: string;
+      };
+      coordinator?: {
+        name: string;
+        email: string;
+      };
+      preferredLanguages?: string[];
+      ndisNumber?: string;
+    }
+  ): Promise<IParticipant | null> => {
+    try {
+      // Validate participantId
+      if (!mongoose.Types.ObjectId.isValid(participantId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid participantId');
+      }
+
+      // Check if user exists and is a participant
+      const participant = await Participant.findById(participantId);
+      if (!participant) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
+      }
+
+      // Check if user's email is verified
+      if (!participant.isEmailVerified) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Email must be verified before onboarding');
+      }
+
+      // Check if onboarding is already complete
+      if (participant.onboardingComplete) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Onboarding already completed');
+      }
+
+      // Convert supportNeeds strings to ObjectIds
+      const supportNeeds = onboardingData.supportNeeds.map(serviceTypeId => 
+        new mongoose.Types.ObjectId(serviceTypeId)
+      );
+
+      // Prepare update data
+      const updateData: Partial<IParticipant> = {
+        supportNeeds,
+        emergencyContact: onboardingData.emergencyContact,
+        planManager: onboardingData.planManager,
+        coordinator: onboardingData.coordinator,
+        preferredLanguages: onboardingData.preferredLanguages || [],
+        ndisNumber: onboardingData.ndisNumber,
+        onboardingComplete: true
+      };
+
+      // Update participant with onboarding data
+      const updatedParticipant = await Participant.findByIdAndUpdate(
+        participantId,
+        updateData,
+        { new: true, runValidators: true }
+      )
+      .populate('supportNeeds', 'name code');
+
+      return updatedParticipant;
+    } catch (error) {
+      logger.error(`Error completing participant onboarding ${participantId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Update participant profile by ID
    */
   updateParticipantById: async (
@@ -240,11 +317,19 @@ export const userService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
       }
 
+      // Process supportNeeds if provided - convert strings to ObjectIds
+      if (updateData.supportNeeds) {
+        updateData.supportNeeds = (updateData.supportNeeds as any[]).map(serviceTypeId => 
+          new mongoose.Types.ObjectId(serviceTypeId)
+        );
+      }
+
       const updatedParticipant = await Participant.findByIdAndUpdate(
         participantId,
         updateData,
         { new: true, runValidators: true }
-      );
+      )
+      .populate('supportNeeds', 'name code');
 
       return updatedParticipant;
     } catch (error) {
@@ -388,7 +473,8 @@ export const userService = {
    */
   getParticipantById: async (participantId: string): Promise<IUser | null> => {
     try{
-      const participant = await Participant.findById(participantId);
+      const participant = await Participant.findById(participantId)
+        .populate('supportNeeds', 'name code');
       return participant;
     } catch (error) {
       logger.error(`Error getting participant ${participantId}:`, error);
