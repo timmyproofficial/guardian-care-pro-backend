@@ -3,11 +3,11 @@
  * Handles HTTP requests related to incident management
  */
 
-import { Response, NextFunction } from "express";
-import httpStatus from "http-status";
-import { incidentService } from "../services/incident.service";
-import { successResponse } from "../utils/api-response";
-import { AuthenticatedRequest } from "../middlewares/auth.middleware";
+import { Response, NextFunction } from 'express';
+import httpStatus from 'http-status';
+import { incidentService } from '../services/incident.service';
+import { successResponse } from '../utils/api-response';
+import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 
 const incidentController = {
   /**
@@ -29,7 +29,7 @@ const incidentController = {
         { id: req.user!.id, role: req.user!.role },
       );
 
-      res.status(httpStatus.CREATED).json(successResponse(incident, "Incident created successfully"));
+      res.status(httpStatus.CREATED).json(successResponse(incident, 'Incident created successfully'));
     } catch (error) {
       next(error);
     }
@@ -41,9 +41,9 @@ const incidentController = {
    */
   getAllIncidents: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const allowedStatuses = ["OPEN", "IN_REVIEW", "RESOLVED", "REJECTED"] as const;
+      const allowedStatuses = ['OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'] as const;
       const statusQuery = req.query.status as string | undefined;
-      const allowedSeverities = ["LOW", "MEDIUM", "HIGH"] as const;
+      const allowedSeverities = ['LOW', 'MEDIUM', 'HIGH'] as const;
       const severityQuery = req.query.severity as string | undefined;
       const filters = {
         status: allowedStatuses.includes(statusQuery as any)
@@ -63,7 +63,7 @@ const incidentController = {
         page: req.query.page ? parseInt(req.query.page as string) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 10,
         sortBy: req.query.sortBy as string,
-        sortOrder: req.query.sortOrder as "asc" | "desc",
+        sortOrder: req.query.sortOrder as 'asc' | 'desc',
       };
 
       const result = await incidentService.getAllIncidents(filters, pagination, {
@@ -71,7 +71,7 @@ const incidentController = {
         role: req.user!.role,
       });
 
-      res.json(successResponse(result, "Incidents retrieved successfully"));
+      res.json(successResponse(result, 'Incidents retrieved successfully'));
     } catch (error) {
       next(error);
     }
@@ -86,7 +86,7 @@ const incidentController = {
       const { shiftId } = req.params;
       const incidents = await incidentService.getIncidentsByShift(shiftId, { id: req.user!.id, role: req.user!.role });
 
-      res.json(successResponse(incidents, "Shift incidents retrieved successfully"));
+      res.json(successResponse(incidents, 'Shift incidents retrieved successfully'));
     } catch (error) {
       next(error);
     }
@@ -101,7 +101,7 @@ const incidentController = {
       const userId = req.params?.id;
       const incidents = await incidentService.getIncidentsByReporter(userId);
 
-      res.json(successResponse(incidents, "User reports retrieved successfully"));
+      res.json(successResponse(incidents, 'User reports retrieved successfully'));
     } catch (error) {
       next(error);
     }
@@ -116,7 +116,7 @@ const incidentController = {
       const userId = req.params?.id;
       const incidents = await incidentService.getIncidentsAgainstUser(userId);
 
-      res.json(successResponse(incidents, "Incidents against user retrieved successfully"));
+      res.json(successResponse(incidents, 'Incidents against user retrieved successfully'));
     } catch (error) {
       next(error);
     }
@@ -131,7 +131,7 @@ const incidentController = {
       const { id } = req.params;
       const incident = await incidentService.getIncidentById(id, { id: req.user!.id, role: req.user!.role });
 
-      res.json(successResponse(incident, "Incident retrieved successfully"));
+      res.json(successResponse(incident, 'Incident retrieved successfully'));
     } catch (error) {
       next(error);
     }
@@ -152,7 +152,7 @@ const incidentController = {
         { id: req.user!.id, role: req.user!.role },
       );
 
-      res.json(successResponse(incident, "Incident status updated successfully"));
+      res.json(successResponse(incident, 'Incident status updated successfully'));
     } catch (error) {
       next(error);
     }
@@ -176,7 +176,7 @@ const incidentController = {
         { id: req.user!.id, role: req.user!.role },
       );
 
-      res.json(successResponse(incident, "Incident resolved successfully"));
+      res.json(successResponse(incident, 'Incident resolved successfully'));
     } catch (error) {
       next(error);
     }
@@ -191,7 +191,7 @@ const incidentController = {
       const { id } = req.params;
       await incidentService.deleteIncident(id, { id: req.user!.id, role: req.user!.role });
 
-      res.json(successResponse({}, "Incident deleted successfully"));
+      res.json(successResponse({}, 'Incident deleted successfully'));
     } catch (error) {
       next(error);
     }
@@ -203,15 +203,20 @@ const incidentController = {
 
   updateIncident: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const { id } = req.params;
-      await incidentService.updateIncident(id, req.body, { id: req.user!.id, role: req.user!.role });
-
-      res.json(successResponse({}, "Incident updated successfully"));
+      const updatedIncident = await incidentService.updateIncident(req.params.id, req.body, {
+        id: req.user!.id,
+        role: req.user!.role,
+      });
+      res.json({
+        success: true,
+        code: httpStatus.OK,
+        message: 'Incident updated successfully',
+        data: updatedIncident,
+      });
     } catch (error) {
       next(error);
     }
   },
-
   /**
    * Get incident statistics (admin action)
    * @route GET /api/v1/incidents/statistics
@@ -225,7 +230,7 @@ const incidentController = {
 
       const statistics = await incidentService.getIncidentStatistics(filters);
 
-      res.json(successResponse(statistics, "Incident statistics retrieved successfully"));
+      res.json(successResponse(statistics, 'Incident statistics retrieved successfully'));
     } catch (error) {
       next(error);
     }
