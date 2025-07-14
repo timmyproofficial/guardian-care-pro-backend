@@ -123,7 +123,7 @@ export const participantValidation = {
     preferredLanguages: Joi.array().items(Joi.string()),
     preferredGenders: Joi.array().items(Joi.string()),
     notes: Joi.string(),
-    ndisNumber: Joi.string().pattern(/^\d{9}$/),
+    ndisNumber: Joi.string().trim(),
     requiresSupervision: Joi.boolean(),
   }),
 
@@ -139,15 +139,12 @@ export const participantValidation = {
       name: Joi.string().required(),
       email: Joi.string().required().email(),
     }),
-    preferredLanguages: Joi.array().items(Joi.string()),
-    preferredGenders: Joi.array().items(Joi.string()),
-    notes: Joi.string(),
-    ndisNumber: Joi.string().pattern(/^\d{9}$/),
-    requiresSupervision: Joi.boolean(),
-    subscription: Joi.object({
-      tier: Joi.string().valid(...Object.values(SubscriptionTier)).required(),
-      paymentMethod: Joi.string(),
+    coordinator: Joi.object({
+      name: Joi.string().required(),
+      email: Joi.string().required().email(),
     }),
+    preferredLanguages: Joi.array().items(Joi.string()),
+    ndisNumber: Joi.string().trim(),
   }),
 
   // Link guardian

@@ -22,6 +22,10 @@ export interface IParticipant extends IUser {
     name: string;
     email: string;
   };
+  coordinator?: {
+    name: string;
+    email: string;
+  };
   guardianId?: mongoose.Types.ObjectId;
   subscription: {
     tier: SubscriptionTier;
@@ -69,6 +73,19 @@ const participantSchema = new Schema<IParticipant>(
         }
       }
     },
+    coordinator: {
+      name: { type: String },
+      email: { 
+        type: String,
+        validate: {
+          validator: function(value: string) {
+            // Email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+          },
+          message: 'Please provide a valid email address for coordinator'
+        }
+      }
+    },
     guardianId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
@@ -109,13 +126,7 @@ const participantSchema = new Schema<IParticipant>(
     },
     ndisNumber: {
       type: String,
-      validate: {
-        validator: function(value: string) {
-          // Simple validation for NDIS number format
-          return /^\d{9}$/.test(value);
-        },
-        message: 'NDIS number must be a 9-digit number'
-      }
+      trim: true,
     },
     requiresSupervision: {
       type: Boolean,
