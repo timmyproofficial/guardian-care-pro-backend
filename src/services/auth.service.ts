@@ -367,12 +367,15 @@ export const authService = {
       user.lastLogin = new Date();
       await user.save();
       
-      // Get populated user data if it's a worker
+      // Get populated user data based on role
       let populatedUser = user;
       if (user.role === UserRole.SUPPORT_WORKER) {
         populatedUser = await Worker.findById(user._id)
           .populate('skills', 'name code')
           .populate('shiftRates.rateTimeBandId', 'name code startTime endTime') || user;
+      } else if (user.role === UserRole.PARTICIPANT) {
+        populatedUser = await Participant.findById(user._id)
+          .populate('supportNeeds', 'name code') || user;
       }
       
       return { user: populatedUser, tokens };
