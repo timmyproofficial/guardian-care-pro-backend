@@ -329,6 +329,8 @@ export const authService = {
       // Send verification email with OTP
       await emailService.sendVerificationOTP(user.email, user.firstName, otpCode);
       
+      // Ensure profileImage is always present
+      if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return user;
     } catch (error) {
       logger.error('Error during user registration:', error);
@@ -378,6 +380,8 @@ export const authService = {
           .populate('supportNeeds', 'name code') || user;
       }
       
+      // Ensure profileImage is always present
+      if (typeof populatedUser.profileImage === 'undefined') populatedUser.profileImage = null;
       return { user: populatedUser, tokens };
     } catch (error) {
       logger.error('Error during login:', error);

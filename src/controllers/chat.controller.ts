@@ -38,6 +38,23 @@ export const chatController = {
         organizationId
       });
 
+      // If this is a direct conversation and it already exists, reject with 409
+      if (
+        type === ConversationType.DIRECT &&
+        conversation &&
+        conversation.type === ConversationType.DIRECT &&
+        conversation.members.some(m => m.userId.toString() === userId) &&
+        conversation.members.some(m => memberIds.includes(m.userId.toString())) &&
+        conversation.isActive
+      ) {
+        // Check if this is an existing conversation (not just created)
+        // If the conversation was just created, it would not have been found before
+        // So, if it exists, reject
+        return res.status(httpStatus.CONFLICT).json(
+          errorResponse('Conversation already exists', httpStatus.CONFLICT)
+        );
+      }
+
       // Populate conversation details
       await conversation.populate([
         {

@@ -30,7 +30,7 @@ export interface IUser extends Document {
     postalCode: string;
     country: string;
   };
-  profileImage?: string;
+  profileImage?: string | null;
   // bio?: string;
   notificationPreferences: NotificationPreference;
   isEmailVerified: boolean;
@@ -119,7 +119,8 @@ const userSchema = new Schema<IUser>(
       country: String,
     },
     profileImage: {
-      type: String, // URL to profile image
+      type: String,
+      default: null,
     },
     // bio: {
     //   type: String,
