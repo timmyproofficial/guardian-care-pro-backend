@@ -41,7 +41,7 @@ export interface WorkerSummary {
   _id: mongoose.Types.ObjectId;
   firstName: string;
   lastName: string;
-  profileImage?: string;
+  profileImage?: string | null;
   skills: { _id: mongoose.Types.ObjectId; name: string; code: string; }[];
   hourlyRate: {
     baseRate: number;
@@ -197,7 +197,7 @@ export const searchWorkers = async (
         _id: worker._id,
         firstName: worker.firstName,
         lastName: worker.lastName,
-        profileImage: worker.profileImage,
+        profileImage: typeof worker.profileImage === 'string' ? worker.profileImage : undefined,
         skills: (worker.skills as any[] ?? []).map((skill: any) => ({
             _id: skill._id,
             name: skill.name,

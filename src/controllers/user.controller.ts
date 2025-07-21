@@ -49,7 +49,8 @@ export const userController = {
       if (!user) {
         return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
       }
-      
+      // Ensure profileImage is always present
+      if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User profile retrieved successfully'));
     } catch (error) {
       next(error);
@@ -72,7 +73,7 @@ export const userController = {
           errorResponse('User not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User retrieved successfully'));
     } catch (error) {
       next(error);
@@ -94,7 +95,7 @@ export const userController = {
           errorResponse('User not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User retrieved successfully'));
     } catch (error) {
       next(error);
@@ -137,7 +138,7 @@ export const userController = {
           updatedUser = await userService.updateUserById(userId, req.body);
       }
       
-      return res.json(successResponse({ user: updatedUser }, 'User profile updated successfully'));
+      return res.json(successResponse({ user: updatedUser && typeof updatedUser.profileImage === 'undefined' ? { ...updatedUser, profileImage: null } : updatedUser }, 'User profile updated successfully'));
     } catch (error) {
       next(error);
       return;
@@ -179,7 +180,7 @@ export const userController = {
         );
       }
       
-      return res.json(successResponse({ user: updatedUser }, 'User updated successfully'));
+      return res.json(successResponse({ user: updatedUser && typeof updatedUser.profileImage === 'undefined' ? { ...updatedUser, profileImage: null } : updatedUser }, 'User updated successfully'));
     } catch (error) {
       next(error);
       return;
@@ -201,7 +202,7 @@ export const userController = {
           errorResponse('User not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User updated successfully'));
     } catch (error) {
       next(error);
@@ -328,7 +329,10 @@ export const userController = {
       };
       
       const result = await userService.getUsers(filter, options);
-      
+      // Ensure every user in the list has profileImage (null if missing)
+      if (result.users && Array.isArray(result.users)) {
+        result.users = result.users.map(u => ({ ...u.toObject?.() || u, profileImage: typeof u.profileImage === 'undefined' ? null : u.profileImage }));
+      }
       res.json(successResponse(result, 'Users retrieved successfully'));
     } catch (error) {
       next(error);
@@ -349,7 +353,7 @@ export const userController = {
           errorResponse('Participant not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof participant.profileImage === 'undefined') participant.profileImage = null;
       return res.json(successResponse({ participant }, 'Participant retrieved successfully'));
     } catch (error) {
       next(error);
@@ -371,7 +375,7 @@ export const userController = {
           errorResponse('Support worker not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof worker.profileImage === 'undefined') worker.profileImage = null;
       return res.json(successResponse({ worker }, 'Support worker retrieved successfully'));
     } catch (error) {
       next(error);
@@ -393,7 +397,7 @@ export const userController = {
           errorResponse('Coordinator not found', httpStatus.NOT_FOUND)
         );
       }
-      
+      if (typeof coordinator.profileImage === 'undefined') coordinator.profileImage = null;
       return res.json(successResponse({ coordinator }, 'Coordinator retrieved successfully'));
     } catch (error) {
       next(error);
