@@ -3,16 +3,16 @@
  * Handles incident-related business logic and database operations
  */
 
-import httpStatus from "http-status";
-import mongoose from "mongoose";
-import Incident, { IIncident } from "../models/incident.model";
-import Shift from "../models/shift.model";
-import User from "../models/user.model";
+import httpStatus from 'http-status';
+import mongoose from 'mongoose';
+import Incident, { IIncident } from '../models/incident.model';
+import Shift from '../models/shift.model';
+import User from '../models/user.model';
 // import { UserRole } from '../types/user.types';
-import ApiError from "../utils/api-error";
-import logger from "../utils/logger";
-import { UserRole } from "../types/user.types";
-import checkIncidentPermissions from "../utils/incident-permissions";
+import ApiError from '../utils/api-error';
+import logger from '../utils/logger';
+import { UserRole } from '../types/user.types';
+import checkIncidentPermissions from '../utils/incident-permissions';
 
 /**
  * Interface for incident creation input
@@ -21,7 +21,7 @@ interface CreateIncidentInput {
   shiftId: string;
   title: string;
   description: string;
-  severity: "LOW" | "MEDIUM" | "HIGH";
+  severity: 'LOW' | 'MEDIUM' | 'HIGH';
   urlLinks?: string[];
 }
 
@@ -29,8 +29,8 @@ interface CreateIncidentInput {
  * Interface for incident filter options
  */
 interface IncidentFilterOptions {
-  status?: "OPEN" | "IN_REVIEW" | "RESOLVED" | "REJECTED";
-  severity?: "LOW" | "MEDIUM" | "HIGH";
+  status?: 'OPEN' | 'IN_REVIEW' | 'RESOLVED' | 'REJECTED';
+  severity?: 'LOW' | 'MEDIUM' | 'HIGH';
   shiftId?: string;
   dateFrom?: Date;
   dateTo?: Date;
@@ -51,7 +51,7 @@ interface PaginationOptions {
   page?: number;
   limit?: number;
   sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: 'asc' | 'desc';
 }
 
 /**
@@ -65,23 +65,23 @@ export const incidentService = {
     try {
       // Check if user can create incidents
       if (!checkIncidentPermissions.canCreateIncident(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to create incidents");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to create incidents');
       }
 
       const shift = await Shift.findOne({ shiftId: incidentData.shiftId });
 
       if (!shift) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Shift not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
       }
 
       // Verify the reporter is the worker of the shift
       if (shift.workerId!.toString() !== user.id) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You can only report incidents for your own shifts");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You can only report incidents for your own shifts');
       }
 
       const incident = await Incident.create({
         ...incidentData,
-        status: "OPEN",
+        status: 'OPEN',
         reportedBy: shift.workerId,
         reportedAgainst: shift.participantId,
       });
@@ -91,14 +91,14 @@ export const incidentService = {
 
       // Populate user details normally
       const populatedIncident = await Incident.findById(incident._id).populate([
-        { path: "reportedBy", select: "firstName lastName email" },
-        { path: "reportedAgainst", select: "firstName lastName email" },
+        { path: 'reportedBy', select: 'firstName lastName email' },
+        { path: 'reportedAgainst', select: 'firstName lastName email' },
       ]);
 
       logger.info(`New incident created: ${incident._id}`);
       return { ...populatedIncident?.toObject(), shiftId: incidentObj.shiftId };
     } catch (error) {
-      logger.error("Error creating incident:", error);
+      logger.error('Error creating incident:', error);
       throw error;
     }
   },
@@ -136,8 +136,8 @@ export const incidentService = {
       const skip = (page - 1) * limit;
 
       // Sorting setup
-      const sortBy = pagination.sortBy || "createdAt";
-      const sortOrder = pagination.sortOrder === "asc" ? 1 : -1;
+      const sortBy = pagination.sortBy || 'createdAt';
+      const sortOrder = pagination.sortOrder === 'asc' ? 1 : -1;
       const sort: Record<string, 1 | -1> = { [sortBy]: sortOrder };
 
       // Execute query with pagination
@@ -145,16 +145,16 @@ export const incidentService = {
         Incident.find(query)
           .populate([
             {
-              path: "reportedBy",
-              select: "firstName lastName email",
+              path: 'reportedBy',
+              select: 'firstName lastName email',
             },
             {
-              path: "reportedAgainst",
-              select: "firstName lastName email",
+              path: 'reportedAgainst',
+              select: 'firstName lastName email',
             },
             {
-              path: "resolvedBy",
-              select: "firstName lastName email",
+              path: 'resolvedBy',
+              select: 'firstName lastName email',
             },
           ])
           .sort(sort)
@@ -167,7 +167,7 @@ export const incidentService = {
       // Manually populate shift information
       const shiftIds = [...new Set(incidents.map((i) => i.shiftId))];
       const shifts = await Shift.find({ shiftId: { $in: shiftIds } })
-        .select("shiftId title startTime endTime")
+        .select('shiftId title startTime endTime')
         .lean();
 
       const incidentsWithShifts = incidents.map((incident) => {
@@ -187,7 +187,7 @@ export const incidentService = {
         currentPage: page,
       };
     } catch (error) {
-      logger.error("Error fetching all incidents:", error);
+      logger.error('Error fetching all incidents:', error);
       throw error;
     }
   },
@@ -200,7 +200,7 @@ export const incidentService = {
       // Validate shift exists
       const shift = await Shift.findOne({ shiftId });
       if (!shift) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Shift not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found');
       }
 
       // Check if user is involved in this shift
@@ -209,19 +209,19 @@ export const incidentService = {
         shift.workerId?.id!.toString() !== user.id &&
         shift.participantId.id.toString() !== user.id
       ) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to view incidents for this shift");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to view incidents for this shift');
       }
 
       const incidents = await Incident.find({ shiftId })
-        .populate("reportedBy", "firstName lastName email")
-        .populate("reportedAgainst", "firstName lastName email")
-        .populate("resolvedBy", "firstName lastName email")
+        .populate('reportedBy', 'firstName lastName email')
+        .populate('reportedAgainst', 'firstName lastName email')
+        .populate('resolvedBy', 'firstName lastName email')
         .sort({ createdAt: -1 });
 
       // Filter incidents based on user permissions
       return incidents.filter((incident) => checkIncidentPermissions.canViewIncident(incident, user.id, user.role));
     } catch (error) {
-      logger.error("Error fetching incidents by shift:", error);
+      logger.error('Error fetching incidents by shift:', error);
       throw error;
     }
   },
@@ -232,14 +232,14 @@ export const incidentService = {
   getIncidentsByReporter: async (userId: string): Promise<IIncident[]> => {
     try {
       const incidents = await Incident.find({ reportedBy: userId })
-        .populate("shiftId", "title startTime endTime")
-        .populate("reportedAgainst", "firstName lastName email")
-        .populate("resolvedBy", "firstName lastName email")
+        .populate('shiftId', 'title startTime endTime')
+        .populate('reportedAgainst', 'firstName lastName email')
+        .populate('resolvedBy', 'firstName lastName email')
         .sort({ createdAt: -1 });
 
       return incidents;
     } catch (error) {
-      logger.error("Error fetching incidents by reporter:", error);
+      logger.error('Error fetching incidents by reporter:', error);
       throw error;
     }
   },
@@ -250,14 +250,14 @@ export const incidentService = {
   getIncidentsAgainstUser: async (userId: string): Promise<IIncident[]> => {
     try {
       const incidents = await Incident.find({ reportedAgainst: userId })
-        .populate("shiftId", "title startTime endTime")
-        .populate("reportedBy", "firstName lastName email")
-        .populate("resolvedBy", "firstName lastName email")
+        .populate('shiftId', 'title startTime endTime')
+        .populate('reportedBy', 'firstName lastName email')
+        .populate('resolvedBy', 'firstName lastName email')
         .sort({ createdAt: -1 });
 
       return incidents;
     } catch (error) {
-      logger.error("Error fetching incidents against user:", error);
+      logger.error('Error fetching incidents against user:', error);
       throw error;
     }
   },
@@ -268,21 +268,21 @@ export const incidentService = {
   getIncidentById: async (incidentId: string, user: { id: string; role: UserRole }): Promise<IIncident> => {
     try {
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid incident ID format");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID format');
       }
 
       const incident = await Incident.findById(incidentId)
-        .populate("reportedBy", "firstName lastName email")
-        .populate("reportedAgainst", "firstName lastName email")
-        .populate("resolvedBy", "firstName lastName email");
+        .populate('reportedBy', 'firstName lastName email')
+        .populate('reportedAgainst', 'firstName lastName email')
+        .populate('resolvedBy', 'firstName lastName email');
 
       if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Incident not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
       // Check if user can view this incident
       if (!checkIncidentPermissions.canViewIncident(incident, user.id, user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to view this incident");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to view this incident');
       }
 
       return incident;
@@ -298,7 +298,7 @@ export const incidentService = {
   updateIncidentStatus: async (
     incidentId: string,
     payload: {
-      status: "OPEN" | "IN_REVIEW" | "RESOLVED" | "REJECTED";
+      status: 'OPEN' | 'IN_REVIEW' | 'RESOLVED' | 'REJECTED';
       updatedBy?: string;
     },
     user: { id: string; role: UserRole },
@@ -306,17 +306,17 @@ export const incidentService = {
     try {
       // Check if user can change status
       if (!checkIncidentPermissions.canChangeStatus(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to change incident status");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to change incident status');
       }
 
       // Basic validation
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid incident ID");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID');
       }
 
-      const validStatuses = ["OPEN", "IN_REVIEW", "RESOLVED", "REJECTED"];
+      const validStatuses = ['OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'];
       if (!validStatuses.includes(payload.status)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid status value");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid status value');
       }
 
       // Prepare update data
@@ -333,16 +333,17 @@ export const incidentService = {
       const incident = await Incident.findByIdAndUpdate(incidentId, updateData, { new: true });
 
       if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Incident not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
       logger.info(`Incident ${incidentId} status updated to ${payload.status}`);
       return incident;
     } catch (error) {
-      logger.error("Error updating incident status:", error);
+      logger.error('Error updating incident status:', error);
       throw error;
     }
   },
+
   /**
    * Resolve an incident with resolution notes
    */
@@ -354,56 +355,56 @@ export const incidentService = {
     try {
       // Check if user can resolve incidents
       if (!checkIncidentPermissions.canResolveIncident(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to resolve incidents");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to resolve incidents');
       }
 
       // Validate resolver matches the authenticated user
       if (resolvedBy !== user.id) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You can only resolve incidents as yourself");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You can only resolve incidents as yourself');
       }
       // Validate incident ID format
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid incident ID");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID');
       }
 
       // Validate resolver exists
       const resolver = await User.findById(resolvedBy);
       if (!resolver) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Resolver user not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Resolver user not found');
       }
 
       // Find and validate incident
       const incident = await Incident.findById(incidentId);
       if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Incident not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
-      if (incident.status === "RESOLVED") {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Incident is already resolved");
+      if (incident.status === 'RESOLVED') {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Incident is already resolved');
       }
 
       // Update incident
       const updateData = {
-        status: "RESOLVED",
+        status: 'RESOLVED',
         resolutionNote,
         resolvedBy: new mongoose.Types.ObjectId(resolvedBy),
         resolvedAt: new Date(),
       };
 
       const updatedIncident = await Incident.findByIdAndUpdate(incidentId, updateData, { new: true }).populate([
-        { path: "reportedBy", select: "firstName lastName email" },
-        { path: "reportedAgainst", select: "firstName lastName email" },
-        { path: "resolvedBy", select: "firstName lastName email" },
+        { path: 'reportedBy', select: 'firstName lastName email' },
+        { path: 'reportedAgainst', select: 'firstName lastName email' },
+        { path: 'resolvedBy', select: 'firstName lastName email' },
       ]);
 
       if (!updatedIncident) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to update incident");
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update incident');
       }
 
       logger.info(`Incident ${incidentId} resolved by ${resolvedBy}`);
       return updatedIncident;
     } catch (error) {
-      logger.error("Error resolving incident:", error);
+      logger.error('Error resolving incident:', error);
       throw error;
     }
   },
@@ -419,21 +420,21 @@ export const incidentService = {
     // Return the updated incident
     try {
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid incident ID");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID');
       }
 
       const incident = await Incident.findById(incidentId);
       if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Incident not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
       // Check if user can update this incident
       if (!checkIncidentPermissions.canUpdateIncident(incident, user.id, user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to update this incident");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to update this incident');
       }
 
-      // Create update object with only allowed fields
-      const updateData: Partial<IIncident> = {
+      // Only allow updating certain fields
+      const updateData = {
         title: data.title,
         description: data.description,
         severity: data.severity,
@@ -441,28 +442,24 @@ export const incidentService = {
         updatedAt: new Date(),
       };
 
-      // Remove undefined fields
-      (Object.keys(updateData) as (keyof IIncident)[]).forEach(
-        (key) => updateData[key] === undefined && delete updateData[key],
-      );
-
+      // Find and return the updated document
       const updatedIncident = await Incident.findByIdAndUpdate(
         incidentId,
         updateData,
-        { new: true }, // Return the updated document
+        { new: true, runValidators: true }, // Return updated doc and run validators
       ).populate([
-        { path: "reportedBy", select: "firstName lastName email" },
-        { path: "reportedAgainst", select: "firstName lastName email" },
+        { path: 'reportedBy', select: 'firstName lastName email' },
+        { path: 'reportedAgainst', select: 'firstName lastName email' },
       ]);
 
       if (!updatedIncident) {
-        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to update incident");
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update incident');
       }
 
       logger.info(`Incident ${incidentId} updated by user ${user.id}`);
       return updatedIncident;
     } catch (error) {
-      logger.error("Error updating incident:", error);
+      logger.error('Error updating incident:', error);
       throw error;
     }
   },
@@ -473,24 +470,24 @@ export const incidentService = {
   deleteIncident: async (incidentId: string, user: { id: string; role: UserRole }): Promise<void> => {
     try {
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Invalid incident ID");
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID');
       }
 
       const incident = await Incident.findById(incidentId);
       if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, "Incident not found");
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
       // Check if user can delete this incident
       if (!checkIncidentPermissions.canDeleteIncident(incident, user.id, user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, "You are not authorized to delete this incident");
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to delete this incident');
       }
 
       await Incident.findByIdAndDelete(incidentId);
 
       logger.info(`Incident ${incidentId} deleted by user ${user.id}`);
     } catch (error) {
-      logger.error("Error deleting incident:", error);
+      logger.error('Error deleting incident:', error);
       throw error;
     }
   },
@@ -520,22 +517,22 @@ export const incidentService = {
       const [totalIncidents, statusStats, severityStats, resolutionStats] = await Promise.all([
         Incident.countDocuments(baseQuery),
 
-        Incident.aggregate([{ $match: baseQuery }, { $group: { _id: "$status", count: { $sum: 1 } } }]),
+        Incident.aggregate([{ $match: baseQuery }, { $group: { _id: '$status', count: { $sum: 1 } } }]),
 
-        Incident.aggregate([{ $match: baseQuery }, { $group: { _id: "$severity", count: { $sum: 1 } } }]),
+        Incident.aggregate([{ $match: baseQuery }, { $group: { _id: '$severity', count: { $sum: 1 } } }]),
 
         Incident.aggregate([
           {
             $match: {
               ...baseQuery,
-              status: "RESOLVED",
+              status: 'RESOLVED',
               resolvedAt: { $exists: true },
             },
           },
           {
             $addFields: {
               resolutionTime: {
-                $subtract: ["$resolvedAt", "$createdAt"],
+                $subtract: ['$resolvedAt', '$createdAt'],
               },
             },
           },
@@ -543,7 +540,7 @@ export const incidentService = {
             $group: {
               _id: null,
               count: { $sum: 1 },
-              avgResolutionTime: { $avg: "$resolutionTime" },
+              avgResolutionTime: { $avg: '$resolutionTime' },
             },
           },
         ]),
@@ -577,7 +574,7 @@ export const incidentService = {
         averageResolutionTime: Math.round(averageResolutionTime / (1000 * 60 * 60)), // Convert to hours
       };
     } catch (error) {
-      logger.error("Error fetching incident statistics:", error);
+      logger.error('Error fetching incident statistics:', error);
       throw error;
     }
   },

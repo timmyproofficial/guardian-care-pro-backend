@@ -3,8 +3,8 @@
  * Defines validation rules for API requests
  */
 
-import Joi from "joi";
-import { UserRole, Gender, NotificationPreference } from "../types/user.types";
+import Joi from 'joi';
+import { UserRole, Gender, NotificationPreference } from '../types/user.types';
 import {
   ShiftStatus,
   ShiftType,
@@ -12,12 +12,12 @@ import {
   CancellationReason,
   LocationType,
   TimesheetStatus,
-} from "../types/shift.types";
-import { SubscriptionTier } from "../types/payment.types";
-import { password } from "./custom-validators";
-import { BatchFrequency } from "../models/batchInvoiceConfig.model";
+} from '../types/shift.types';
+import { SubscriptionTier } from '../types/payment.types';
+import { password } from './custom-validators';
+import { BatchFrequency } from '../models/batchInvoiceConfig.model';
 // import mongoose from 'mongoose';
-import ServiceTypeModel from "../models/serviceType.model";
+import ServiceTypeModel from '../models/serviceType.model';
 
 /**
  * Authentication validation schemas
@@ -244,7 +244,7 @@ export const workerValidation = {
           Joi.object({
             day: Joi.string()
               .required()
-              .valid("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"),
+              .valid('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'),
             available: Joi.boolean().required(),
             slots: Joi.array().items(
               Joi.object({
@@ -270,7 +270,7 @@ export const workerValidation = {
         Joi.object({
           day: Joi.string()
             .required()
-            .valid("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"),
+            .valid('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'),
           available: Joi.boolean().required(),
           slots: Joi.array().items(
             Joi.object({
@@ -323,10 +323,10 @@ export const organizationValidation = {
 
   // Process invite
   processInvite: Joi.object({
-    status: Joi.string().required().valid("accepted", "declined"),
+    status: Joi.string().required().valid('accepted', 'declined'),
     adminNotes: Joi.string(),
-    declineReason: Joi.string().when("status", {
-      is: "declined",
+    declineReason: Joi.string().when('status', {
+      is: 'declined',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -347,8 +347,8 @@ export const organizationValidation = {
       endDate: Joi.date(),
       termsAccepted: Joi.boolean().required().valid(true),
       additionalTerms: Joi.string(),
-    }).when("status", {
-      is: "accepted",
+    }).when('status', {
+      is: 'accepted',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -392,7 +392,7 @@ export const rateTimeBandValidation = {
  */
 const objectId = Joi.string()
   .regex(/^[0-9a-fA-F]{24}$/)
-  .message("Invalid ObjectId format");
+  .message('Invalid ObjectId format');
 
 /**
  * Custom Joi validation for ServiceType ObjectId
@@ -400,30 +400,30 @@ const objectId = Joi.string()
  */
 const serviceTypeId = Joi.string()
   .regex(/^[0-9a-fA-F]{24}$/)
-  .message("Invalid ServiceType ID format")
+  .message('Invalid ServiceType ID format')
   .external(async (value) => {
     // Skip external validation if value is not provided, empty, or invalid
-    if (!value || typeof value !== "string" || value.trim() === "" || value.length !== 24) {
+    if (!value || typeof value !== 'string' || value.trim() === '' || value.length !== 24) {
       return value;
     }
 
     try {
       const serviceType = await ServiceTypeModel.findOne({
         _id: value.trim(),
-        status: "active",
+        status: 'active',
       });
 
       if (!serviceType) {
-        throw new Error("Service type not found or inactive");
+        throw new Error('Service type not found or inactive');
       }
 
       return value;
     } catch (error) {
-      if (error instanceof Error && error.message === "Service type not found or inactive") {
+      if (error instanceof Error && error.message === 'Service type not found or inactive') {
         throw error;
       }
       // Handle any database connection or other errors gracefully
-      throw new Error("Error validating service type");
+      throw new Error('Error validating service type');
     }
   });
 
@@ -435,23 +435,23 @@ export const shiftValidation = {
   createShift: Joi.object({
     organizationId: objectId.required(),
     isMultiWorkerShift: Joi.boolean().default(false),
-    workerId: Joi.when("isMultiWorkerShift", {
+    workerId: Joi.when('isMultiWorkerShift', {
       is: false,
       then: objectId,
       otherwise: Joi.forbidden(),
     }),
-    workerIds: Joi.when("isMultiWorkerShift", {
+    workerIds: Joi.when('isMultiWorkerShift', {
       is: true,
       then: Joi.array().items(objectId).min(1).max(3).required(),
       otherwise: Joi.forbidden(),
     }),
     serviceTypeId: serviceTypeId.required(),
     startTime: Joi.date().required(),
-    endTime: Joi.date().greater(Joi.ref("startTime")).required(),
+    endTime: Joi.date().greater(Joi.ref('startTime')).required(),
     locationType: Joi.string()
       .valid(...Object.values(LocationType))
       .required(),
-    address: Joi.when("locationType", {
+    address: Joi.when('locationType', {
       is: LocationType.IN_PERSON,
       then: Joi.string().required(),
       otherwise: Joi.string().optional(),
@@ -466,7 +466,7 @@ export const shiftValidation = {
         .valid(...Object.values(RecurrencePattern))
         .required(),
       occurrences: Joi.number().integer().min(1).max(100),
-      endDate: Joi.date().greater(Joi.ref("....startTime")),
+      endDate: Joi.date().greater(Joi.ref('....startTime')),
     }).optional(),
   }),
 
@@ -477,9 +477,9 @@ export const shiftValidation = {
     serviceTypeId: serviceTypeId.optional(),
     startTime: Joi.date().optional(),
     endTime: Joi.date()
-      .when("startTime", {
+      .when('startTime', {
         is: Joi.exist(),
-        then: Joi.date().greater(Joi.ref("startTime")),
+        then: Joi.date().greater(Joi.ref('startTime')),
         otherwise: Joi.date(),
       })
       .optional(),
@@ -498,7 +498,7 @@ export const shiftValidation = {
   // Respond to shift
   respondToShift: Joi.object({
     accept: Joi.boolean().required(),
-    declineReason: Joi.when("accept", {
+    declineReason: Joi.when('accept', {
       is: false,
       then: Joi.string().required(),
       otherwise: Joi.forbidden(),
@@ -524,7 +524,7 @@ export const timesheetValidation = {
       .required()
       .regex(/^[0-9a-fA-F]{24}$/),
     actualStartTime: Joi.date().required(),
-    actualEndTime: Joi.date().required().greater(Joi.ref("actualStartTime")),
+    actualEndTime: Joi.date().required().greater(Joi.ref('actualStartTime')),
     distanceTravelKm: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
@@ -532,7 +532,7 @@ export const timesheetValidation = {
         title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
-        payer: Joi.string().valid("participant", "supportWorker").required(),
+        payer: Joi.string().valid('participant', 'supportWorker').required(),
         receiptUrl: Joi.string().uri(),
       }),
     ),
@@ -546,7 +546,7 @@ export const timesheetValidation = {
   // Revise timesheet
   reviseTimesheet: Joi.object({
     actualStartTime: Joi.date(),
-    actualEndTime: Joi.date().greater(Joi.ref("actualStartTime")),
+    actualEndTime: Joi.date().greater(Joi.ref('actualStartTime')),
     distanceTravelKm: Joi.number().min(0),
     notes: Joi.string(),
     expenses: Joi.array().items(
@@ -554,7 +554,7 @@ export const timesheetValidation = {
         title: Joi.string().required(),
         description: Joi.string().required(),
         amount: Joi.number().required().min(0),
-        payer: Joi.string().valid("participant", "supportWorker").required(),
+        payer: Joi.string().valid('participant', 'supportWorker').required(),
         receiptUrl: Joi.string().uri(),
       }),
     ),
@@ -567,7 +567,7 @@ export const timesheetValidation = {
       !value.notes &&
       !value.expenses
     ) {
-      return helpers.error("At least one field must be updated");
+      return helpers.error('At least one field must be updated');
     }
     return value;
   }),
@@ -575,7 +575,7 @@ export const timesheetValidation = {
   // Admin update timesheet status
   adminUpdateTimesheet: Joi.object({
     status: Joi.string().valid(...Object.values(TimesheetStatus)),
-    reason: Joi.string().when("status", {
+    reason: Joi.string().when('status', {
       is: TimesheetStatus.REJECTED,
       then: Joi.required(),
       otherwise: Joi.optional(),
@@ -584,7 +584,7 @@ export const timesheetValidation = {
   }).custom((value, helpers) => {
     // Ensure at least one field is being updated
     if (value.status === undefined && value.isPaid === undefined) {
-      return helpers.error("At least one field must be provided for update");
+      return helpers.error('At least one field must be provided for update');
     }
     return value;
   }),
@@ -596,9 +596,9 @@ export const timesheetValidation = {
 export const chatValidation = {
   // Create conversation
   createConversation: Joi.object({
-    type: Joi.string().required().valid("direct", "group"),
-    name: Joi.string().min(1).max(100).when("type", {
-      is: "group",
+    type: Joi.string().required().valid('direct', 'group'),
+    name: Joi.string().min(1).max(100).when('type', {
+      is: 'group',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -613,9 +613,9 @@ export const chatValidation = {
 
   // Send message
   sendMessage: Joi.object({
-    type: Joi.string().valid("text", "image", "file", "audio", "video").default("text"),
-    content: Joi.string().max(4000).when("type", {
-      is: "text",
+    type: Joi.string().valid('text', 'image', 'file', 'audio', 'video').default('text'),
+    content: Joi.string().max(4000).when('type', {
+      is: 'text',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -679,7 +679,7 @@ export const batchInvoiceValidation = {
     periodStartDay: Joi.number().min(0).max(6),
     periodEndDay: Joi.number().min(0).max(6),
     monthlyStartDate: Joi.number().min(1).max(31),
-    monthlyEndDate: Joi.alternatives().try(Joi.number().min(1).max(31), Joi.string().valid("last")),
+    monthlyEndDate: Joi.alternatives().try(Joi.number().min(1).max(31), Joi.string().valid('last')),
     automaticEmailParticipant: Joi.boolean(),
     automaticEmailWorker: Joi.boolean(),
   }),
@@ -687,7 +687,7 @@ export const batchInvoiceValidation = {
   // Trigger batch generation
   triggerBatch: Joi.object({
     startDate: Joi.date().required(),
-    endDate: Joi.date().required().min(Joi.ref("startDate")),
+    endDate: Joi.date().required().min(Joi.ref('startDate')),
     workerId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     participantId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     sendEmails: Joi.boolean(),
@@ -699,7 +699,7 @@ export const batchInvoiceValidation = {
     sendToWorker: Joi.boolean(),
   }).custom((value, helpers) => {
     if (!value.sendToParticipant && !value.sendToWorker) {
-      return helpers.error("At least one recipient (participant or worker) must be specified");
+      return helpers.error('At least one recipient (participant or worker) must be specified');
     }
     return value;
   }),
@@ -714,10 +714,10 @@ export const subscriptionValidation = {
     tier: Joi.string()
       .required()
       .valid(...Object.values(SubscriptionTier)),
-    paymentMethod: Joi.string().required().valid("creditCard", "directDebit", "bankTransfer", "paypal", "ndis"),
+    paymentMethod: Joi.string().required().valid('creditCard', 'directDebit', 'bankTransfer', 'paypal', 'ndis'),
     autoRenew: Joi.boolean().required(),
-    paymentToken: Joi.string().when("paymentMethod", {
-      is: "creditCard",
+    paymentToken: Joi.string().when('paymentMethod', {
+      is: 'creditCard',
       then: Joi.required(),
       otherwise: Joi.optional(),
     }),
@@ -736,9 +736,9 @@ export const incidentValidation = {
     // reportedAgainst: Joi.string().regex(/^[0-9a-fA-F]{24}$/), b
     title: Joi.string().required().trim().min(5).max(200),
     description: Joi.string().required().min(10).max(2000),
-    severity: Joi.string().valid("LOW", "MEDIUM", "HIGH").default("LOW"),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH').default('LOW'),
     urlLinks: Joi.array()
-      .items(Joi.string().uri({ scheme: ["http", "https"] }))
+      .items(Joi.string().uri({ scheme: ['http', 'https'] }))
       .max(10),
   }),
 
@@ -746,14 +746,14 @@ export const incidentValidation = {
   updateIncident: Joi.object({
     title: Joi.string().trim().min(5).max(200),
     description: Joi.string().min(10).max(2000),
-    severity: Joi.string().valid("LOW", "MEDIUM", "HIGH"),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH'),
     urlLinks: Joi.array()
-      .items(Joi.string().uri({ scheme: ["http", "https"] }))
+      .items(Joi.string().uri({ scheme: ['http', 'https'] }))
       .max(10),
   }).custom((value, helpers) => {
     // Ensure at least one field is being updated
     if (!value.title && !value.description && !value.severity && !value.urlLinks) {
-      return helpers.error("At least one field must be updated");
+      return helpers.error('At least one field must be updated');
     }
     return value;
   }),
@@ -768,12 +768,12 @@ export const incidentValidation = {
 
   // Admin review incident
   reviewIncident: Joi.object({
-    status: Joi.string().required().valid("IN_REVIEW", "RESOLVED", "REJECTED"),
+    status: Joi.string().required().valid('IN_REVIEW', 'RESOLVED', 'REJECTED'),
     resolutionNote: Joi.string()
       .min(10)
       .max(1000)
-      .when("status", {
-        is: Joi.valid("RESOLVED", "REJECTED"),
+      .when('status', {
+        is: Joi.valid('RESOLVED', 'REJECTED'),
         then: Joi.required(),
         otherwise: Joi.optional(),
       }),
@@ -781,15 +781,15 @@ export const incidentValidation = {
 
   // Admin update incident status
   updateIncidentStatus: Joi.object({
-    status: Joi.string().required().valid("OPEN", "IN_REVIEW", "RESOLVED", "REJECTED"),
+    status: Joi.string().required().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
     updatedBy: Joi.string()
       .regex(/^[0-9a-fA-F]{24}$/)
       .optional(),
     resolutionNote: Joi.string()
       .min(10)
       .max(1000)
-      .when("status", {
-        is: Joi.valid("RESOLVED", "REJECTED"),
+      .when('status', {
+        is: Joi.valid('RESOLVED', 'REJECTED'),
         then: Joi.required(),
         otherwise: Joi.optional(),
       }),
@@ -800,15 +800,15 @@ export const incidentValidation = {
     shiftId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     reportedBy: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     reportedAgainst: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
-    severity: Joi.string().valid("LOW", "MEDIUM", "HIGH"),
-    status: Joi.string().valid("OPEN", "IN_REVIEW", "RESOLVED", "REJECTED"),
+    severity: Joi.string().valid('LOW', 'MEDIUM', 'HIGH'),
+    status: Joi.string().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
     resolvedBy: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     startDate: Joi.date(),
-    endDate: Joi.date().greater(Joi.ref("startDate")),
+    endDate: Joi.date().greater(Joi.ref('startDate')),
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).max(100).default(20),
-    sortBy: Joi.string().valid("createdAt", "updatedAt", "severity", "status").default("createdAt"),
-    sortOrder: Joi.string().valid("asc", "desc").default("desc"),
+    sortBy: Joi.string().valid('createdAt', 'updatedAt', 'severity', 'status').default('createdAt'),
+    sortOrder: Joi.string().valid('asc', 'desc').default('desc'),
   }),
 
   // Bulk update incidents (admin only)
@@ -818,19 +818,19 @@ export const incidentValidation = {
       .min(1)
       .max(50)
       .required(),
-    status: Joi.string().valid("OPEN", "IN_REVIEW", "RESOLVED", "REJECTED"),
+    status: Joi.string().valid('OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'),
     resolutionNote: Joi.string()
       .min(10)
       .max(1000)
-      .when("status", {
-        is: Joi.valid("RESOLVED", "REJECTED"),
+      .when('status', {
+        is: Joi.valid('RESOLVED', 'REJECTED'),
         then: Joi.required(),
         otherwise: Joi.optional(),
       }),
   }).custom((value, helpers) => {
     // Ensure at least status is being updated
     if (!value.status) {
-      return helpers.error("Status must be provided for bulk update");
+      return helpers.error('Status must be provided for bulk update');
     }
     return value;
   }),
@@ -845,8 +845,8 @@ export const incidentValidation = {
   getIncidentStats: Joi.object({
     organizationId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
     startDate: Joi.date(),
-    endDate: Joi.date().greater(Joi.ref("startDate")),
-    groupBy: Joi.string().valid("day", "week", "month", "severity", "status").default("status"),
+    endDate: Joi.date().greater(Joi.ref('startDate')),
+    groupBy: Joi.string().valid('day', 'week', 'month', 'severity', 'status').default('status'),
   }),
 };
 
@@ -858,18 +858,18 @@ export const serviceTypeValidation = {
   createServiceType: Joi.object({
     name: Joi.string().required().trim().min(2).max(100),
     code: Joi.string().required().trim().min(2).max(50).uppercase(),
-    status: Joi.string().valid("active", "inactive").default("active"),
+    status: Joi.string().valid('active', 'inactive').default('active'),
   }),
 
   // Update service type
   updateServiceType: Joi.object({
     name: Joi.string().trim().min(2).max(100),
     code: Joi.string().trim().min(2).max(50).uppercase(),
-    status: Joi.string().valid("active", "inactive"),
+    status: Joi.string().valid('active', 'inactive'),
   }).custom((value, helpers) => {
     // Ensure at least one field is being updated
     if (!value.name && !value.code && !value.status) {
-      return helpers.error("At least one field must be updated");
+      return helpers.error('At least one field must be updated');
     }
     return value;
   }),
