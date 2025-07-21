@@ -156,6 +156,11 @@ export const searchWorkers = async (
       return [...workerIds, ...orgWorkerIds];
     }, []);
 
+    // Exclude workers already in the participant's organization
+    if (organizationWorkerIds.length > 0) {
+      query._id = { $nin: organizationWorkerIds };
+    }
+
     // Calculate pagination
     const skip = (page - 1) * limit;
 
