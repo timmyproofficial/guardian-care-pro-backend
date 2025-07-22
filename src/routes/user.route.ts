@@ -40,6 +40,29 @@ router.post(
   userController.changePassword
 );
 
+// User-specific account management routes
+/**
+ * @route DELETE /api/users/profile
+ * @desc Delete current user's account
+ * @access Private (Authenticated User)
+ */
+router.delete(
+  '/profile',
+  authenticate,
+  userController.deleteMyAccount
+);
+
+/**
+ * @route PATCH /api/users/profile/deactivate
+ * @desc Deactivate current user's account
+ * @access Private (Authenticated User)
+ */
+router.patch(
+  '/profile/deactivate',
+  authenticate,
+  userController.deactivateMyAccount
+);
+
 // General user management routes (admin access)
 router.get(
   '/',

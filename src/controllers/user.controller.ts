@@ -290,7 +290,45 @@ export const userController = {
       await userService.deleteUserById(userId);
       res.json(successResponse({}, 'User deleted successfully'));
     } catch (error) {
-      next(error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Delete current user's account
+   * @route DELETE /api/users/profile
+   */
+  deleteMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+      const userId = req.user._id.toString();
+      await userService.deleteUserById(userId);
+      res.json(successResponse({}, 'Your account has been successfully deleted. This action cannot be undone.'));
+    } catch (error) {
+      return next(error);
+    }
+  },
+
+  /**
+   * Deactivate current user's account
+   * @route PATCH /api/users/profile/deactivate
+   */
+  deactivateMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+      const userId = req.user._id.toString();
+      await userService.updateUserStatus(userId, UserStatus.INACTIVE);
+      res.json(successResponse({}, 'Your account has been deactivated. You can reactivate it by logging in.'));
+    } catch (error) {
+      return next(error);
     }
   },
 
