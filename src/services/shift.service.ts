@@ -2,6 +2,7 @@ import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import moment from 'moment';
 import Shift, { IShift } from '../models/shift.model';
+import Routine from '../models/routine.model';
 import Organization from '../models/organization.model';
 import User, { IUser } from '../models/user.model';
 import ServiceType from '../models/serviceType.model';
@@ -34,6 +35,8 @@ interface CreateShiftInput {
   shiftType: ShiftType;
   requiresSupervision?: boolean;
   specialInstructions?: string;
+  routineId?: string;                        // Optional routine to attach
+  routineRequired?: boolean;                 // Whether routine completion is mandatory
   recurrence?: {
     pattern: RecurrencePattern;
     occurrences?: number;
@@ -54,6 +57,8 @@ interface UpdateShiftInput {
   address?: string;
   requiresSupervision?: boolean;
   specialInstructions?: string;
+  routineId?: string;                        // Update routine attachment
+  routineRequired?: boolean;                 // Update routine requirement
   status?: ShiftStatus;
   updateRecurring?: boolean;
   declineReason?: string;
@@ -251,6 +256,28 @@ export const shiftService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found or inactive');
       }
       
+      // Validate routine if provided
+      let routine = null;
+      if (shiftData.routineId) {
+        routine = await Routine.findOne({
+          routineId: shiftData.routineId,
+          participantId: new mongoose.Types.ObjectId(shiftData.participantId),
+          status: 'active'
+        });
+        
+        if (!routine) {
+          throw new ApiError(httpStatus.NOT_FOUND, 'Routine not found or inactive');
+        }
+        
+        // Optionally validate that routine matches service type
+        if (routine.serviceTypeId && routine.serviceTypeId.toString() !== shiftData.serviceTypeId) {
+          logger.warn('Routine service type does not match shift service type', {
+            routineServiceType: routine.serviceTypeId.toString(),
+            shiftServiceType: shiftData.serviceTypeId
+          });
+        }
+      }
+      
       // Handle single worker or multi-worker setup
       if (shiftData.isMultiWorkerShift) {
         // Validate worker count limit (maximum 3)
@@ -302,12 +329,22 @@ export const shiftService = {
           shiftType: shiftData.shiftType,
           requiresSupervision: shiftData.requiresSupervision || false,
           specialInstructions: shiftData.specialInstructions,
+          routineId: routine ? routine._id : undefined,
+          routineRequired: shiftData.routineRequired || false,
           status: ShiftStatus.PENDING // Overall shift status
         };
         
         // Handle single shift or recurring shifts
         if (!shiftData.recurrence || shiftData.recurrence.pattern === RecurrencePattern.NONE) {
           const shift = await Shift.create(shiftBase);
+          
+          // Increment routine usage if routine is attached
+          if (routine) {
+            await Routine.findByIdAndUpdate(routine._id, {
+              $inc: { timesUsed: 1 },
+              lastUsedAt: new Date()
+            });
+          }
           
           // Notify all assigned workers
           for (const assignment of shift.workerAssignments || []) {
@@ -463,12 +500,22 @@ export const shiftService = {
           shiftType: shiftData.shiftType,
           requiresSupervision: shiftData.requiresSupervision || false,
           specialInstructions: shiftData.specialInstructions,
+          routineId: routine ? routine._id : undefined,
+          routineRequired: shiftData.routineRequired || false,
           status
         };
         
         // Handle single shift (no recurrence)
         if (!shiftData.recurrence || shiftData.recurrence.pattern === RecurrencePattern.NONE) {
           const shift = await Shift.create(shiftBase);
+          
+          // Increment routine usage if routine is attached
+          if (routine) {
+            await Routine.findByIdAndUpdate(routine._id, {
+              $inc: { timesUsed: 1 },
+              lastUsedAt: new Date()
+            });
+          }
           
           // Notify the worker if assigned
           if (shift.workerId) {
@@ -1367,6 +1414,120 @@ export const shiftService = {
       return shift;
     } catch (error) {
       logger.error(`Error cancelling shift ${shiftId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update shift routine attachment
+   */
+  updateShiftRoutine: async (
+    shiftId: string, 
+    routineId: string | null, 
+    routineRequired: boolean = false,
+    participantId: string
+  ): Promise<IShift> => {
+    try {
+      // Find shift and validate ownership
+      const shift = await Shift.findOne({
+        _id: shiftId,
+        participantId: new mongoose.Types.ObjectId(participantId)
+      });
+
+      if (!shift) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Shift not found or access denied');
+      }
+
+      // Only allow routine updates on pending or confirmed shifts
+      if (![ShiftStatus.PENDING, ShiftStatus.CONFIRMED].includes(shift.status)) {
+        throw new ApiError(
+          httpStatus.BAD_REQUEST, 
+          'Cannot modify routine for shifts that are in progress or completed'
+        );
+      }
+
+      // Validate routine if provided
+      let routine = null;
+      if (routineId) {
+        routine = await Routine.findOne({
+          routineId,
+          participantId: new mongoose.Types.ObjectId(participantId),
+          status: 'active'
+        });
+
+        if (!routine) {
+          throw new ApiError(httpStatus.NOT_FOUND, 'Routine not found or inactive');
+        }
+      }
+
+      // Update shift routine fields
+      const previousRoutineId = shift.routineId;
+      shift.routineId = routine ? routine._id : undefined;
+      shift.routineRequired = routineRequired;
+      await shift.save();
+
+      // Update routine usage counters
+      if (routine && !previousRoutineId) {
+        // New routine attached
+        await Routine.findByIdAndUpdate(routine._id, {
+          $inc: { timesUsed: 1 },
+          lastUsedAt: new Date()
+        });
+      } else if (!routine && previousRoutineId) {
+        // Routine removed - decrement usage
+        await Routine.findByIdAndUpdate(previousRoutineId, {
+          $inc: { timesUsed: -1 }
+        });
+      } else if (routine && previousRoutineId && routine._id.toString() !== previousRoutineId.toString()) {
+        // Routine changed - update both counters
+        await Routine.findByIdAndUpdate(routine._id, {
+          $inc: { timesUsed: 1 },
+          lastUsedAt: new Date()
+        });
+        await Routine.findByIdAndUpdate(previousRoutineId, {
+          $inc: { timesUsed: -1 }
+        });
+      }
+
+      logger.info('Shift routine updated', { 
+        shiftId: shift.shiftId, 
+        routineId: routine?.routineId || null,
+        previousRoutineId,
+        participantId 
+      });
+
+      return shift;
+    } catch (error) {
+      logger.error(`Error updating routine for shift ${shiftId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get shift with routine details
+   */
+  getShiftWithRoutine: async (shiftId: string, userId?: string): Promise<IShift | null> => {
+    try {
+      const query: any = { _id: shiftId };
+      
+      // Add user-based access control if userId provided
+      if (userId) {
+        query.$or = [
+          { participantId: new mongoose.Types.ObjectId(userId) },
+          { workerId: new mongoose.Types.ObjectId(userId) },
+          { 'workerAssignments.workerId': new mongoose.Types.ObjectId(userId) }
+        ];
+      }
+
+      const shift = await Shift.findOne(query)
+        .populate('routineId', 'routineId name description estimatedDuration tasks status')
+        .populate('participantId', 'firstName lastName')
+        .populate('workerId', 'firstName lastName')
+        .populate('serviceTypeId', 'name code');
+
+      return shift;
+    } catch (error) {
+      logger.error(`Error getting shift with routine ${shiftId}:`, error);
       throw error;
     }
   }

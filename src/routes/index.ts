@@ -18,6 +18,7 @@ import invoiceRoute from './invoice.route';
 import batchInvoiceRoute from './batchInvoice.route';
 import incidentRoute from './incident.route';
 import analyticsRoute from './analytics.route';
+import routineRoute from './routine.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -68,6 +69,11 @@ const routes: Route[] = [
     path: '/shifts',
     route: shiftRoute,
     // authRequired: true,
+  },
+  {
+    path: '/routines',
+    route: routineRoute,
+    authRequired: true,
   },
   {
     path: '/timesheets',
