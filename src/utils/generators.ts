@@ -36,3 +36,15 @@ export const generateInvoiceNumber = (): string => {
   // Format as INV-YYYYMMDD-XXXXX
   return `INV-${dateString}-${uniqueId}`;
 };
+
+/**
+ * Generate a unique routine ID
+ * Format: RTN-XXXXXXXXXX (where X is alphanumeric)
+ * @returns A unique routine identifier
+ */
+export const generateRoutineId = (): string => {
+  // Generate a 10 character alphanumeric string
+  const uniqueId = nanoid(10).toUpperCase();
+  // Format as RTN-XXXXXXXXXX
+  return `RTN-${uniqueId}`;
+};

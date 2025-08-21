@@ -46,6 +46,10 @@ export interface IShift extends Document {
   cancellationNote?: string;                 // Additional notes for cancellation
   declineReason?: string;                    // Reason for worker declining
   
+  // Routine association
+  routineId?: mongoose.Types.ObjectId;       // Reference to routine (optional)
+  routineRequired: boolean;                  // Whether routine completion is mandatory
+  
   // Recurrence for recurring shifts
   recurrence?: {
     pattern: RecurrencePattern;              // Recurrence pattern (daily, weekly, etc.)
@@ -178,6 +182,14 @@ const shiftSchema = new Schema<IShift>(
     declineReason: {
       type: String
     },
+    routineId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Routine'
+    },
+    routineRequired: {
+      type: Boolean,
+      default: false
+    },
     recurrence: {
       pattern: {
         type: String,
@@ -210,6 +222,7 @@ shiftSchema.index({ workerId: 1 });
 shiftSchema.index({ 'workerAssignments.workerId': 1 }); // Add index for worker assignments
 shiftSchema.index({ organizationId: 1 });
 shiftSchema.index({ serviceTypeId: 1 }); // Add index for service type
+shiftSchema.index({ routineId: 1 }); // Add index for routine
 shiftSchema.index({ status: 1 });
 shiftSchema.index({ startTime: 1 });
 shiftSchema.index({ 'recurrence.parentShiftId': 1 });

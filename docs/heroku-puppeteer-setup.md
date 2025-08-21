@@ -21,18 +21,18 @@ Run these commands in your terminal to configure the buildpacks:
 
 ```bash
 # Add Chrome buildpack (this installs Chrome)
-heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome --index 1 --app your-app-name
+heroku buildpacks:add https://github.com/heroku/heroku-buildpack-google-chrome --index 1 --app backend-guardian-care-pro
 
 # Add Node.js buildpack (if not already present)
-heroku buildpacks:add heroku/nodejs --index 2 --app your-app-name
+heroku buildpacks:add heroku/nodejs --index 2 --app backend-guardian-care-pro
 
 # Verify buildpacks are set correctly
-heroku buildpacks --app your-app-name
+heroku buildpacks --app backend-guardian-care-pro
 ```
 
 Expected output:
 ```
-=== your-app-name Buildpack URLs
+=== backend-guardian-care-pro Buildpack URLs
 1. https://github.com/heroku/heroku-buildpack-google-chrome
 2. heroku/nodejs
 ```
@@ -41,13 +41,13 @@ Expected output:
 
 ```bash
 # Set NODE_ENV to production
-heroku config:set NODE_ENV=production --app your-app-name
+heroku config:set NODE_ENV=production --app backend-guardian-care-pro
 
 # Skip Puppeteer's Chromium download (we use Chrome from buildpack)
-heroku config:set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true --app your-app-name
+heroku config:set PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true --app backend-guardian-care-pro
 
 # Verify config
-heroku config --app your-app-name
+heroku config --app backend-guardian-care-pro
 ```
 
 ### 3. Deploy the Updated Code
@@ -68,10 +68,10 @@ git push heroku main
 After deployment, test the invoice download:
 ```bash
 # Check if the app is running
-heroku ps --app your-app-name
+heroku ps --app backend-guardian-care-pro
 
 # View logs to see if there are any errors
-heroku logs --tail --app your-app-name
+heroku logs --tail --app backend-guardian-care-pro
 ```
 
 Then try downloading an invoice again:
