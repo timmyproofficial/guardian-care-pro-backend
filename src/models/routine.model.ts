@@ -6,7 +6,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
 import { 
   RoutineStatus, 
-  RoutineTaskType, 
   RoutineTask 
 } from '../types/routine.types';
 import { generateRoutineId } from '../utils/generators';
@@ -25,7 +24,6 @@ export interface IRoutine extends Document {
   
   // Routine configuration
   serviceTypeId?: mongoose.Types.ObjectId;   // Optional: link to service type
-  estimatedDuration: number;                 // Total estimated minutes
   status: RoutineStatus;                     // Current status of the routine
   
   // Tasks within the routine
@@ -60,25 +58,6 @@ const routineTaskSchema = new Schema<RoutineTask>(
       type: String,
       trim: true,
       maxlength: 500
-    },
-    taskType: {
-      type: String,
-      enum: Object.values(RoutineTaskType),
-      required: true
-    },
-    isRequired: {
-      type: Boolean,
-      default: true
-    },
-    estimatedMinutes: {
-      type: Number,
-      min: 0,
-      max: 240 // Max 4 hours for a single task
-    },
-    order: {
-      type: Number,
-      required: true,
-      min: 0
     }
   },
   {
@@ -122,12 +101,7 @@ const routineSchema = new Schema<IRoutine>(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'ServiceType'
     },
-    estimatedDuration: {
-      type: Number,
-      required: true,
-      min: 1,
-      max: 480 // Max 8 hours
-    },
+
     status: {
       type: String,
       enum: Object.values(RoutineStatus),
@@ -180,47 +154,15 @@ routineSchema.virtual('taskCount').get(function() {
   return this.tasks.length;
 });
 
-/**
- * Virtual for required task count
- */
-routineSchema.virtual('requiredTaskCount').get(function() {
-  return this.tasks.filter(task => task.isRequired).length;
-});
 
-/**
- * Pre-save middleware to validate and set task orders
- */
-routineSchema.pre('save', function(next) {
-  // Ensure task orders are sequential starting from 0
-  if (this.tasks && this.tasks.length > 0) {
-    this.tasks.forEach((task, index) => {
-      task.order = index;
-    });
-    
-    // Sort tasks by order to maintain consistency
-    this.tasks.sort((a, b) => a.order - b.order);
-  }
-  
-  // Calculate estimated duration based on tasks if not provided
-  if (this.tasks && this.tasks.length > 0) {
-    const totalEstimatedTime = this.tasks.reduce((total, task) => {
-      return total + (task.estimatedMinutes || 0);
-    }, 0);
-    
-    // Update estimated duration if it seems incorrect
-    if (totalEstimatedTime > 0 && Math.abs(this.estimatedDuration - totalEstimatedTime) > this.estimatedDuration * 0.5) {
-      this.estimatedDuration = totalEstimatedTime;
-    }
-  }
-  
-  next();
-});
+
+
 
 /**
  * Instance method to get active tasks
  */
 routineSchema.methods.getActiveTasks = function() {
-  return this.tasks.filter((task: RoutineTask) => task.isRequired || true);
+  return this.tasks;
 };
 
 /**

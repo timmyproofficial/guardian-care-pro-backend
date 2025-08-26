@@ -4,18 +4,14 @@
  */
 
 import Joi from 'joi';
-import { RoutineStatus, RoutineTaskType, TaskCompletionStatus, RoutineCompletionStatus } from '../types/routine.types';
+import { RoutineStatus, TaskCompletionStatus, RoutineCompletionStatus } from '../types/routine.types';
 
 /**
  * Task validation schema
  */
 const taskSchema = Joi.object({
   title: Joi.string().required().max(200).trim(),
-  description: Joi.string().optional().max(500).trim(),
-  taskType: Joi.string().valid(...Object.values(RoutineTaskType)).required(),
-  isRequired: Joi.boolean().default(true),
-  estimatedMinutes: Joi.number().integer().min(0).max(240).optional(),
-  order: Joi.number().integer().min(0).required()
+  description: Joi.string().optional().max(500).trim()
 });
 
 /**
@@ -39,7 +35,6 @@ export const routineValidation = {
     name: Joi.string().required().max(100).trim(),
     description: Joi.string().optional().max(500).trim(),
     serviceTypeId: Joi.string().optional(),
-    estimatedDuration: Joi.number().integer().min(1).max(480).required(),
     tasks: Joi.array().items(taskSchema).min(1).max(50).required()
   }),
 
@@ -62,7 +57,6 @@ export const routineValidation = {
     name: Joi.string().optional().max(100).trim(),
     description: Joi.string().optional().max(500).trim(),
     serviceTypeId: Joi.string().optional(),
-    estimatedDuration: Joi.number().integer().min(1).max(480).optional(),
     status: Joi.string().valid(...Object.values(RoutineStatus)).optional(),
     tasks: Joi.array().items(taskSchema).min(1).max(50).optional()
   }),
