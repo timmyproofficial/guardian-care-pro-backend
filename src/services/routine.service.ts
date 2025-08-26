@@ -233,14 +233,9 @@ const duplicateRoutine = async (
       name: newName || `${originalRoutine.name} (Copy)`,
       description: originalRoutine.description,
       serviceTypeId: originalRoutine.serviceTypeId?.toString(),
-      estimatedDuration: originalRoutine.estimatedDuration,
       tasks: originalRoutine.tasks.map(task => ({
         title: task.title,
-        description: task.description,
-        taskType: task.taskType,
-        isRequired: task.isRequired,
-        estimatedMinutes: task.estimatedMinutes,
-        order: task.order
+        description: task.description
       }))
     };
 

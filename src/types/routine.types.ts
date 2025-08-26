@@ -15,17 +15,7 @@ export enum RoutineStatus {
   DRAFT = 'draft'
 }
 
-/**
- * Routine task type enumeration
- * Defines different types of tasks within a routine
- */
-export enum RoutineTaskType {
-  CHECKLIST = 'checklist',        // Simple yes/no completion
-  TEXT_INPUT = 'textInput',       // Requires text note
-  NUMBER_INPUT = 'numberInput',   // Numeric value (e.g., medication count)
-  TIME_TRACKING = 'timeTracking', // Track time spent on task
-  PHOTO_REQUIRED = 'photoRequired' // Requires photo documentation
-}
+
 
 /**
  * Routine completion status enumeration
@@ -57,10 +47,6 @@ export interface RoutineTask {
   _id: mongoose.Types.ObjectId;
   title: string;
   description?: string;
-  taskType: RoutineTaskType;
-  isRequired: boolean;
-  estimatedMinutes?: number;
-  order: number; // For task ordering
 }
 
 /**
@@ -85,7 +71,6 @@ export interface RoutineInput {
   name: string;
   description?: string;
   serviceTypeId?: string;
-  estimatedDuration: number;
   tasks: Omit<RoutineTask, '_id'>[];
 }
 
@@ -97,7 +82,6 @@ export interface RoutineUpdateInput {
   name?: string;
   description?: string;
   serviceTypeId?: string;
-  estimatedDuration?: number;
   status?: RoutineStatus;
   tasks?: Omit<RoutineTask, '_id'>[];
 }

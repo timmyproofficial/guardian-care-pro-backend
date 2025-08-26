@@ -662,6 +662,9 @@ export const shiftService = {
           {
             path: 'serviceTypeId',
             select: 'name code status'
+          },
+          {
+            path: 'routineId'
           }
         ]);
       
@@ -702,6 +705,9 @@ export const shiftService = {
           {
             path: 'serviceTypeId',
             select: 'name code status'
+          },
+          {
+            path: 'routineId'
           }
         ]);
       
@@ -770,6 +776,9 @@ export const shiftService = {
           {
             path: 'serviceTypeId',
             select: 'name code status'
+          },
+          {
+            path: 'routineId'
           }
         ]);
       
@@ -836,6 +845,9 @@ export const shiftService = {
           {
             path: 'serviceTypeId',
             select: 'name code status'
+          },
+          {
+            path: 'routineId'
           }
         ]);
       
@@ -1520,7 +1532,7 @@ export const shiftService = {
       }
 
       const shift = await Shift.findOne(query)
-        .populate('routineId', 'routineId name description estimatedDuration tasks status')
+        .populate('routineId')
         .populate('participantId', 'firstName lastName')
         .populate('workerId', 'firstName lastName')
         .populate('serviceTypeId', 'name code');
