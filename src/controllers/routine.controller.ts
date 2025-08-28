@@ -9,6 +9,7 @@ import { routineService } from '../services/routine.service';
 import { routineCompletionService } from '../services/routineCompletion.service';
 import { shiftService } from '../services/shift.service';
 import { organizationService } from '../services/organization.service';
+import { dailyRoutineAnalyticsService } from '../services/daily-routine-analytics.service';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { UserRole } from '../types/user.types';
 import { 
@@ -590,6 +591,219 @@ export const routineController = {
       );
     } catch (error) {
       logger.error('Error getting worker completions:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Get daily completion statistics for a participant
+   * @route GET /api/routines/daily-stats/:participantId
+   */
+  getDailyStats: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      const { participantId } = req.params;
+      const { date } = req.query;
+
+      // Parse date or use today
+      const targetDate = date ? new Date(date as string) : new Date();
+
+      // Participants can only see their own stats, workers/admins can see any participant's stats
+      if (req.user.role === UserRole.PARTICIPANT && req.user._id.toString() !== participantId) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Participants can only view their own statistics', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const stats = await dailyRoutineAnalyticsService.getDailyCompletionStats(
+        participantId,
+        targetDate
+      );
+
+      return res.status(httpStatus.OK).json(
+        successResponse(stats, 'Daily completion statistics retrieved successfully')
+      );
+    } catch (error) {
+      logger.error('Error getting daily completion stats:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Get detailed daily routine completions for a participant
+   * @route GET /api/routines/daily-details/:participantId
+   */
+  getDailyDetails: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      const { participantId } = req.params;
+      const { date } = req.query;
+
+      // Parse date or use today
+      const targetDate = date ? new Date(date as string) : new Date();
+
+      // Participants can only see their own details, workers/admins can see any participant's details
+      if (req.user.role === UserRole.PARTICIPANT && req.user._id.toString() !== participantId) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Participants can only view their own routine details', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const details = await dailyRoutineAnalyticsService.getDailyRoutineDetails(
+        participantId,
+        targetDate
+      );
+
+      return res.status(httpStatus.OK).json(
+        successResponse(details, 'Daily routine details retrieved successfully')
+      );
+    } catch (error) {
+      logger.error('Error getting daily routine details:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Get weekly completion trend for a participant
+   * @route GET /api/routines/weekly-trend/:participantId
+   */
+  getWeeklyTrend: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      const { participantId } = req.params;
+      const { weekStartDate } = req.query;
+
+      // Parse week start date or use current week start (Monday)
+      let startDate: Date;
+      if (weekStartDate) {
+        startDate = new Date(weekStartDate as string);
+      } else {
+        const today = new Date();
+        const dayOfWeek = today.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        startDate = new Date(today);
+        startDate.setDate(today.getDate() + mondayOffset);
+        startDate.setHours(0, 0, 0, 0);
+      }
+
+      // Participants can only see their own trends, workers/admins can see any participant's trends
+      if (req.user.role === UserRole.PARTICIPANT && req.user._id.toString() !== participantId) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Participants can only view their own weekly trends', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const trend = await dailyRoutineAnalyticsService.getWeeklyCompletionTrend(
+        participantId,
+        startDate
+      );
+
+      return res.status(httpStatus.OK).json(
+        successResponse(trend, 'Weekly completion trend retrieved successfully')
+      );
+    } catch (error) {
+      logger.error('Error getting weekly completion trend:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Get organization daily statistics (admin only)
+   * @route GET /api/routines/organization-daily-stats
+   */
+  getOrganizationDailyStats: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Only admins can view organization stats
+      if (req.user.role !== UserRole.ADMIN) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only administrators can view organization statistics', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const { date } = req.query;
+      
+      // Parse date or use today
+      const targetDate = date ? new Date(date as string) : new Date();
+
+      // Get organization ID
+      const organizationId = req.query.organizationId as string;
+
+      if (!organizationId) {
+        return res.status(httpStatus.BAD_REQUEST).json(
+          errorResponse('Organization ID is required', httpStatus.BAD_REQUEST)
+        );
+      }
+
+      const stats = await dailyRoutineAnalyticsService.getOrganizationDailyStats(
+        organizationId,
+        targetDate
+      );
+
+      return res.status(httpStatus.OK).json(
+        successResponse(stats, 'Organization daily statistics retrieved successfully')
+      );
+    } catch (error) {
+      logger.error('Error getting organization daily stats:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Get overdue routines for organization (admin only)
+   * @route GET /api/routines/overdue
+   */
+  getOverdueRoutines: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Only admins can view overdue routines
+      if (req.user.role !== UserRole.ADMIN) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only administrators can view overdue routines', httpStatus.FORBIDDEN)
+        );
+      }
+
+      // Get organization ID
+      const organizationId = req.query.organizationId as string;
+
+      if (!organizationId) {
+        return res.status(httpStatus.BAD_REQUEST).json(
+          errorResponse('Organization ID is required', httpStatus.BAD_REQUEST)
+        );
+      }
+
+      const overdueRoutines = await dailyRoutineAnalyticsService.getOverdueRoutines(organizationId);
+
+      return res.status(httpStatus.OK).json(
+        successResponse(overdueRoutines, 'Overdue routines retrieved successfully')
+      );
+    } catch (error) {
+      logger.error('Error getting overdue routines:', error);
       return next(error);
     }
   }

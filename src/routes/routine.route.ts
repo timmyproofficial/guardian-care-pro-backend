@@ -199,4 +199,72 @@ router.get(
   routineController.getWorkerCompletions
 );
 
+/**
+ * @route GET /api/routines/daily-stats/:participantId
+ * @desc Get daily completion statistics for a participant
+ * @access Private (Participants can only view their own, workers/admins can view any)
+ * @query {string} [date] - Date in ISO format (defaults to today)
+ */
+router.get(
+  '/daily-stats/:participantId',
+  authenticate,
+  validate(routineValidation.getDailyStats, 'query'),
+  routineController.getDailyStats
+);
+
+/**
+ * @route GET /api/routines/daily-details/:participantId
+ * @desc Get detailed daily routine completions for a participant
+ * @access Private (Participants can only view their own, workers/admins can view any)
+ * @query {string} [date] - Date in ISO format (defaults to today)
+ */
+router.get(
+  '/daily-details/:participantId',
+  authenticate,
+  validate(routineValidation.getDailyDetails, 'query'),
+  routineController.getDailyDetails
+);
+
+/**
+ * @route GET /api/routines/weekly-trend/:participantId
+ * @desc Get weekly completion trend for a participant
+ * @access Private (Participants can only view their own, workers/admins can view any)
+ * @query {string} [weekStartDate] - Week start date in ISO format (defaults to current week Monday)
+ */
+router.get(
+  '/weekly-trend/:participantId',
+  authenticate,
+  validate(routineValidation.getWeeklyTrend, 'query'),
+  routineController.getWeeklyTrend
+);
+
+/**
+ * @route GET /api/routines/organization-daily-stats
+ * @desc Get organization daily statistics (admin only)
+ * @access Private (Admin and Organization Admin only)
+ * @query {string} [date] - Date in ISO format (defaults to today)
+ * @query {string} [organizationId] - Organization ID (required for admin, auto for org admin)
+ */
+router.get(
+  '/organization-daily-stats',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  validate(routineValidation.getOrganizationDailyStats, 'query'),
+  routineController.getOrganizationDailyStats
+);
+
+/**
+ * @route GET /api/routines/overdue
+ * @desc Get overdue routines for organization (admin only)
+ * @access Private (Admin and Organization Admin only)
+ * @query {string} [organizationId] - Organization ID (required for admin, auto for org admin)
+ */
+router.get(
+  '/overdue',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  validate(routineValidation.getOverdueRoutines, 'query'),
+  routineController.getOverdueRoutines
+);
+
 export default router;
