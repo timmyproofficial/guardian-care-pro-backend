@@ -206,6 +206,22 @@ routineCompletionSchema.index({
   name: 'idx_routine_status' 
 });
 
+// Index for daily routine completion tracking
+routineCompletionSchema.index({ 
+  participantId: 1, 
+  completedAt: 1 
+}, { 
+  name: 'idx_participant_daily_completion' 
+});
+
+// Index for daily routine assignment tracking
+routineCompletionSchema.index({ 
+  participantId: 1, 
+  createdAt: 1 
+}, { 
+  name: 'idx_participant_daily_assignment' 
+});
+
 /**
  * Virtual for completed task count
  */
@@ -385,6 +401,85 @@ routineCompletionSchema.statics.findByWorker = function(
   }
   
   return this.find(query).sort({ completedAt: -1, createdAt: -1 });
+};
+
+/**
+ * Static method to get daily completion statistics for a participant
+ */
+routineCompletionSchema.statics.getDailyCompletionStats = function(
+  participantId: string,
+  date: Date
+) {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  return this.aggregate([
+    {
+      $match: {
+        participantId: new mongoose.Types.ObjectId(participantId),
+        createdAt: { $gte: startOfDay, $lte: endOfDay }
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalAssigned: { $sum: 1 },
+        completed: {
+          $sum: {
+            $cond: [{ $eq: ['$status', RoutineCompletionStatus.COMPLETED] }, 1, 0]
+          }
+        },
+        inProgress: {
+          $sum: {
+            $cond: [{ $eq: ['$status', RoutineCompletionStatus.IN_PROGRESS] }, 1, 0]
+          }
+        },
+        partiallyCompleted: {
+          $sum: {
+            $cond: [{ $eq: ['$status', RoutineCompletionStatus.PARTIALLY_COMPLETED] }, 1, 0]
+          }
+        },
+        notStarted: {
+          $sum: {
+            $cond: [{ $eq: ['$status', RoutineCompletionStatus.NOT_STARTED] }, 1, 0]
+          }
+        },
+        skipped: {
+          $sum: {
+            $cond: [{ $eq: ['$status', RoutineCompletionStatus.SKIPPED] }, 1, 0]
+          }
+        },
+        averageCompletionPercentage: { $avg: '$completionPercentage' },
+        totalTimeSpent: { $sum: '$totalTimeSpentMinutes' }
+      }
+    }
+  ]);
+};
+
+/**
+ * Static method to get detailed daily routine completions
+ */
+routineCompletionSchema.statics.getDailyRoutineCompletions = function(
+  participantId: string,
+  date: Date
+) {
+  const startOfDay = new Date(date);
+  startOfDay.setHours(0, 0, 0, 0);
+  
+  const endOfDay = new Date(date);
+  endOfDay.setHours(23, 59, 59, 999);
+  
+  return this.find({
+    participantId: new mongoose.Types.ObjectId(participantId),
+    createdAt: { $gte: startOfDay, $lte: endOfDay }
+  })
+  .populate('routineId', 'routineId name description')
+  .populate('shiftId', 'shiftId startTime endTime')
+  .populate('workerId', 'firstName lastName')
+  .sort({ createdAt: 1 });
 };
 
 /**

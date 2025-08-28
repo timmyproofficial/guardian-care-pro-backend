@@ -117,4 +117,40 @@ export const routineValidation = {
     endDate: Joi.date().iso().min(Joi.ref('startDate')).optional()
   }),
 
+  /**
+   * Get daily completion stats validation (for query params)
+   */
+  getDailyStats: Joi.object({
+    date: Joi.date().iso().optional()
+  }),
+
+  /**
+   * Get daily routine details validation (for query params)
+   */
+  getDailyDetails: Joi.object({
+    date: Joi.date().iso().optional()
+  }),
+
+  /**
+   * Get weekly completion trend validation (for query params)
+   */
+  getWeeklyTrend: Joi.object({
+    weekStartDate: Joi.date().iso().optional()
+  }),
+
+  /**
+   * Get organization daily stats validation (for query params)
+   */
+  getOrganizationDailyStats: Joi.object({
+    date: Joi.date().iso().optional(),
+    organizationId: Joi.string().optional()
+  }),
+
+  /**
+   * Get overdue routines validation (for query params)
+   */
+  getOverdueRoutines: Joi.object({
+    organizationId: Joi.string().optional()
+  }),
+
 };
