@@ -461,7 +461,7 @@ export const shiftValidation = {
       .required(),
     requiresSupervision: Joi.boolean().default(false),
     specialInstructions: Joi.string().optional(),
-    routineId: objectId.optional(),
+    routineId: Joi.string().pattern(/^RTN-[A-Z0-9]{10}$/).optional(),
     routineRequired: Joi.boolean().default(false),
     recurrence: Joi.object({
       pattern: Joi.string()
@@ -491,7 +491,7 @@ export const shiftValidation = {
     address: Joi.string().optional(),
     requiresSupervision: Joi.boolean().optional(),
     specialInstructions: Joi.string().optional(),
-    routineId: objectId.allow(null).optional(),
+    routineId: Joi.string().pattern(/^RTN-[A-Z0-9]{10}$/).allow(null).optional(),
     routineRequired: Joi.boolean().optional(),
     status: Joi.string()
       .valid(...Object.values(ShiftStatus))
