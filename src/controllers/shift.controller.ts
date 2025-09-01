@@ -140,6 +140,8 @@ export const shiftController = {
         shiftType,
         requiresSupervision,
         specialInstructions,
+        routineId,
+        routineRequired,
         recurrence
       } = req.body;
       
@@ -157,6 +159,8 @@ export const shiftController = {
         shiftType,
         requiresSupervision,
         specialInstructions,
+        routineId,
+        routineRequired,
         recurrence
       });
       
