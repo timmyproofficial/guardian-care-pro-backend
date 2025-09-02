@@ -103,4 +103,6 @@ export interface RoutineCompletionFilter {
   organizationId?: string;
   startDate?: Date;
   endDate?: Date;
+  limit?: number;
+  offset?: number;
 }
