@@ -6,6 +6,7 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import RoutineCompletion from '../models/routineCompletion.model';
+import Shift from '../models/shift.model';
 import User from '../models/user.model';
 import { RoutineCompletionStatus } from '../types/routine.types';
 import { UserRole } from '../types/user.types';
@@ -57,7 +58,7 @@ export interface WeeklyCompletionTrend {
 }
 
 /**
- * Get daily completion statistics for a participant
+ * Get daily completion statistics for a participant (FIXED LOGIC)
  */
 const getDailyCompletionStats = async (
   participantId: string,
@@ -74,41 +75,76 @@ const getDailyCompletionStats = async (
       throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
     }
 
-    // Get statistics from the model
-    const statsResult = await (RoutineCompletion as any).getDailyCompletionStats(
-      participantId,
-      date
-    );
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
 
-    const stats = statsResult[0] || {
-      totalAssigned: 0,
-      completed: 0,
-      notStarted: 0
-    };
+    // 1. Count TOTAL ASSIGNED: All shifts for that day with routines assigned
+    const totalAssignedCount = await Shift.countDocuments({
+      participantId: new mongoose.Types.ObjectId(participantId),
+      startTime: { $gte: startOfDay, $lte: endOfDay },
+      routineId: { $exists: true, $ne: null },
+      routineRequired: true
+    });
 
-    const completionRate = stats.totalAssigned > 0 
-      ? Math.round((stats.completed / stats.totalAssigned) * 100) 
+    // 2. Count COMPLETED: RoutineCompletion records with COMPLETED status for shifts on that day
+    const completedRoutines = await RoutineCompletion.aggregate([
+      {
+        $lookup: {
+          from: 'shifts',
+          localField: 'shiftId',
+          foreignField: '_id',
+          as: 'shift'
+        }
+      },
+      {
+        $unwind: '$shift'
+      },
+      {
+        $match: {
+          participantId: new mongoose.Types.ObjectId(participantId),
+          'shift.startTime': { $gte: startOfDay, $lte: endOfDay },
+          status: RoutineCompletionStatus.COMPLETED
+        }
+      },
+      {
+        $count: 'completed'
+      }
+    ]);
+
+    const completedCount = completedRoutines[0]?.completed || 0;
+
+    // 3. Calculate NOT STARTED: totalAssigned - completed
+    const notStartedCount = totalAssignedCount - completedCount;
+
+    const completionRate = totalAssignedCount > 0 
+      ? Math.round((completedCount / totalAssignedCount) * 100) 
       : 0;
 
     const result: DailyCompletionStats = {
       date: date.toISOString().split('T')[0],
       participantId,
-      totalAssigned: stats.totalAssigned,
-      completed: stats.completed,
-      notStarted: stats.notStarted,
+      totalAssigned: totalAssignedCount,
+      completed: completedCount,
+      notStarted: notStartedCount,
       completionRate
     };
 
-    logger.info('Daily completion stats retrieved', { 
+    logger.info('Daily completion stats retrieved (FIXED)', { 
       participantId, 
       date: date.toISOString().split('T')[0],
+      totalAssigned: totalAssignedCount,
+      completed: completedCount,
+      notStarted: notStartedCount,
       completionRate: result.completionRate
     });
 
     return result;
   } catch (error) {
     logger.error(`Error getting daily completion stats for participant ${participantId}:`, error);
-    throw error;
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to get daily completion statistics');
   }
 };
 
