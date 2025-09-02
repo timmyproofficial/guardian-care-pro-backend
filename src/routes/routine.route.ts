@@ -116,17 +116,7 @@ router.put(
   routineController.updateShiftRoutine
 );
 
-/**
- * @route POST /api/shifts/:shiftId/routine/start
- * @desc Initialize routine completion for shift
- * @access Private (Workers only)
- */
-router.post(
-  '/shifts/:shiftId/routine/start',
-  authenticate,
-  authorize([UserRole.SUPPORT_WORKER]),
-  routineController.initializeRoutineCompletion
-);
+
 
 /**
  * @route GET /api/shifts/:shiftId/routine-completion
@@ -139,31 +129,7 @@ router.get(
   routineController.getRoutineCompletionByShift
 );
 
-/**
- * @route PUT /api/routine-completions/:completionId
- * @desc Update task completions
- * @access Private (Workers only)
- */
-router.put(
-  '/routine-completions/:completionId',
-  authenticate,
-  authorize([UserRole.SUPPORT_WORKER]),
-  validate(routineValidation.updateTaskCompletions),
-  routineController.updateTaskCompletions
-);
 
-/**
- * @route POST /api/routine-completions/:completionId/complete
- * @desc Mark routine as completed
- * @access Private (Workers only)
- */
-router.post(
-  '/routine-completions/:completionId/complete',
-  authenticate,
-  authorize([UserRole.SUPPORT_WORKER]),
-  validate(routineValidation.completeRoutine),
-  routineController.completeRoutine
-);
 
 /**
  * @route GET /api/participants/:participantId/routine-completions
@@ -265,6 +231,18 @@ router.get(
   authorize([UserRole.ADMIN]),
   validate(routineValidation.getOverdueRoutines, 'query'),
   routineController.getOverdueRoutines
+);
+
+/**
+ * @route PATCH /api/shifts/:shiftId/routine/complete
+ * @desc Complete routine for a shift (ultra-simplified)
+ * @access Private (Workers only)
+ */
+router.patch(
+  '/shifts/:shiftId/routine/complete',
+  authenticate,
+  authorize([UserRole.SUPPORT_WORKER]),
+  routineController.completeShiftRoutine
 );
 
 export default router;

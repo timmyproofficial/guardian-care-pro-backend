@@ -13,24 +13,19 @@ import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 
 /**
- * Interface for daily completion statistics
+ * Interface for daily completion statistics (simplified)
  */
 export interface DailyCompletionStats {
   date: string;
   participantId: string;
   totalAssigned: number;
   completed: number;
-  inProgress: number;
-  partiallyCompleted: number;
   notStarted: number;
-  skipped: number;
   completionRate: number; // percentage
-  averageCompletionPercentage: number;
-  totalTimeSpent: number; // minutes
 }
 
 /**
- * Interface for detailed daily routine status
+ * Interface for detailed daily routine status (simplified)
  */
 export interface DailyRoutineDetail {
   routineCompletionId: string;
@@ -42,9 +37,7 @@ export interface DailyRoutineDetail {
   workerName?: string;
   status: RoutineCompletionStatus;
   completionPercentage: number;
-  startedAt?: Date;
   completedAt?: Date;
-  timeSpent?: number;
   isOverdue?: boolean;
 }
 
@@ -60,7 +53,6 @@ export interface WeeklyCompletionTrend {
     totalAssigned: number;
     totalCompleted: number;
     averageCompletionRate: number;
-    totalTimeSpent: number;
   };
 }
 
@@ -91,12 +83,7 @@ const getDailyCompletionStats = async (
     const stats = statsResult[0] || {
       totalAssigned: 0,
       completed: 0,
-      inProgress: 0,
-      partiallyCompleted: 0,
-      notStarted: 0,
-      skipped: 0,
-      averageCompletionPercentage: 0,
-      totalTimeSpent: 0
+      notStarted: 0
     };
 
     const completionRate = stats.totalAssigned > 0 
@@ -108,13 +95,8 @@ const getDailyCompletionStats = async (
       participantId,
       totalAssigned: stats.totalAssigned,
       completed: stats.completed,
-      inProgress: stats.inProgress,
-      partiallyCompleted: stats.partiallyCompleted,
       notStarted: stats.notStarted,
-      skipped: stats.skipped,
-      completionRate,
-      averageCompletionPercentage: Math.round(stats.averageCompletionPercentage || 0),
-      totalTimeSpent: stats.totalTimeSpent || 0
+      completionRate
     };
 
     logger.info('Daily completion stats retrieved', { 
@@ -152,23 +134,21 @@ const getDailyRoutineDetails = async (
                         completion.shiftId.endTime < now && 
                         completion.status !== RoutineCompletionStatus.COMPLETED;
 
-      return {
-        routineCompletionId: completion._id.toString(),
-        routineId: completion.routineId?.routineId || completion.routineId?._id?.toString() || '',
-        routineName: completion.routineId?.name || 'Unknown Routine',
-        shiftId: completion.shiftId?.shiftId || completion.shiftId?._id?.toString() || '',
-        shiftStartTime: completion.shiftId?.startTime || completion.createdAt,
-        workerId: completion.workerId?._id?.toString(),
-        workerName: completion.workerId ? 
-          `${completion.workerId.firstName} ${completion.workerId.lastName}` : 
-          undefined,
-        status: completion.status,
-        completionPercentage: completion.completionPercentage,
-        startedAt: completion.startedAt,
-        completedAt: completion.completedAt,
-        timeSpent: completion.totalTimeSpentMinutes,
-        isOverdue: Boolean(isOverdue)
-      };
+              return {
+          routineCompletionId: completion._id.toString(),
+          routineId: completion.routineId?.routineId || completion.routineId?._id?.toString() || '',
+          routineName: completion.routineId?.name || 'Unknown Routine',
+          shiftId: completion.shiftId?.shiftId || completion.shiftId?._id?.toString() || '',
+          shiftStartTime: completion.shiftId?.startTime || completion.createdAt,
+          workerId: completion.workerId?._id?.toString(),
+          workerName: completion.workerId ? 
+            `${completion.workerId.firstName} ${completion.workerId.lastName}` : 
+            undefined,
+          status: completion.status,
+          completionPercentage: completion.completionPercentage,
+          completedAt: completion.completedAt,
+          isOverdue: Boolean(isOverdue)
+        };
     });
 
     return details;
@@ -206,8 +186,7 @@ const getWeeklyCompletionTrend = async (
       totalCompleted: dailyStats.reduce((sum, day) => sum + day.completed, 0),
       averageCompletionRate: Math.round(
         dailyStats.reduce((sum, day) => sum + day.completionRate, 0) / 7
-      ),
-      totalTimeSpent: dailyStats.reduce((sum, day) => sum + day.totalTimeSpent, 0)
+      )
     };
 
     const result: WeeklyCompletionTrend = {
@@ -279,7 +258,7 @@ const getOverdueRoutines = async (organizationId: string): Promise<DailyRoutineD
     const overdueCompletions = await RoutineCompletion.find({
       organizationId: new mongoose.Types.ObjectId(organizationId),
       status: { 
-        $nin: [RoutineCompletionStatus.COMPLETED, RoutineCompletionStatus.SKIPPED] 
+        $ne: RoutineCompletionStatus.COMPLETED
       }
     })
     .populate('routineId', 'routineId name')
@@ -306,9 +285,7 @@ const getOverdueRoutines = async (organizationId: string): Promise<DailyRoutineD
             'Unassigned',
           status: completion.status,
           completionPercentage: completion.completionPercentage,
-          startedAt: completion.startedAt,
           completedAt: completion.completedAt,
-          timeSpent: completion.totalTimeSpentMinutes,
           isOverdue: true
         });
       }

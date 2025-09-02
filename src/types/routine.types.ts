@@ -19,24 +19,11 @@ export enum RoutineStatus {
 
 /**
  * Routine completion status enumeration
- * Tracks overall completion status of a routine
+ * Simplified to track only basic completion states
  */
 export enum RoutineCompletionStatus {
   NOT_STARTED = 'notStarted',
-  IN_PROGRESS = 'inProgress',
-  COMPLETED = 'completed',
-  PARTIALLY_COMPLETED = 'partiallyCompleted',
-  SKIPPED = 'skipped'
-}
-
-/**
- * Task completion status enumeration
- * Tracks completion status of individual tasks
- */
-export enum TaskCompletionStatus {
-  COMPLETED = 'completed',
-  SKIPPED = 'skipped',
-  NOT_STARTED = 'notStarted'
+  COMPLETED = 'completed'
 }
 
 /**
@@ -49,19 +36,7 @@ export interface RoutineTask {
   description?: string;
 }
 
-/**
- * Task completion interface
- * Tracks completion data for individual tasks
- */
-export interface TaskCompletion {
-  taskId: mongoose.Types.ObjectId;
-  status: TaskCompletionStatus;
-  completedAt?: Date;
-  notes?: string;
-  numericValue?: number;
-  photoUrls?: string[];
-  timeSpentMinutes?: number;
-}
+
 
 /**
  * Routine input interface
@@ -97,24 +72,11 @@ export interface RoutineCompletionInput {
 }
 
 /**
- * Task completion update interface
- * Data for updating task completions
- */
-export interface TaskCompletionUpdateInput {
-  taskCompletions: TaskCompletion[];
-  overallNotes?: string;
-  issuesEncountered?: string;
-}
-
-/**
  * Complete routine input interface
- * Data for marking routine as completed
+ * Data for marking routine as completed (simplified)
  */
 export interface CompleteRoutineInput {
-  taskCompletions: TaskCompletion[];
   overallNotes?: string;
-  issuesEncountered?: string;
-  totalTimeSpentMinutes?: number;
 }
 
 /**

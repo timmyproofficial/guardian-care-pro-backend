@@ -10,12 +10,14 @@ import { routineCompletionService } from '../services/routineCompletion.service'
 import { shiftService } from '../services/shift.service';
 import { organizationService } from '../services/organization.service';
 import { dailyRoutineAnalyticsService } from '../services/daily-routine-analytics.service';
+import RoutineCompletion from '../models/routineCompletion.model';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { UserRole } from '../types/user.types';
 import { 
   RoutineStatus, 
   RoutineFilter, 
-  RoutineCompletionFilter 
+  RoutineCompletionFilter,
+  RoutineCompletionStatus
 } from '../types/routine.types';
 import { successResponse, errorResponse } from '../utils/api-response';
 import logger from '../utils/logger';
@@ -330,121 +332,9 @@ export const routineController = {
     }
   },
 
-  /**
-   * Initialize routine completion for shift
-   * @route POST /api/shifts/:shiftId/routine/start
-   */
-  initializeRoutineCompletion: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
-      }
 
-      // Only workers can initialize routine completions
-      if (req.user.role !== UserRole.SUPPORT_WORKER) {
-        return res.status(httpStatus.FORBIDDEN).json(
-          errorResponse('Only workers can initialize routine completions', httpStatus.FORBIDDEN)
-        );
-      }
 
-      const { shiftId } = req.params;
-      const workerId = req.user._id.toString();
 
-      const completion = await routineCompletionService.initializeRoutineCompletion(
-        shiftId,
-        workerId
-      );
-
-      if (!completion) {
-        return res.json(
-          successResponse({}, 'Shift has no routine attached')
-        );
-      }
-
-      return res.status(httpStatus.CREATED).json(
-        successResponse(completion, 'Routine completion initialized successfully')
-      );
-    } catch (error) {
-      logger.error('Error initializing routine completion:', error);
-      return next(error);
-    }
-  },
-
-  /**
-   * Update task completions
-   * @route PUT /api/routine-completions/:completionId
-   */
-  updateTaskCompletions: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
-      }
-
-      // Only workers can update task completions
-      if (req.user.role !== UserRole.SUPPORT_WORKER) {
-        return res.status(httpStatus.FORBIDDEN).json(
-          errorResponse('Only workers can update task completions', httpStatus.FORBIDDEN)
-        );
-      }
-
-      const { completionId } = req.params;
-      const workerId = req.user._id.toString();
-
-      const completion = await routineCompletionService.updateTaskCompletions(
-        completionId,
-        workerId,
-        req.body
-      );
-
-      return res.json(
-        successResponse(completion, 'Task completions updated successfully')
-      );
-    } catch (error) {
-      logger.error('Error updating task completions:', error);
-      return next(error);
-    }
-  },
-
-  /**
-   * Complete entire routine
-   * @route POST /api/routine-completions/:completionId/complete
-   */
-  completeRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
-      }
-
-      // Only workers can complete routines
-      if (req.user.role !== UserRole.SUPPORT_WORKER) {
-        return res.status(httpStatus.FORBIDDEN).json(
-          errorResponse('Only workers can complete routines', httpStatus.FORBIDDEN)
-        );
-      }
-
-      const { completionId } = req.params;
-      const workerId = req.user._id.toString();
-
-      const completion = await routineCompletionService.completeRoutine(
-        completionId,
-        workerId,
-        req.body
-      );
-
-      return res.json(
-        successResponse(completion, 'Routine completed successfully')
-      );
-    } catch (error) {
-      logger.error('Error completing routine:', error);
-      return next(error);
-    }
-  },
 
   /**
    * Get routine completion by shift
@@ -804,6 +694,98 @@ export const routineController = {
       );
     } catch (error) {
       logger.error('Error getting overdue routines:', error);
+      return next(error);
+    }
+  },
+
+  /**
+   * Complete routine for a shift (ultra-simplified)
+   * @route PATCH /api/shifts/:shiftId/routine/complete
+   */
+  completeShiftRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res.status(httpStatus.UNAUTHORIZED).json(
+          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
+        );
+      }
+
+      // Only workers can complete routines
+      if (req.user.role !== UserRole.SUPPORT_WORKER) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('Only workers can complete routines', httpStatus.FORBIDDEN)
+        );
+      }
+
+      const { shiftId } = req.params;
+      const workerId = req.user._id.toString();
+      const { notes } = req.body;
+
+      // Get the shift with routine
+      const shift = await shiftService.getShiftWithRoutine(shiftId, workerId);
+      
+      if (!shift) {
+        return res.status(httpStatus.NOT_FOUND).json(
+          errorResponse('Shift not found or access denied', httpStatus.NOT_FOUND)
+        );
+      }
+
+      if (!shift.routineId) {
+        return res.status(httpStatus.BAD_REQUEST).json(
+          errorResponse('This shift has no routine attached', httpStatus.BAD_REQUEST)
+        );
+      }
+
+      // Verify worker is assigned to this shift
+      if (shift.workerId?.toString() !== workerId) {
+        return res.status(httpStatus.FORBIDDEN).json(
+          errorResponse('You are not assigned to this shift', httpStatus.FORBIDDEN)
+        );
+      }
+
+      // Find or create routine completion record
+      let routineCompletion = await RoutineCompletion.findOne({ 
+        shiftId: shift._id 
+      });
+
+      if (!routineCompletion) {
+        // Create new completion record directly as COMPLETED
+        routineCompletion = await RoutineCompletion.create({
+          shiftId: shift._id,
+          routineId: shift.routineId,
+          workerId: shift.workerId,
+          participantId: shift.participantId,
+          organizationId: shift.organizationId,
+          status: RoutineCompletionStatus.COMPLETED,
+          completionPercentage: 100,
+          completedAt: new Date(),
+          overallNotes: notes || undefined
+        });
+      } else {
+        // Update existing record to completed
+        routineCompletion.status = RoutineCompletionStatus.COMPLETED;
+        routineCompletion.completionPercentage = 100;
+        routineCompletion.completedAt = new Date();
+        if (notes) routineCompletion.overallNotes = notes;
+        await routineCompletion.save();
+      }
+
+      logger.info('Routine completed', { 
+        shiftId: shift.shiftId, 
+        workerId,
+        routineId: shift.routineId
+      });
+
+      return res.json(
+        successResponse({ 
+          shiftId: shift.shiftId,
+          routineCompleted: true,
+          completedAt: routineCompletion.completedAt,
+          notes: routineCompletion.overallNotes 
+        }, 'Routine completed successfully')
+      );
+    } catch (error) {
+      logger.error('Error completing routine:', error);
       return next(error);
     }
   }
