@@ -4,7 +4,7 @@
  */
 
 import Joi from 'joi';
-import { RoutineStatus, TaskCompletionStatus, RoutineCompletionStatus } from '../types/routine.types';
+import { RoutineStatus, RoutineCompletionStatus } from '../types/routine.types';
 
 /**
  * Task validation schema
@@ -14,18 +14,7 @@ const taskSchema = Joi.object({
   description: Joi.string().optional().max(500).trim()
 });
 
-/**
- * Task completion validation schema
- */
-const taskCompletionSchema = Joi.object({
-  taskId: Joi.string().required(),
-  status: Joi.string().valid(...Object.values(TaskCompletionStatus)).required(),
-  completedAt: Joi.date().optional(),
-  notes: Joi.string().optional().max(500).trim(),
-  numericValue: Joi.number().min(0).optional(),
-  photoUrls: Joi.array().items(Joi.string().uri()).optional(),
-  timeSpentMinutes: Joi.number().integer().min(0).max(240).optional()
-});
+// Task completion validation removed - using simplified system
 
 export const routineValidation = {
   /**
@@ -76,23 +65,13 @@ export const routineValidation = {
     routineRequired: Joi.boolean().default(false)
   }),
 
-  /**
-   * Update task completions validation
-   */
-  updateTaskCompletions: Joi.object({
-    taskCompletions: Joi.array().items(taskCompletionSchema).min(1).required(),
-    overallNotes: Joi.string().optional().max(1000).trim(),
-    issuesEncountered: Joi.string().optional().max(1000).trim()
-  }),
+  // updateTaskCompletions removed - using simplified system
 
   /**
-   * Complete routine validation
+   * Complete routine validation (simplified)
    */
   completeRoutine: Joi.object({
-    taskCompletions: Joi.array().items(taskCompletionSchema).optional(),
-    overallNotes: Joi.string().optional().max(1000).trim(),
-    issuesEncountered: Joi.string().optional().max(1000).trim(),
-    totalTimeSpentMinutes: Joi.number().integer().min(0).max(480).optional()
+    overallNotes: Joi.string().optional().max(1000).trim()
   }),
 
   /**

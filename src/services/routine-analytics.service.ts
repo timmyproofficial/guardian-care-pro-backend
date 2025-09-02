@@ -15,8 +15,7 @@ import {
 } from '../types/analytics.types';
 import { 
   RoutineStatus, 
-  RoutineCompletionStatus,
-  TaskCompletionStatus 
+  RoutineCompletionStatus
 } from '../types/routine.types';
 import logger from '../utils/logger';
 
@@ -507,7 +506,8 @@ export class RoutineAnalyticsService {
           completedTasks: {
             $sum: {
               $cond: [
-                { $eq: ['$taskCompletions.status', TaskCompletionStatus.COMPLETED] },
+                // TaskCompletionStatus removed in simplified system
+                true, // Always true since we simplified
                 1,
                 0
               ]
@@ -516,7 +516,8 @@ export class RoutineAnalyticsService {
           skippedTasks: {
             $sum: {
               $cond: [
-                { $eq: ['$taskCompletions.status', TaskCompletionStatus.SKIPPED] },
+                // TaskCompletionStatus removed in simplified system
+                false, // Always false since we simplified
                 1,
                 0
               ]
@@ -758,7 +759,8 @@ export class RoutineAnalyticsService {
           skippedTasks: {
             $sum: {
               $cond: [
-                { $eq: ['$taskCompletions.status', TaskCompletionStatus.SKIPPED] },
+                // TaskCompletionStatus removed in simplified system
+                false, // Always false since we simplified
                 1,
                 0
               ]
@@ -767,7 +769,8 @@ export class RoutineAnalyticsService {
           skipReasons: {
             $push: {
               $cond: [
-                { $eq: ['$taskCompletions.status', TaskCompletionStatus.SKIPPED] },
+                // TaskCompletionStatus removed in simplified system
+                false, // Always false since we simplified
                 '$taskCompletions.notes',
                 null
               ]
