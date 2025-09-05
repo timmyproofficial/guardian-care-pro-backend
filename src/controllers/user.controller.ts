@@ -21,11 +21,11 @@ export const userController = {
       if (!req.user) {
         return res.status(httpStatus.UNAUTHORIZED).json({ message: 'Unauthorized: User not found on request' });
       }
-  
+
       const userId = req.user._id.toString();
       const userRole = req.user.role;
       let user;
-      
+
       // Get user data with appropriate population based on role
       switch (userRole) {
         case UserRole.SUPPORT_WORKER:
@@ -45,7 +45,7 @@ export const userController = {
         default:
           user = await userService.getUserById(userId);
       }
-      
+
       if (!user) {
         return res.status(httpStatus.NOT_FOUND).json({ message: 'User not found' });
       }
@@ -54,11 +54,9 @@ export const userController = {
       return res.json(successResponse({ user }, 'User profile retrieved successfully'));
     } catch (error) {
       next(error);
-      return; 
+      return;
     }
-  }
-  ,
-
+  },
   /**
    * Get user by ID
    * @route GET /api/users/:userId
@@ -67,11 +65,9 @@ export const userController = {
     try {
       const { userId } = req.params;
       const user = await userService.getUserById(userId);
-      
+
       if (!user) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('User not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('User not found', httpStatus.NOT_FOUND));
       }
       if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User retrieved successfully'));
@@ -89,11 +85,9 @@ export const userController = {
     try {
       const { email } = req.params;
       const user = await userService.getUserByEmail(email);
-      
+
       if (!user) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('User not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('User not found', httpStatus.NOT_FOUND));
       }
       if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User retrieved successfully'));
@@ -110,15 +104,15 @@ export const userController = {
   updateProfile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json({ 
-          message: 'Unauthorized: User not found on request' 
+        return res.status(httpStatus.UNAUTHORIZED).json({
+          message: 'Unauthorized: User not found on request',
         });
       }
-  
+
       const userId = req.user._id.toString();
       const userRole = req.user.role;
       let updatedUser;
-      
+
       // Route to the appropriate service method based on user role
       switch (userRole) {
         case UserRole.SUPPORT_WORKER:
@@ -137,14 +131,24 @@ export const userController = {
         default:
           updatedUser = await userService.updateUserById(userId, req.body);
       }
-      
-      return res.json(successResponse({ user: updatedUser && typeof updatedUser.profileImage === 'undefined' ? { ...updatedUser, profileImage: null } : updatedUser }, 'User profile updated successfully'));
+
+      return res.json(
+        successResponse(
+          {
+            user:
+              updatedUser && typeof updatedUser.profileImage === 'undefined'
+                ? { ...updatedUser, profileImage: null }
+                : updatedUser,
+          },
+          'User profile updated successfully',
+        ),
+      );
     } catch (error) {
       next(error);
       return;
     }
   },
-  
+
   /**
    * Update specific user by ID and role (admin function)
    * @route PATCH /api/users/:role/:userId
@@ -153,7 +157,7 @@ export const userController = {
     try {
       const { role, userId } = req.params;
       let updatedUser;
-      
+
       switch (role) {
         case UserRole.SUPPORT_WORKER:
           updatedUser = await userService.updateWorkerById(userId, req.body);
@@ -169,25 +173,29 @@ export const userController = {
           updatedUser = await userService.updateUserById(userId, req.body);
           break;
         default:
-          return res.status(httpStatus.BAD_REQUEST).json(
-            errorResponse('Invalid user role', httpStatus.BAD_REQUEST)
-          );
+          return res.status(httpStatus.BAD_REQUEST).json(errorResponse('Invalid user role', httpStatus.BAD_REQUEST));
       }
-      
+
       if (!updatedUser) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('User not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('User not found', httpStatus.NOT_FOUND));
       }
-      
-      return res.json(successResponse({ user: updatedUser && typeof updatedUser.profileImage === 'undefined' ? { ...updatedUser, profileImage: null } : updatedUser }, 'User updated successfully'));
+
+      return res.json(
+        successResponse(
+          {
+            user:
+              updatedUser && typeof updatedUser.profileImage === 'undefined'
+                ? { ...updatedUser, profileImage: null }
+                : updatedUser,
+          },
+          'User updated successfully',
+        ),
+      );
     } catch (error) {
       next(error);
       return;
     }
-  }
-  ,
-
+  },
   /**
    * Update user by ID (admin function)
    * @route PATCH /api/users/:userId
@@ -196,11 +204,9 @@ export const userController = {
     try {
       const { userId } = req.params;
       const user = await userService.updateUserById(userId, req.body);
-      
+
       if (!user) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('User not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('User not found', httpStatus.NOT_FOUND));
       }
       if (typeof user.profileImage === 'undefined') user.profileImage = null;
       return res.json(successResponse({ user }, 'User updated successfully'));
@@ -217,28 +223,26 @@ export const userController = {
   updateProfileImage: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
-  
+
       if (!req.file) {
-        return res.status(httpStatus.BAD_REQUEST).json(
-          errorResponse('No image file provided', httpStatus.BAD_REQUEST)
-        );
+        return res.status(httpStatus.BAD_REQUEST).json(errorResponse('No image file provided', httpStatus.BAD_REQUEST));
       }
-  
+
       const userId = req.user._id;
       const filePath = req.file.path;
-  
+
       // Update profile image
       const user = await userService.updateProfileImage(userId.toString(), filePath);
-  
+
       // Clean up temporary file if needed
       if (fs.existsSync(filePath)) {
         fs.unlinkSync(filePath);
       }
-  
+
       return res.json(successResponse({ user }, 'Profile image updated successfully'));
     } catch (error) {
       // Clean up temporary file in case of error
@@ -248,9 +252,7 @@ export const userController = {
       next(error);
       return;
     }
-  }
-  ,
-
+  },
   /**
    * Update user password
    * @route POST /api/users/change-password
@@ -258,28 +260,22 @@ export const userController = {
   changePassword: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
-  
+
       const userId = req.user._id;
       const { currentPassword, newPassword } = req.body;
-  
-      await userService.updatePassword(
-        userId.toString(),
-        currentPassword,
-        newPassword
-      );
-  
+
+      await userService.updatePassword(userId.toString(), currentPassword, newPassword);
+
       return res.json(successResponse({}, 'Password changed successfully'));
     } catch (error) {
       next(error);
       return;
     }
-  }
-  ,
-
+  },
   /**
    * Delete user by ID
    * @route DELETE /api/users/:userId
@@ -301,9 +297,9 @@ export const userController = {
   deleteMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
       const userId = req.user._id.toString();
       await userService.deleteUserById(userId);
@@ -320,9 +316,9 @@ export const userController = {
   deactivateMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
       const userId = req.user._id.toString();
       await userService.updateUserStatus(userId, UserStatus.INACTIVE);
@@ -339,37 +335,40 @@ export const userController = {
   getUsers: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { role, status, search, sortBy, limit, page } = req.query;
-      
+
       // Build filter
       const filter: Record<string, any> = {};
-      
+
       if (role) {
         filter.role = role;
       }
-      
+
       if (status) {
         filter.status = status;
       }
-      
+
       if (search) {
         filter.$or = [
           { firstName: { $regex: search, $options: 'i' } },
           { lastName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } }
+          { email: { $regex: search, $options: 'i' } },
         ];
       }
-      
+
       // Set options
       const options = {
         sortBy: sortBy as string,
         limit: limit ? parseInt(limit as string, 10) : 10,
-        page: page ? parseInt(page as string, 10) : 1
+        page: page ? parseInt(page as string, 10) : 1,
       };
-      
+
       const result = await userService.getUsers(filter, options);
       // Ensure every user in the list has profileImage (null if missing)
       if (result.users && Array.isArray(result.users)) {
-        result.users = result.users.map(u => ({ ...u.toObject?.() || u, profileImage: typeof u.profileImage === 'undefined' ? null : u.profileImage }));
+        result.users = result.users.map((u) => ({
+          ...(u.toObject?.() || u),
+          profileImage: typeof u.profileImage === 'undefined' ? null : u.profileImage,
+        }));
       }
       res.json(successResponse(result, 'Users retrieved successfully'));
     } catch (error) {
@@ -385,11 +384,9 @@ export const userController = {
     try {
       const { participantId } = req.params;
       const participant = await userService.getParticipantById(participantId);
-      
+
       if (!participant) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('Participant not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Participant not found', httpStatus.NOT_FOUND));
       }
       if (typeof participant.profileImage === 'undefined') participant.profileImage = null;
       return res.json(successResponse({ participant }, 'Participant retrieved successfully'));
@@ -407,11 +404,9 @@ export const userController = {
     try {
       const { workerId } = req.params;
       const worker = await userService.getWorkerById(workerId);
-      
+
       if (!worker) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('Support worker not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Support worker not found', httpStatus.NOT_FOUND));
       }
       if (typeof worker.profileImage === 'undefined') worker.profileImage = null;
       return res.json(successResponse({ worker }, 'Support worker retrieved successfully'));
@@ -429,11 +424,9 @@ export const userController = {
     try {
       const { coordinatorId } = req.params;
       const coordinator = await userService.getCoordinatorById(coordinatorId);
-      
+
       if (!coordinator) {
-        return res.status(httpStatus.NOT_FOUND).json(
-          errorResponse('Coordinator not found', httpStatus.NOT_FOUND)
-        );
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Coordinator not found', httpStatus.NOT_FOUND));
       }
       if (typeof coordinator.profileImage === 'undefined') coordinator.profileImage = null;
       return res.json(successResponse({ coordinator }, 'Coordinator retrieved successfully'));
@@ -451,16 +444,14 @@ export const userController = {
     try {
       const { userId } = req.params;
       const { status } = req.body;
-      
+
       // Check if status is valid
       if (!Object.values(UserStatus).includes(status as UserStatus)) {
-        return res.status(httpStatus.BAD_REQUEST).json(
-          errorResponse('Invalid status value', httpStatus.BAD_REQUEST)
-        );
+        return res.status(httpStatus.BAD_REQUEST).json(errorResponse('Invalid status value', httpStatus.BAD_REQUEST));
       }
-      
+
       const user = await userService.updateUserStatus(userId, status as UserStatus);
-      
+
       return res.json(successResponse({ user }, 'User status updated successfully'));
     } catch (error) {
       next(error);
@@ -475,9 +466,9 @@ export const userController = {
   linkGuardianToParticipant: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { participantId, guardianId } = req.params;
-      
+
       await userService.linkGuardianToParticipant(guardianId, participantId);
-      
+
       res.json(successResponse({}, 'Guardian linked to participant successfully'));
     } catch (error) {
       next(error);
@@ -491,9 +482,9 @@ export const userController = {
   unlinkGuardianFromParticipant: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { participantId, guardianId } = req.params;
-      
+
       await userService.unlinkGuardianFromParticipant(guardianId, participantId);
-      
+
       res.json(successResponse({}, 'Guardian unlinked from participant successfully'));
     } catch (error) {
       next(error);
@@ -507,16 +498,16 @@ export const userController = {
   completeParticipantOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
 
       // Check if user is a participant
       if (req.user.role !== UserRole.PARTICIPANT) {
-        return res.status(httpStatus.FORBIDDEN).json(
-          errorResponse('Only participants can complete onboarding', httpStatus.FORBIDDEN)
-        );
+        return res
+          .status(httpStatus.FORBIDDEN)
+          .json(errorResponse('Only participants can complete onboarding', httpStatus.FORBIDDEN));
       }
 
       const participantId = req.user._id.toString();
@@ -524,7 +515,9 @@ export const userController = {
 
       const updatedParticipant = await userService.completeParticipantOnboarding(participantId, onboardingData);
 
-      return res.json(successResponse({ participant: updatedParticipant }, 'Participant onboarding completed successfully'));
+      return res.json(
+        successResponse({ participant: updatedParticipant }, 'Participant onboarding completed successfully'),
+      );
     } catch (error) {
       next(error);
       return;
@@ -538,16 +531,16 @@ export const userController = {
   completeWorkerOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
       }
 
       // Check if user is a support worker
       if (req.user.role !== UserRole.SUPPORT_WORKER) {
-        return res.status(httpStatus.FORBIDDEN).json(
-          errorResponse('Only support workers can complete onboarding', httpStatus.FORBIDDEN)
-        );
+        return res
+          .status(httpStatus.FORBIDDEN)
+          .json(errorResponse('Only support workers can complete onboarding', httpStatus.FORBIDDEN));
       }
 
       const workerId = req.user._id.toString();
@@ -560,5 +553,5 @@ export const userController = {
       next(error);
       return;
     }
-  }
+  },
 };
