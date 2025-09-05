@@ -13,32 +13,18 @@ import { UserRole } from '../types/user.types';
 const router = express.Router();
 
 // Current user profile routes
-router.get(
-  '/profile',
-  authenticate,
-  userController.getProfile
-);
+router.get('/profile', authenticate, userController.getProfile);
 
 router.patch(
   '/profile',
   authenticate,
-  validate(userValidation.updateUser),
-  userController.updateProfile
+  // validate(userValidation.updateUser),
+  userController.updateProfile,
 );
 
-router.post(
-  '/profile-image',
-  authenticate,
-  profileUpload.single('image'),
-  userController.updateProfileImage
-);
+router.post('/profile-image', authenticate, profileUpload.single('image'), userController.updateProfileImage);
 
-router.post(
-  '/change-password',
-  authenticate,
-  validate(userValidation.updatePassword),
-  userController.changePassword
-);
+router.post('/change-password', authenticate, validate(userValidation.updatePassword), userController.changePassword);
 
 // User-specific account management routes
 /**
@@ -46,93 +32,43 @@ router.post(
  * @desc Delete current user's account
  * @access Private (Authenticated User)
  */
-router.delete(
-  '/profile',
-  authenticate,
-  userController.deleteMyAccount
-);
+router.delete('/profile', authenticate, userController.deleteMyAccount);
 
 /**
  * @route PATCH /api/users/profile/deactivate
  * @desc Deactivate current user's account
  * @access Private (Authenticated User)
  */
-router.patch(
-  '/profile/deactivate',
-  authenticate,
-  userController.deactivateMyAccount
-);
+router.patch('/profile/deactivate', authenticate, userController.deactivateMyAccount);
 
 // General user management routes (admin access)
-router.get(
-  '/',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.getUsers
-);
+router.get('/', authenticate, authorize([UserRole.ADMIN]), userController.getUsers);
 
-router.get(
-  '/:userId',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.getUserById
-);
+router.get('/:userId', authenticate, authorize([UserRole.ADMIN]), userController.getUserById);
 
-router.get(
-  '/email/:email',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.getUserByEmail
-);
+router.get('/email/:email', authenticate, authorize([UserRole.ADMIN]), userController.getUserByEmail);
 
 // Admin routes for role-specific updates
-router.patch(
-  '/:role/:userId',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.updateUserByRoleAndId
-);
+router.patch('/:role/:userId', authenticate, authorize([UserRole.ADMIN]), userController.updateUserByRoleAndId);
 
 router.patch(
   '/:userId',
   authenticate,
   authorize([UserRole.ADMIN]),
   validate(userValidation.updateUser),
-  userController.updateUser
+  userController.updateUser,
 );
 
-router.delete(
-  '/:userId',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.deleteUser
-);
+router.delete('/:userId', authenticate, authorize([UserRole.ADMIN]), userController.deleteUser);
 
-router.patch(
-  '/:userId/status',
-  authenticate,
-  authorize([UserRole.ADMIN]),
-  userController.updateUserStatus
-);
+router.patch('/:userId/status', authenticate, authorize([UserRole.ADMIN]), userController.updateUserStatus);
 
 // Role-specific user routes
-router.get(
-  '/participants/:participantId',
-  authenticate,
-  userController.getParticipantById
-);
+router.get('/participants/:participantId', authenticate, userController.getParticipantById);
 
-router.get(
-  '/workers/:workerId',
-  authenticate,
-  userController.getWorkerById
-);
+router.get('/workers/:workerId', authenticate, userController.getWorkerById);
 
-router.get(
-  '/coordinators/:coordinatorId',
-  authenticate,
-  userController.getCoordinatorById
-);
+router.get('/coordinators/:coordinatorId', authenticate, userController.getCoordinatorById);
 
 // Worker onboarding route
 router.post(
@@ -140,7 +76,7 @@ router.post(
   authenticate,
   authorize([UserRole.SUPPORT_WORKER]),
   validate(workerValidation.onboarding),
-  userController.completeWorkerOnboarding
+  userController.completeWorkerOnboarding,
 );
 
 // Participant onboarding route
@@ -149,7 +85,7 @@ router.post(
   authenticate,
   authorize([UserRole.PARTICIPANT]),
   validate(participantValidation.onboarding),
-  userController.completeParticipantOnboarding
+  userController.completeParticipantOnboarding,
 );
 
 // Guardian-participant relationship routes
@@ -157,14 +93,14 @@ router.post(
   '/participants/:participantId/guardians/:guardianId',
   authenticate,
   authorize([UserRole.ADMIN]),
-  userController.linkGuardianToParticipant
+  userController.linkGuardianToParticipant,
 );
 
 router.delete(
   '/participants/:participantId/guardians/:guardianId',
   authenticate,
   authorize([UserRole.ADMIN]),
-  userController.unlinkGuardianFromParticipant
+  userController.unlinkGuardianFromParticipant,
 );
 
 export default router;
