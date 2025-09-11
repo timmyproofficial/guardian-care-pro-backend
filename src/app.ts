@@ -22,7 +22,12 @@ import { getSocketServer } from './services/socket.server';
  */
 const app: Express = express();
 
-const allowedOrigins = ['http://localhost:3000', 'http://localhost:8080', 'https://guardian-pro-webapp.vercel.app'];
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'https://guardian-pro-webapp.vercel.app',
+  'https://support24.vercel.app'
+];
 
 // Set security headers
 app.use(helmet());
