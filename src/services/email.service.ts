@@ -64,31 +64,31 @@ export const emailService = {
     name: string,
     otpCode: string
   ): Promise<void> => {
-    const subject = 'Email Verification Code - Guardian Care Pro';
+    const subject = 'Email Verification Code - Support24';
     const text = `
       Hello ${name},
       
-      Your verification code for Guardian Care Pro is: ${otpCode}
+      Your verification code for Support24 is: ${otpCode}
       
       This code will expire in 10 minutes.
       
       If you did not create an account with us, please ignore this email.
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Welcome to Guardian Care Pro!</h2>
+        <h2>Welcome to Support24!</h2>
         <p>Hello ${name},</p>
-        <p>Your verification code for Guardian Care Pro is:</p>
+        <p>Your verification code for Support24 is:</p>
         <div style="background-color: #f5f5f5; padding: 12px; margin: 20px 0; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px;">
           ${otpCode}
         </div>
         <p>This code will expire in 10 minutes.</p>
         <p>If you did not create an account with us, please ignore this email.</p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -103,7 +103,7 @@ export const emailService = {
     name: string,
     otpCode: string
   ): Promise<void> => {
-    const subject = 'Password Reset Code - Guardian Care Pro';
+    const subject = 'Password Reset Code - Support24';
     const text = `
       Hello ${name},
       
@@ -114,7 +114,7 @@ export const emailService = {
       If you didn't request this, please ignore this email and your password will remain unchanged.
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
@@ -127,7 +127,7 @@ export const emailService = {
         </div>
         <p>This code will expire in 10 minutes.</p>
         <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -140,7 +140,7 @@ export const emailService = {
   sendShiftBookingEmail: async (
     to: string,
     name: string,
-    shiftDetails: {
+    shiftDetails: {a
       date: string;
       startTime: string;
       endTime: string;
@@ -150,7 +150,7 @@ export const emailService = {
       location: string;
     }
   ): Promise<void> => {
-    const subject = 'New Shift Booking - Guardian Care Pro';
+    const subject = 'New Shift Booking - Support24';
     
     // Customize message based on whether it's for a worker or participant
     const recipientDetails = shiftDetails.participantName
@@ -167,10 +167,10 @@ export const emailService = {
       Service: ${shiftDetails.serviceType}
       Location: ${shiftDetails.location}
       
-      You can view the details and manage this booking in your Guardian Care Pro dashboard.
+      You can view the details and manage this booking in your Support24 dashboard.
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
@@ -184,8 +184,8 @@ export const emailService = {
           <p><strong>Service:</strong> ${shiftDetails.serviceType}</p>
           <p><strong>Location:</strong> ${shiftDetails.location}</p>
         </div>
-        <p>You can <a href="${config.clientUrl}/dashboard">view the details and manage this booking</a> in your Guardian Care Pro dashboard.</p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>You can <a href="${config.clientUrl}/dashboard">view the details and manage this booking</a> in your Support24 dashboard.</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -206,7 +206,7 @@ export const emailService = {
       status: string;
     }
   ): Promise<void> => {
-    const subject = 'Timesheet Update - Guardian Care Pro';
+    const subject = 'Timesheet Update - Support24';
     
     const text = `
       Hello ${name},
@@ -219,10 +219,10 @@ export const emailService = {
       Hours: ${timesheetDetails.hours}
       Status: ${timesheetDetails.status}
       
-      You can view all timesheet details in your Guardian Care Pro dashboard.
+      You can view all timesheet details in your Support24 dashboard.
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
@@ -236,8 +236,8 @@ export const emailService = {
           <p><strong>Hours:</strong> ${timesheetDetails.hours}</p>
           <p><strong>Status:</strong> ${timesheetDetails.status}</p>
         </div>
-        <p>You can <a href="${config.clientUrl}/dashboard/timesheets">view all timesheet details</a> in your Guardian Care Pro dashboard.</p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>You can <a href="${config.clientUrl}/dashboard/timesheets">view all timesheet details</a> in your Support24 dashboard.</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -256,7 +256,7 @@ export const emailService = {
       notes?: string;
     }
   ): Promise<void> => {
-    const subject = 'Document Verification Update - Guardian Care Pro';
+    const subject = 'Document Verification Update - Support24';
     
     const text = `
       Hello ${name},
@@ -272,7 +272,7 @@ export const emailService = {
       }
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
@@ -288,7 +288,7 @@ export const emailService = {
             ? '<a href="' + config.clientUrl + '/dashboard/documents">Please log in to your account</a> to update the document.'
             : 'You can <a href="' + config.clientUrl + '/dashboard/documents">view the details in your account</a>.'
         }</p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -308,12 +308,12 @@ export const emailService = {
       renewalDate: string;
     }
   ): Promise<void> => {
-    const subject = 'Subscription Confirmation - Guardian Care Pro';
+    const subject = 'Subscription Confirmation - Support24';
     
     const text = `
       Hello ${name},
       
-      Thank you for subscribing to Guardian Care Pro. Your subscription has been confirmed.
+      Thank you for subscribing to Support24. Your subscription has been confirmed.
       
       Subscription Details:
       Tier: ${subscriptionDetails.tier}
@@ -323,15 +323,15 @@ export const emailService = {
       
       You can manage your subscription from your account settings.
       
-      Thank you for choosing Guardian Care Pro,
-      Guardian Care Pro Team
+      Thank you for choosing Support24,
+      Support24 Team
     `;
     
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6;">
         <h2>Subscription Confirmation</h2>
         <p>Hello ${name},</p>
-        <p>Thank you for subscribing to Guardian Care Pro. Your subscription has been confirmed.</p>
+        <p>Thank you for subscribing to Support24. Your subscription has been confirmed.</p>
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
           <p><strong>Tier:</strong> ${subscriptionDetails.tier}</p>
           <p><strong>Start Date:</strong> ${subscriptionDetails.startDate}</p>
@@ -339,7 +339,7 @@ export const emailService = {
           <p><strong>Next Renewal:</strong> ${subscriptionDetails.renewalDate}</p>
         </div>
         <p>You can <a href="${config.clientUrl}/settings/subscription">manage your subscription</a> from your account settings.</p>
-        <p>Thank you for choosing Guardian Care Pro,<br>Guardian Care Pro Team</p>
+        <p>Thank you for choosing Support24,<br>Support24 Team</p>
       </div>
     `;
     
@@ -358,7 +358,7 @@ export const emailService = {
       daysRemaining: number;
     }
   ): Promise<void> => {
-    const subject = 'Document Expiry Reminder - Guardian Care Pro';
+    const subject = 'Document Expiry Reminder - Support24';
     
     const text = `
       Hello ${name},
@@ -370,7 +370,7 @@ export const emailService = {
       You can upload a new document from your account dashboard.
       
       Thank you,
-      Guardian Care Pro Team
+      Support24 Team
     `;
     
     const html = `
@@ -380,7 +380,7 @@ export const emailService = {
         <p>This is a reminder that your <strong>${documentDetails.documentType}</strong> is expiring soon on <strong>${documentDetails.expiryDate}</strong> (${documentDetails.daysRemaining} days remaining).</p>
         <p>Please update your document before it expires to ensure continued access to the platform.</p>
         <p><a href="${config.clientUrl}/dashboard/documents" style="display: inline-block; background-color: #4285F4; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 4px;">Upload New Document</a></p>
-        <p>Thank you,<br>Guardian Care Pro Team</p>
+        <p>Thank you,<br>Support24 Team</p>
       </div>
     `;
     
@@ -401,7 +401,7 @@ sendInvoiceEmail: async (
     amount: string;
   }
 ): Promise<void> => {
-  const subject = `Invoice ${invoiceDetails.invoiceNumber} - Guardian Care Pro`;
+  const subject = `Invoice ${invoiceDetails.invoiceNumber} - Support24`;
   
   const text = `
     Hello ${name},
@@ -413,15 +413,15 @@ sendInvoiceEmail: async (
     Due Date: ${invoiceDetails.dueDate}
     Amount: $${invoiceDetails.amount}
     
-    You can view and download the invoice from your Guardian Care Pro dashboard.
+    You can view and download the invoice from your Support24 dashboard.
     
-    Thank you for using Guardian Care Pro,
-    Guardian Care Pro Team
+    Thank you for using Support24,
+    Support24 Team
   `;
   
   const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Invoice from Guardian Care Pro</h2>
+      <h2>Invoice from Support24</h2>
       <p>Hello ${name},</p>
       <p>Please find your invoice 
         <strong>${invoiceDetails.invoiceNumber}</strong> 
@@ -434,8 +434,8 @@ sendInvoiceEmail: async (
       </div>
       <p>You can 
       <a href="${config.clientUrl}/dashboard/invoices">view and download the invoice</a> 
-      from your Guardian Care Pro dashboard.</p>
-      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+      from your Support24 dashboard.</p>
+      <p>Thank you for using Support24,<br>Support24 Team</p>
     </div>
   `;
   
@@ -469,10 +469,10 @@ sendBatchInvoiceEmail: async (
     Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
     Total Amount: $${invoiceDetails.totalAmount}
     
-    You can view and download the detailed invoice from your Guardian Care Pro dashboard.
+    You can view and download the detailed invoice from your Support24 dashboard.
     
-    Thank you for using Guardian Care Pro,
-    Guardian Care Pro Team
+    Thank you for using Support24,
+    Support24 Team
   `;
   
   const html = `
@@ -486,8 +486,8 @@ sendBatchInvoiceEmail: async (
         <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
         <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
       </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view and download the detailed invoice</a> from your Guardian Care Pro dashboard.</p>
-      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view and download the detailed invoice</a> from your Support24 dashboard.</p>
+      <p>Thank you for using Support24,<br>Support24 Team</p>
     </div>
   `;
   
@@ -522,10 +522,10 @@ sendWorkerBatchInvoiceEmail: async (
     Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
     Total Amount: $${invoiceDetails.totalAmount}
     
-    You can view, download, and send this invoice to the participant from your Guardian Care Pro dashboard.
+    You can view, download, and send this invoice to the participant from your Support24 dashboard.
     
-    Thank you for using Guardian Care Pro,
-    Guardian Care Pro Team
+    Thank you for using Support24,
+    Support24 Team
   `;
   
   const html = `
@@ -540,8 +540,8 @@ sendWorkerBatchInvoiceEmail: async (
         <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
         <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
       </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view, download, and send this invoice</a> to the participant from your Guardian Care Pro dashboard.</p>
-      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view, download, and send this invoice</a> to the participant from your Support24 dashboard.</p>
+      <p>Thank you for using Support24,<br>Support24 Team</p>
     </div>
   `;
   
@@ -562,7 +562,7 @@ sendBatchInvoicesEmail: async (
     endDate: string;
   }
 ): Promise<void> => {
-  const subject = `Batch Invoices (${batchDetails.invoiceCount}) - Guardian Care Pro`;
+  const subject = `Batch Invoices (${batchDetails.invoiceCount}) - Support24`;
   
   const text = `
     Hello ${name},
@@ -572,23 +572,23 @@ sendBatchInvoicesEmail: async (
     Invoice Numbers: ${batchDetails.invoiceNumbers}
     Total Amount: $${batchDetails.totalAmount}
     
-    You can view and download these invoices from your Guardian Care Pro dashboard.
+    You can view and download these invoices from your Support24 dashboard.
     
-    Thank you for using Guardian Care Pro,
-    Guardian Care Pro Team
+    Thank you for using Support24,
+    Support24 Team
   `;
   
   const html = `
     <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Batch Invoices from Guardian Care Pro</h2>
+      <h2>Batch Invoices from Support24</h2>
       <p>Hello ${name},</p>
       <p>Please find ${batchDetails.invoiceCount} invoices for services between <strong>${batchDetails.startDate}</strong> and <strong>${batchDetails.endDate}</strong>.</p>
       <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
         <p><strong>Invoice Numbers:</strong> ${batchDetails.invoiceNumbers}</p>
         <p><strong>Total Amount:</strong> $${batchDetails.totalAmount}</p>
       </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/invoices">view and download these invoices</a> from your Guardian Care Pro dashboard.</p>
-      <p>Thank you for using Guardian Care Pro,<br>Guardian Care Pro Team</p>
+      <p>You can <a href="${config.clientUrl}/dashboard/invoices">view and download these invoices</a> from your Support24 dashboard.</p>
+      <p>Thank you for using Support24,<br>Support24 Team</p>
     </div>
   `;
   

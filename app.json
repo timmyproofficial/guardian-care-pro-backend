@@ -1,6 +1,6 @@
 {
-  "name": "Guardian Care Pro API",
-  "description": "Backend API for Guardian Care Pro platform",
+  "name": "Support24 API",
+  "description": "Backend API for Support24 platform",
   "repository": "https://github.com/your-org/guardian-care-pro-api",
   "keywords": [
     "nodejs",

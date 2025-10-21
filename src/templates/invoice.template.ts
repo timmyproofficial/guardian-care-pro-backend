@@ -263,7 +263,7 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
           <div>
             <div class="invoice-title">INVOICE</div>
             <div class="company-info">
-              <div>Guardian Care Pro</div>
+              <div>Support24</div>
               <div>123 Support Street</div>
               <div>Sydney, NSW 2000</div>
               <div>ABN: 12 345 678 901</div>
@@ -345,7 +345,7 @@ export const generateInvoiceHtml = (invoice: IInvoice): string => {
         
         <div class="invoice-footer">
           <p>Thank you for your business. If you have any questions about this invoice, please contact us.</p>
-          <p>&copy; ${new Date().getFullYear()} Guardian Care Pro. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Support24. All rights reserved.</p>
         </div>
       </div>
     </body>
