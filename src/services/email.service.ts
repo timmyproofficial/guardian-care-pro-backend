@@ -140,7 +140,7 @@ export const emailService = {
   sendShiftBookingEmail: async (
     to: string,
     name: string,
-    shiftDetails: {a
+    shiftDetails: {
       date: string;
       startTime: string;
       endTime: string;
