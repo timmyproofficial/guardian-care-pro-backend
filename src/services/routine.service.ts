@@ -119,7 +119,7 @@ const getParticipantRoutines = async (
       .sort({ timesUsed: -1, name: 1 })
       .lean();
 
-    return routines;
+    return routines as unknown as IRoutine[];
   } catch (error) {
     logger.error(`Error getting routines for participant ${participantId}:`, error);
     throw error;
@@ -324,7 +324,7 @@ const getPopularRoutinesByServiceType = async (
       .limit(limit)
       .lean();
 
-    return routines;
+    return routines as unknown as IRoutine[];
   } catch (error) {
     logger.error(`Error getting popular routines for service type ${serviceTypeId}:`, error);
     throw error;
@@ -371,7 +371,7 @@ const searchOrganizationRoutines = async (
       .limit(filter.limit || 20)
       .lean();
 
-    return { routines, total };
+    return { routines: routines as unknown as IRoutine[], total };
   } catch (error) {
     logger.error(`Error searching organization routines:`, error);
     throw error;
