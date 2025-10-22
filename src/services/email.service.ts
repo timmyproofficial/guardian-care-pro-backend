@@ -19,7 +19,7 @@ if (config.env !== 'test') {
   transport
     .verify()
     .then(() => logger.info('Connected to email server'))
-    .catch((error) =>
+    .catch((error: unknown) =>
       logger.warn(
         'Unable to connect to email server. Make sure you have configured the SMTP options:',
         error

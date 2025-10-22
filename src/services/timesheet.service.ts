@@ -6,6 +6,7 @@
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
 import moment from 'moment';
+import type {} from 'multer';
 import Timesheet, { ITimesheet, Expense, RateCalculation, ExpensePayer } from '../models/timesheet.model';
 import Shift from '../models/shift.model';
 import Organization from '../models/organization.model';

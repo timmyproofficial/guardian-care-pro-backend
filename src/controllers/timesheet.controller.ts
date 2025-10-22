@@ -6,6 +6,7 @@
 import { Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import mongoose from 'mongoose';
+import type {} from 'multer';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 import { timesheetService } from '../services/timesheet.service';
 import { UserRole } from '../types/user.types';

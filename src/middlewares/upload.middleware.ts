@@ -55,11 +55,11 @@ const fileFilterConfig = {
  * In production, this would be replaced with cloud storage like S3
  */
 const storage = multer.diskStorage({
-  destination: (_req, _, cb) => {
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
     // In production, this would be a temporary directory before S3 upload
     cb(null, 'uploads/');
   },
-  filename: (_req, file, cb) => {
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
     // Generate a random name to prevent filename conflicts
     const randomName = crypto.randomBytes(16).toString('hex');
     const extension = path.extname(file.originalname);
