@@ -215,8 +215,8 @@ const shiftSchema = new Schema<IShift>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'shiftId' field already has unique: true in field definition, so no need for explicit index
  */
-shiftSchema.index({ shiftId: 1 }, { unique: true });
 shiftSchema.index({ participantId: 1 });
 shiftSchema.index({ workerId: 1 });
 shiftSchema.index({ 'workerAssignments.workerId': 1 }); // Add index for worker assignments

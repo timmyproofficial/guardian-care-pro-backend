@@ -99,8 +99,8 @@ const userPresenceSchema = new Schema<IUserPresence>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'userId' field already has unique: true in field definition, so no need for explicit index
  */
-userPresenceSchema.index({ userId: 1 }, { unique: true });
 userPresenceSchema.index({ status: 1 });
 userPresenceSchema.index({ lastSeen: -1 });
 userPresenceSchema.index({ socketId: 1 });

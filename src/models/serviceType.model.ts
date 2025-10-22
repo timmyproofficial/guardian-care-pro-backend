@@ -58,8 +58,8 @@ const serviceTypeSchema = new Schema<IServiceType>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'code' field already has unique: true in field definition, so no need for explicit index
  */
-serviceTypeSchema.index({ code: 1 }, { unique: true });
 serviceTypeSchema.index({ status: 1 });
 serviceTypeSchema.index({ name: 1 });
 

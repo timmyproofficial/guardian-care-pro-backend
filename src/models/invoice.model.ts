@@ -308,8 +308,8 @@ const invoiceSchema = new Schema<IInvoice>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'invoiceNumber' field already has unique: true in field definition, so no need for explicit index
  */
-invoiceSchema.index({ invoiceNumber: 1 }, { unique: true });
 invoiceSchema.index({ timesheetId: 1 }, { unique: true });
 invoiceSchema.index({ participantId: 1 });
 invoiceSchema.index({ workerId: 1 });

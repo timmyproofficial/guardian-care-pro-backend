@@ -16,10 +16,10 @@ if (!fs.existsSync(uploadsDir)) {
 
 // Define storage options
 const storage = multer.diskStorage({
-  destination: function (_req, _file, cb) {
+  destination: function (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) {
     cb(null, uploadsDir);
   },
-  filename: function (_req, file, cb) {
+  filename: function (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) {
     // Generate unique filename
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
@@ -53,7 +53,7 @@ export const uploadReceiptImages = multer({
 export const uploadTimesheetData = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit per file
-  fileFilter: (_req, file, cb) => {
+  fileFilter: (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
     // Only filter files from expense receipt fields
     if (file.fieldname.includes('receiptFile') && !file.originalname.match(/\.(jpg|jpeg|png|gif)$/i)) {
       return cb(new Error('Only image files are allowed for receipts!'));

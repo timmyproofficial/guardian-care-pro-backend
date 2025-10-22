@@ -35,7 +35,7 @@ This repository contains the backend API implementation built with Express.js, T
 ## Project Structure
 
 ```
-guardian-care-pro-api/
+support24-api/
 ├── src/
 │   ├── config/         # Configuration files
 │   ├── controllers/    # HTTP request handlers

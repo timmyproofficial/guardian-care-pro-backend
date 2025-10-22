@@ -154,8 +154,8 @@ const batchInvoiceSchema = new Schema<IBatchInvoice>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'batchNumber' field already has unique: true in field definition, so no need for explicit index
  */
-batchInvoiceSchema.index({ batchNumber: 1 }, { unique: true });
 batchInvoiceSchema.index({ workerId: 1 });
 batchInvoiceSchema.index({ participantId: 1 });
 batchInvoiceSchema.index({ status: 1 });

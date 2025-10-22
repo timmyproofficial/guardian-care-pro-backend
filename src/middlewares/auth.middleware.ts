@@ -94,7 +94,7 @@ export const authenticate = async (
     next();
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
-      logger.error('JWT verification failed:', error.message);
+      logger.error('JWT verification failed:', (error as Error).message);
       next(new ApiError(httpStatus.UNAUTHORIZED, 'Invalid or expired token'));
     } else if (error instanceof ApiError) {
       next(error);
