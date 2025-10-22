@@ -127,8 +127,8 @@ const batchProcessingHistorySchema = new Schema<IBatchProcessingHistory>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'runId' field already has unique: true in field definition, so no need for explicit index
  */
-batchProcessingHistorySchema.index({ runId: 1 }, { unique: true });
 batchProcessingHistorySchema.index({ runType: 1 });
 batchProcessingHistorySchema.index({ status: 1 });
 batchProcessingHistorySchema.index({ processingStartTime: 1 });

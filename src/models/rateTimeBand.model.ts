@@ -84,7 +84,7 @@ const rateTimeBandSchema = new Schema<IRateTimeBand>(
 );
 
 // Add indexes
-rateTimeBandSchema.index({ code: 1 });
+// Note: 'code' field already has unique: true in field definition, so no need for explicit index
 rateTimeBandSchema.index({ isActive: 1 });
 
 const RateTimeBand = mongoose.model<IRateTimeBand>('RateTimeBand', rateTimeBandSchema);

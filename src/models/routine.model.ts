@@ -133,8 +133,8 @@ const routineSchema = new Schema<IRoutine>(
 
 /**
  * Add indexes for faster queries
+ * Note: 'routineId' field already has unique: true in field definition, so no need for explicit index
  */
-routineSchema.index({ routineId: 1 }, { unique: true });
 routineSchema.index({ participantId: 1 });
 routineSchema.index({ organizationId: 1 });
 routineSchema.index({ status: 1 });
