@@ -49,7 +49,7 @@ if (config.env === 'production') {
 const logger = winston.createLogger({
   level: config.logLevel || 'info',
   format: logFormat,
-  defaultMeta: { service: 'guardian-care-pro-api' },
+  defaultMeta: { service: 'support24-api' },
   transports,
 });
 
