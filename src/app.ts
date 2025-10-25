@@ -27,7 +27,8 @@ const allowedOrigins = [
   'http://localhost:8080',
   'https://guardian-pro-webapp.vercel.app',
   'https://guardian-pro-webapp-git-main-timmyproofficials-projects.vercel.app',
-  'https://support24.vercel.app'
+  'https://support24.vercel.app',
+  'https://support-24.netlify.app'
 ];
 
 // Set security headers
