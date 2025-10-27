@@ -6,7 +6,13 @@
 import nodemailer from 'nodemailer';
 import config from '../config/env';
 import logger from '../utils/logger';
-import { generateEmailTemplate } from '../utils/email-template';
+import {
+  generateEmailTemplate,
+  createInfoBox,
+  createCodeBox,
+  createParagraph,
+  createAlertBox,
+} from '../utils/email-template';
 
 /**
  * Email transport configuration
@@ -74,36 +80,22 @@ export const emailService = {
       This code will expire in 10 minutes.
       
       If you did not create an account with us, please ignore this email.
-      
     `;
     
-    // const html = `
-    //   <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-    //     <h2>Welcome to Support24!</h2>
-    //     <p>Hello ${name},</p>
-    //     <p>Your verification code for Support24 is:</p>
-    //     <div style="background-color: #f5f5f5; padding: 12px; margin: 20px 0; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px;">
-    //       ${otpCode}
-    //     </div>
-    //     <p>This code will expire in 10 minutes.</p>
-    //     <p>If you did not create an account with us, please ignore this email.</p>
-    //   </div>
-    // `;
+    const bodyContent = `
+      ${createParagraph('Thank you for creating an account with Support24! Your verification code is:')}
+      ${createCodeBox(otpCode)}
+      ${createAlertBox('⏱️ This code will expire in 10 minutes.', 'warning')}
+      ${createParagraph('If you did not create an account with us, please ignore this email.')}
+    `;
 
     const html = generateEmailTemplate({
       preheader: 'Your verification code for Support24',
-      contentTitle: 'Email Verification Code',
-      greeting: 'Hello',
+      greeting: 'Dear',
       recipientName: name,
-      mainContent: `Your verification code for Support24 is: ${otpCode}
-                    
-      This code will expire in 10 minutes.
-      
-      If you did not create an account with us, please ignore this email.
-      `,
-      // footerText: 'This code will expire in 10 minutes.',
-      showDashboardButton: false,
-      bannerImageUrl: config.assets.emailBanner,
+      bodyContent,
+      showButton: false,
+      includeTagline: true,
     });
     
     await emailService.sendEmail(to, subject, text, html);
@@ -126,24 +118,23 @@ export const emailService = {
       This code will expire in 10 minutes.
       
       If you didn't request this, please ignore this email and your password will remain unchanged.
-      
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Reset Your Password</h2>
-        <p>Hello ${name},</p>
-        <p>You requested to reset your password. Your password reset code is:</p>
-        <div style="background-color: #f5f5f5; padding: 12px; margin: 20px 0; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px;">
-          ${otpCode}
-        </div>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you didn't request this, please ignore this email and your password will remain unchanged.</p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
+    const bodyContent = `
+      ${createParagraph('You requested to reset your password. Your password reset code is:')}
+      ${createCodeBox(otpCode)}
+      ${createAlertBox('⏱️ This code will expire in 10 minutes.', 'warning')}
+      ${createAlertBox('If you didn\'t request this, please ignore this email and your password will remain unchanged.', 'info')}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: 'Reset your Support24 password',
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: false,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -182,26 +173,29 @@ export const emailService = {
       Location: ${shiftDetails.location}
       
       You can view the details and manage this booking in your Support24 dashboard.
-      
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>New Shift Booking</h2>
-        <p>Hello ${name},</p>
-        <p>A new shift has been booked ${recipientDetails}:</p>
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-          <p><strong>Date:</strong> ${shiftDetails.date}</p>
-          <p><strong>Time:</strong> ${shiftDetails.startTime} - ${shiftDetails.endTime}</p>
-          <p><strong>Service:</strong> ${shiftDetails.serviceType}</p>
-          <p><strong>Location:</strong> ${shiftDetails.location}</p>
-        </div>
-        <p>You can <a href="${config.clientUrl}/dashboard">view the details and manage this booking</a> in your Support24 dashboard.</p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
+    const bodyContent = `
+      ${createParagraph(`A new shift has been booked ${recipientDetails}:`)}
+      ${createInfoBox('Shift Details', [
+        { label: '📅 Date:', value: shiftDetails.date },
+        { label: '⏰ Time:', value: `${shiftDetails.startTime} - ${shiftDetails.endTime}` },
+        { label: '🏥 Service:', value: shiftDetails.serviceType },
+        { label: '📍 Location:', value: shiftDetails.location },
+      ])}
+      ${createParagraph('You can view the full details and manage this booking in your Support24 dashboard.')}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: `New shift booking ${recipientDetails}`,
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: true,
+      buttonText: 'View Shift Details',
+      buttonUrl: `${config.clientUrl}/dashboard/shifts`,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -234,26 +228,33 @@ export const emailService = {
       Status: ${timesheetDetails.status}
       
       You can view all timesheet details in your Support24 dashboard.
-      
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Timesheet Update</h2>
-        <p>Hello ${name},</p>
-        <p>The timesheet for ${timesheetDetails.date} with ${timesheetDetails.participantName} has been <strong>${timesheetDetails.status}</strong>.</p>
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-          <p><strong>Worker:</strong> ${timesheetDetails.workerName}</p>
-          <p><strong>Date:</strong> ${timesheetDetails.date}</p>
-          <p><strong>Hours:</strong> ${timesheetDetails.hours}</p>
-          <p><strong>Status:</strong> ${timesheetDetails.status}</p>
-        </div>
-        <p>You can <a href="${config.clientUrl}/dashboard/timesheets">view all timesheet details</a> in your Support24 dashboard.</p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
+    const alertType = timesheetDetails.status.toLowerCase() === 'approved' ? 'success' : 
+                      timesheetDetails.status.toLowerCase() === 'rejected' ? 'error' : 'info';
+    
+    const bodyContent = `
+      ${createParagraph(`The timesheet for ${timesheetDetails.date} with ${timesheetDetails.participantName} has been <strong>${timesheetDetails.status}</strong>.`)}
+      ${createInfoBox('Timesheet Details', [
+        { label: '👤 Worker:', value: timesheetDetails.workerName },
+        { label: '📅 Date:', value: timesheetDetails.date },
+        { label: '⏱️ Hours:', value: `${timesheetDetails.hours}` },
+        { label: '📋 Status:', value: timesheetDetails.status },
+      ])}
+      ${createAlertBox(`Timesheet has been ${timesheetDetails.status}`, alertType)}
+      ${createParagraph('You can view all timesheet details in your Support24 dashboard.')}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: `Timesheet ${timesheetDetails.status} for ${timesheetDetails.date}`,
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: true,
+      buttonText: 'View Timesheets',
+      buttonUrl: `${config.clientUrl}/dashboard/timesheets`,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -284,27 +285,32 @@ export const emailService = {
           ? 'Please log in to your account to update the document.'
           : 'You can view the details in your account.'
       }
-      
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Document Verification Update</h2>
-        <p>Hello ${name},</p>
-        <p>The status of your <strong>${documentDetails.documentType}</strong> document has been updated to <strong style="color: ${
-      documentDetails.status === 'approved' ? 'green' : documentDetails.status === 'rejected' ? 'red' : 'orange'
-    };">${documentDetails.status}</strong>.</p>
-        ${documentDetails.notes ? `<p><strong>Notes:</strong> ${documentDetails.notes}</p>` : ''}
-        <p>${
-          documentDetails.status === 'rejected'
-            ? '<a href="' + config.clientUrl + '/dashboard/documents">Please log in to your account</a> to update the document.'
-            : 'You can <a href="' + config.clientUrl + '/dashboard/documents">view the details in your account</a>.'
-        }</p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
+    const alertType = documentDetails.status.toLowerCase() === 'approved' ? 'success' : 
+                      documentDetails.status.toLowerCase() === 'rejected' ? 'error' : 'warning';
+    
+    const bodyContent = `
+      ${createParagraph(`The status of your <strong>${documentDetails.documentType}</strong> document has been updated to <strong>${documentDetails.status}</strong>.`)}
+      ${documentDetails.notes ? createAlertBox(`<strong>Notes:</strong> ${documentDetails.notes}`, 'info') : ''}
+      ${createAlertBox(
+        documentDetails.status === 'rejected'
+          ? '⚠️ Please log in to your account to update the document.'
+          : '✅ You can view the details in your account.',
+        alertType
+      )}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: `Document verification ${documentDetails.status}`,
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: true,
+      buttonText: documentDetails.status === 'rejected' ? 'Update Document' : 'View Documents',
+      buttonUrl: `${config.clientUrl}/dashboard/documents`,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -336,26 +342,30 @@ export const emailService = {
       Next Renewal: ${subscriptionDetails.renewalDate}
       
       You can manage your subscription from your account settings.
-      
-      Thank you for choosing Support24,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Subscription Confirmation</h2>
-        <p>Hello ${name},</p>
-        <p>Thank you for subscribing to Support24. Your subscription has been confirmed.</p>
-        <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-          <p><strong>Tier:</strong> ${subscriptionDetails.tier}</p>
-          <p><strong>Start Date:</strong> ${subscriptionDetails.startDate}</p>
-          <p><strong>Amount:</strong> ${subscriptionDetails.amount}</p>
-          <p><strong>Next Renewal:</strong> ${subscriptionDetails.renewalDate}</p>
-        </div>
-        <p>You can <a href="${config.clientUrl}/settings/subscription">manage your subscription</a> from your account settings.</p>
-        <p>Thank you for choosing Support24,<br>Support24 Team</p>
-      </div>
+    const bodyContent = `
+      ${createParagraph('Thank you for subscribing to Support24! Your subscription has been confirmed.')}
+      ${createInfoBox('Subscription Details', [
+        { label: '📦 Tier:', value: subscriptionDetails.tier },
+        { label: '📅 Start Date:', value: subscriptionDetails.startDate },
+        { label: '💰 Amount:', value: subscriptionDetails.amount },
+        { label: '🔄 Next Renewal:', value: subscriptionDetails.renewalDate },
+      ])}
+      ${createAlertBox('✅ Your subscription is now active!', 'success')}
+      ${createParagraph('You can manage your subscription from your account settings.')}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: 'Your Support24 subscription is confirmed',
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: true,
+      buttonText: 'Manage Subscription',
+      buttonUrl: `${config.clientUrl}/settings/subscription`,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -382,21 +392,29 @@ export const emailService = {
       Please update your document before it expires to ensure continued access to the platform.
       
       You can upload a new document from your account dashboard.
-      
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Document Expiry Reminder</h2>
-        <p>Hello ${name},</p>
-        <p>This is a reminder that your <strong>${documentDetails.documentType}</strong> is expiring soon on <strong>${documentDetails.expiryDate}</strong> (${documentDetails.daysRemaining} days remaining).</p>
-        <p>Please update your document before it expires to ensure continued access to the platform.</p>
-        <p><a href="${config.clientUrl}/dashboard/documents" style="display: inline-block; background-color: #4285F4; color: white; padding: 10px 20px; text-align: center; text-decoration: none; border-radius: 4px;">Upload New Document</a></p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
+    const bodyContent = `
+      ${createParagraph(`This is a reminder that your <strong>${documentDetails.documentType}</strong> is expiring soon.`)}
+      ${createInfoBox('Document Expiry Details', [
+        { label: '📄 Document Type:', value: documentDetails.documentType },
+        { label: '📅 Expiry Date:', value: documentDetails.expiryDate },
+        { label: '⏰ Days Remaining:', value: `${documentDetails.daysRemaining} days` },
+      ])}
+      ${createAlertBox(`⚠️ Please update your document before it expires to ensure continued access to the platform.`, 'warning')}
+      ${createParagraph('You can upload a new document from your account dashboard.')}
     `;
+    
+    const html = generateEmailTemplate({
+      preheader: `Your ${documentDetails.documentType} expires in ${documentDetails.daysRemaining} days`,
+      greeting: 'Dear',
+      recipientName: name,
+      bodyContent,
+      showButton: true,
+      buttonText: 'Upload New Document',
+      buttonUrl: `${config.clientUrl}/dashboard/documents`,
+      includeTagline: true,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
@@ -428,30 +446,29 @@ sendInvoiceEmail: async (
     Amount: $${invoiceDetails.amount}
     
     You can view and download the invoice from your Support24 dashboard.
-    
-    Thank you for using Support24,
-    Support24 Team
   `;
   
-  const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Invoice from Support24</h2>
-      <p>Hello ${name},</p>
-      <p>Please find your invoice 
-        <strong>${invoiceDetails.invoiceNumber}</strong> 
-        from <strong>${invoiceDetails.workerName}</strong>.</p>
-      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
-        <p><strong>Date:</strong> ${invoiceDetails.invoiceDate}</p>
-        <p><strong>Due Date:</strong> ${invoiceDetails.dueDate}</p>
-        <p><strong>Amount:</strong> $${invoiceDetails.amount}</p>
-      </div>
-      <p>You can 
-      <a href="${config.clientUrl}/dashboard/invoices">view and download the invoice</a> 
-      from your Support24 dashboard.</p>
-      <p>Thank you for using Support24,<br>Support24 Team</p>
-    </div>
+  const bodyContent = `
+    ${createParagraph(`Please find your invoice <strong>${invoiceDetails.invoiceNumber}</strong> from <strong>${invoiceDetails.workerName}</strong>.`)}
+    ${createInfoBox('Invoice Details', [
+      { label: '📄 Invoice Number:', value: invoiceDetails.invoiceNumber },
+      { label: '📅 Date:', value: invoiceDetails.invoiceDate },
+      { label: '⏰ Due Date:', value: invoiceDetails.dueDate },
+      { label: '💰 Amount:', value: `$${invoiceDetails.amount}` },
+    ])}
+    ${createParagraph('You can view and download the invoice from your Support24 dashboard.')}
   `;
+  
+  const html = generateEmailTemplate({
+    preheader: `Invoice ${invoiceDetails.invoiceNumber} from ${invoiceDetails.workerName}`,
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View Invoice',
+    buttonUrl: `${config.clientUrl}/dashboard/invoices`,
+    includeTagline: true,
+  });
   
   await emailService.sendEmail(to, subject, text, html);
 },
@@ -484,26 +501,29 @@ sendBatchInvoiceEmail: async (
     Total Amount: $${invoiceDetails.totalAmount}
     
     You can view and download the detailed invoice from your Support24 dashboard.
-    
-    Thank you for using Support24,
-    Support24 Team
   `;
   
-  const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Weekly Invoice Summary</h2>
-      <p>Hello ${name},</p>
-      <p>Please find your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> from <strong>${invoiceDetails.workerName}</strong> for services provided between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong>.</p>
-      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
-        <p><strong>Batch Number:</strong> ${invoiceDetails.batchNumber}</p>
-        <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
-        <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
-      </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view and download the detailed invoice</a> from your Support24 dashboard.</p>
-      <p>Thank you for using Support24,<br>Support24 Team</p>
-    </div>
+  const bodyContent = `
+    ${createParagraph(`Please find your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> from <strong>${invoiceDetails.workerName}</strong> for services provided between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong>.`)}
+    ${createInfoBox('Weekly Invoice Summary', [
+      { label: '📄 Invoice Number:', value: invoiceDetails.invoiceNumber },
+      { label: '🔢 Batch Number:', value: invoiceDetails.batchNumber },
+      { label: '📅 Period:', value: `${invoiceDetails.startDate} to ${invoiceDetails.endDate}` },
+      { label: '💰 Total Amount:', value: `$${invoiceDetails.totalAmount}` },
+    ])}
+    ${createParagraph('You can view and download the detailed invoice from your Support24 dashboard.')}
   `;
+  
+  const html = generateEmailTemplate({
+    preheader: `Consolidated invoice for ${invoiceDetails.startDate} - ${invoiceDetails.endDate}`,
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View Batch Invoice',
+    buttonUrl: `${config.clientUrl}/dashboard/batch-invoices`,
+    includeTagline: true,
+  });
   
   await emailService.sendEmail(to, subject, text, html);
 },
@@ -537,27 +557,31 @@ sendWorkerBatchInvoiceEmail: async (
     Total Amount: $${invoiceDetails.totalAmount}
     
     You can view, download, and send this invoice to the participant from your Support24 dashboard.
-    
-    Thank you for using Support24,
-    Support24 Team
   `;
   
-  const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Weekly Invoice Generated</h2>
-      <p>Hello ${name},</p>
-      <p>Your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> for services provided to <strong>${invoiceDetails.participantName}</strong> between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong> has been generated.</p>
-      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-        <p><strong>Invoice Number:</strong> ${invoiceDetails.invoiceNumber}</p>
-        <p><strong>Batch Number:</strong> ${invoiceDetails.batchNumber}</p>
-        <p><strong>Participant:</strong> ${invoiceDetails.participantName}</p>
-        <p><strong>Period:</strong> ${invoiceDetails.startDate} to ${invoiceDetails.endDate}</p>
-        <p><strong>Total Amount:</strong> $${invoiceDetails.totalAmount}</p>
-      </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/batch-invoices">view, download, and send this invoice</a> to the participant from your Support24 dashboard.</p>
-      <p>Thank you for using Support24,<br>Support24 Team</p>
-    </div>
+  const bodyContent = `
+    ${createParagraph(`Your consolidated invoice <strong>${invoiceDetails.invoiceNumber}</strong> for services provided to <strong>${invoiceDetails.participantName}</strong> between <strong>${invoiceDetails.startDate}</strong> and <strong>${invoiceDetails.endDate}</strong> has been generated.`)}
+    ${createInfoBox('Weekly Invoice Generated', [
+      { label: '📄 Invoice Number:', value: invoiceDetails.invoiceNumber },
+      { label: '🔢 Batch Number:', value: invoiceDetails.batchNumber },
+      { label: '👤 Participant:', value: invoiceDetails.participantName },
+      { label: '📅 Period:', value: `${invoiceDetails.startDate} to ${invoiceDetails.endDate}` },
+      { label: '💰 Total Amount:', value: `$${invoiceDetails.totalAmount}` },
+    ])}
+    ${createAlertBox('✅ Your invoice is ready to view and send!', 'success')}
+    ${createParagraph('You can view, download, and send this invoice to the participant from your Support24 dashboard.')}
   `;
+  
+  const html = generateEmailTemplate({
+    preheader: `Your invoice for ${invoiceDetails.participantName} is ready`,
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View & Send Invoice',
+    buttonUrl: `${config.clientUrl}/dashboard/batch-invoices`,
+    includeTagline: true,
+  });
   
   await emailService.sendEmail(to, subject, text, html);
 },
@@ -581,30 +605,35 @@ sendBatchInvoicesEmail: async (
   const text = `
     Hello ${name},
     
-    Please find attached ${batchDetails.invoiceCount} invoices for services between ${batchDetails.startDate} and ${batchDetails.endDate}.
+    Please find ${batchDetails.invoiceCount} invoices for services between ${batchDetails.startDate} and ${batchDetails.endDate}.
     
     Invoice Numbers: ${batchDetails.invoiceNumbers}
     Total Amount: $${batchDetails.totalAmount}
     
     You can view and download these invoices from your Support24 dashboard.
-    
-    Thank you for using Support24,
-    Support24 Team
   `;
   
-  const html = `
-    <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-      <h2>Batch Invoices from Support24</h2>
-      <p>Hello ${name},</p>
-      <p>Please find ${batchDetails.invoiceCount} invoices for services between <strong>${batchDetails.startDate}</strong> and <strong>${batchDetails.endDate}</strong>.</p>
-      <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 15px 0;">
-        <p><strong>Invoice Numbers:</strong> ${batchDetails.invoiceNumbers}</p>
-        <p><strong>Total Amount:</strong> $${batchDetails.totalAmount}</p>
-      </div>
-      <p>You can <a href="${config.clientUrl}/dashboard/invoices">view and download these invoices</a> from your Support24 dashboard.</p>
-      <p>Thank you for using Support24,<br>Support24 Team</p>
-    </div>
+  const bodyContent = `
+    ${createParagraph(`Please find <strong>${batchDetails.invoiceCount} invoices</strong> for services between <strong>${batchDetails.startDate}</strong> and <strong>${batchDetails.endDate}</strong>.`)}
+    ${createInfoBox('Batch Invoice Summary', [
+      { label: '🔢 Invoice Count:', value: `${batchDetails.invoiceCount}` },
+      { label: '📄 Invoice Numbers:', value: batchDetails.invoiceNumbers },
+      { label: '📅 Period:', value: `${batchDetails.startDate} to ${batchDetails.endDate}` },
+      { label: '💰 Total Amount:', value: `$${batchDetails.totalAmount}` },
+    ])}
+    ${createParagraph('You can view and download these invoices from your Support24 dashboard.')}
   `;
+  
+  const html = generateEmailTemplate({
+    preheader: `${batchDetails.invoiceCount} invoices for ${batchDetails.startDate} - ${batchDetails.endDate}`,
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View All Invoices',
+    buttonUrl: `${config.clientUrl}/dashboard/invoices`,
+    includeTagline: true,
+  });
   
   await emailService.sendEmail(to, subject, text, html);
 }
