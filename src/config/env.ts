@@ -44,7 +44,16 @@ const envVarsSchema = Joi.object()
     CLOUDINARY_CLOUD_NAME: Joi.string().required().description('Cloudinary cloud name'),
     CLOUDINARY_API_KEY: Joi.string().required().description('Cloudinary API key'),
     CLOUDINARY_API_SECRET: Joi.string().required().description('Cloudinary API secret'),
-    EMAIL_BANNER: Joi.string().description('Email banner'),
+    
+    // Email Assets
+    EMAIL_BANNER: Joi.string().description('Email banner image URL'),
+    LOGO_URL: Joi.string().description('Company logo URL for emails'),
+    FACEBOOK_ICON_URL: Joi.string().description('Facebook icon URL for email footer'),
+    INSTAGRAM_ICON_URL: Joi.string().description('Instagram icon URL for email footer'),
+    LINKEDIN_ICON_URL: Joi.string().description('LinkedIn icon URL for email footer'),
+    FACEBOOK_URL: Joi.string().description('Facebook profile/page URL'),
+    INSTAGRAM_URL: Joi.string().description('Instagram profile URL'),
+    LINKEDIN_URL: Joi.string().description('LinkedIn company page URL'),
     
     // Storage (AWS S3)
     AWS_BUCKET_NAME: Joi.string().description('AWS S3 bucket name'),
@@ -113,8 +122,20 @@ const config = {
     apiSecret: envVars.CLOUDINARY_API_SECRET,
   },
 
+  // Assets config
   assets: {
     emailBanner: envVars.EMAIL_BANNER || 'https://asset.cloudinary.com/dj8g798ed/1d70f4e84be394b93e812f9953037fd3',
+    logo: envVars.LOGO_URL || 'https://asset.cloudinary.com/dj8g798ed/support24-logo.png',
+    socialIcons: {
+      facebook: envVars.FACEBOOK_ICON_URL || 'https://cdn-icons-png.flaticon.com/512/124/124010.png',
+      instagram: envVars.INSTAGRAM_ICON_URL || 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png',
+      linkedin: envVars.LINKEDIN_ICON_URL || 'https://cdn-icons-png.flaticon.com/512/174/174857.png',
+    },
+    socialLinks: {
+      facebook: envVars.FACEBOOK_URL || '#',
+      instagram: envVars.INSTAGRAM_URL || '#',
+      linkedin: envVars.LINKEDIN_URL || '#',
+    }
   },
   
   // AWS S3 config
