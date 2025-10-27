@@ -4,14 +4,15 @@
  */
 
 import config from '../config/env';
+import { getCachedBase64Image } from './image-encoder';
 
 /**
  * Email template options interface
  */
 interface EmailTemplateOptions {
-  preheader?: string;
-  greeting?: string;
-  recipientName?: string;
+    preheader?: string;
+    greeting?: string;
+    recipientName?: string;
   bodyContent: string;
   showButton?: boolean;
   buttonText?: string;
@@ -31,47 +32,55 @@ interface DetailRow {
 /**
  * Generate the main email template with reusable header and footer
  */
-export const generateEmailTemplate = (options: EmailTemplateOptions): string => {
-  const {
+  export const generateEmailTemplate = (options: EmailTemplateOptions): string => {
+    const {
     preheader = 'Support24 - Professional Care Services',
     greeting = 'Dear',
-    recipientName = 'there',
+      recipientName = 'there',
     bodyContent,
     showButton = false,
     buttonText = 'View Dashboard',
     buttonUrl = config.clientUrl + '/dashboard',
     includeTagline = true,
     customBannerUrl = '',
-  } = options;
+    } = options;
 
-  const bannerUrl = customBannerUrl || config.assets.emailBanner;
-
-  return `
-<!DOCTYPE html>
+  // Determine banner URL - prefer base64 for reliability
+  let bannerUrl = customBannerUrl || config.assets.emailBanner;
+  
+  // If local banner path is provided and base64 is enabled, use base64 encoding
+  if (config.assets.useBase64Images && config.assets.emailBannerLocal) {
+    try {
+      bannerUrl = getCachedBase64Image(config.assets.emailBannerLocal);
+    } catch (error) {
+      console.warn('Failed to encode banner image, falling back to URL:', error);
+      // Fallback to URL if encoding fails
+    }
+  }
+  
+    return `
+  <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>Support24</title>
-  
-  <!-- Preheader text (hidden but shown in email previews) -->
+    
+    <!-- Preheader text (hidden but shown in email previews) -->
   <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
-    ${preheader}
-  </div>
-  
-  <!--[if mso]>
-  <style type="text/css">
+      ${preheader}
+    </div>
+    
+    <!--[if mso]>
+    <style type="text/css">
     .email-container {width: 770px !important;}
     table {border-collapse: collapse;}
-  </style>
-  <![endif]-->
-  
-  <style>
-    /* Reset styles */
+    </style>
+    <![endif]-->
+    
+    <style>
+      /* Reset styles */
     * {
       margin: 0;
       padding: 0;
@@ -95,18 +104,16 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
       text-decoration: none;
       -ms-interpolation-mode: bicubic;
     }
-    
-    /* Base styles */
-    html {
-      font-family: "Montserrat", "Segoe UI", Arial, sans-serif;
-      font-optical-sizing: auto;
-    }
-    
-    body {
+      
+      /* Base styles */
+    html, body {
+      font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
       background-color: #f5f5f5;
       margin: 0;
       padding: 0;
       width: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
     
     /* Email Container */
@@ -159,9 +166,9 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
       border-left: 5px solid #0D2BEC;
       border-radius: 15px;
       padding: 25px 30px;
-      margin: 20px 0;
-    }
-    
+        margin: 20px 0;
+      }
+      
     .info-box-title {
       font-size: 18px;
       font-weight: 600;
@@ -193,16 +200,16 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
     }
     
     /* Code/OTP Box */
-    .code-box {
-      background-color: #f5f5f5;
+      .code-box {
+        background-color: #f5f5f5;
       padding: 20px;
-      margin: 24px 0;
-      text-align: center;
-      font-size: 32px;
-      font-weight: bold;
-      letter-spacing: 8px;
-      border-radius: 8px;
-      color: #2c3e50;
+        margin: 24px 0;
+        text-align: center;
+        font-size: 32px;
+        font-weight: bold;
+        letter-spacing: 8px;
+        border-radius: 8px;
+        color: #2c3e50;
       border: 2px dashed #0D2BEC;
     }
     
@@ -292,10 +299,10 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
       height: 20px;
       vertical-align: middle;
       display: inline-block;
-    }
-    
-    /* Responsive */
-    @media screen and (max-width: 600px) {
+      }
+      
+      /* Responsive */
+      @media screen and (max-width: 600px) {
       .email-container {
         width: 100% !important;
       }
@@ -337,9 +344,9 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
         letter-spacing: 5px !important;
         padding: 15px !important;
       }
-    }
-  </style>
-</head>
+      }
+    </style>
+  </head>
 <body style="margin: 0; padding: 0; background-color: #f5f5f5;">
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f5f5f5;">
     <tr>
@@ -352,15 +359,15 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
           <tr>
             <td class="email-header" style="padding: 0;">
               <img src="${bannerUrl}" alt="Support24" class="banner-img" style="width: 100%; height: 219px; display: block; border: 0;">
-            </td>
-          </tr>
-          
-          <!-- Email Content -->
-          <tr>
+          </td>
+        </tr>
+        
+        <!-- Email Content -->
+        <tr>
             <td class="email-content" style="padding: 40px 50px; background-color: #ffffff;">
               
               <!-- Greeting -->
-              <p class="greeting" style="font-size: 21px; font-weight: 700; color: #000000; margin: 0 0 20px 0;">
+              <p class="greeting" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 21px; font-weight: 700; color: #000000; margin: 0 0 20px 0; line-height: 1.4;">
                 ${greeting} ${recipientName} 👋
               </p>
               
@@ -372,7 +379,7 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
               <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="margin: 20px 0;">
                 <tr>
                   <td class="button-container" align="center">
-                    <a href="${buttonUrl}" class="cta-button" style="display: inline-block; background-color: #0D2BEC; color: #ffffff; font-size: 18px; font-weight: 600; padding: 15px 35px; border-radius: 8px; text-decoration: none;">${buttonText}</a>
+                    <a href="${buttonUrl}" class="cta-button" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; display: inline-block; background-color: #0D2BEC; color: #ffffff !important; font-size: 18px; font-weight: 600; padding: 15px 35px; border-radius: 8px; text-decoration: none;">${buttonText}</a>
                   </td>
                 </tr>
               </table>
@@ -380,29 +387,29 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
               
               ${includeTagline ? `
               <!-- Tagline -->
-              <p class="tagline" style="font-size: 18px; font-weight: 400; color: #000000; font-style: italic; margin: 30px 0 20px 0;">
+              <p class="tagline" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; font-style: italic; margin: 30px 0 20px 0; line-height: 1.6;">
                 Let's build a healthier workplace or community together
               </p>
               ` : ''}
               
               <!-- Sign-off -->
-              <p class="sign-off" style="font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 20px 0 0 0;">
+              <p class="sign-off" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 20px 0 0 0;">
                 <strong>Best Regards</strong><br>
                 <strong>Support24 Team</strong>
               </p>
               
-            </td>
-          </tr>
-          
+          </td>
+        </tr>
+        
           <!-- Email Footer -->
           <tr>
             <td class="email-footer" style="background: #050F53; padding: 30px 50px; text-align: center;">
               
-              <p class="footer-text-primary" style="font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 8px 0;">
+              <p class="footer-text-primary" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 8px 0;">
                 © 2025 Support24. All rights reserved.
               </p>
               
-              <p class="footer-text-secondary" style="font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 20px 0;">
+              <p class="footer-text-secondary" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 20px 0;">
                 Connecting organizations with trusted allied health professionals
               </p>
               
@@ -423,22 +430,22 @@ export const generateEmailTemplate = (options: EmailTemplateOptions): string => 
                     <a href="${config.assets.socialLinks.linkedin}" class="social-link" style="display: inline-block; width: 40px; height: 40px; background-color: #ffffff; border-radius: 50%; text-align: center; line-height: 40px; margin: 0 10px;">
                       <img src="${config.assets.socialIcons.linkedin}" alt="LinkedIn" class="social-icon" style="width: 20px; height: 20px; vertical-align: middle; border: 0;">
                     </a>
-                  </td>
-                </tr>
-              </table>
+                </td>
+              </tr>
+            </table>
               
-            </td>
-          </tr>
-          
-        </table>
+          </td>
+        </tr>
+        
+      </table>
         
       </td>
     </tr>
   </table>
-</body>
-</html>
-  `;
-};
+  </body>
+  </html>
+    `;
+  };
 
 /**
  * Helper: Create an info/details box (like organization details)
@@ -450,10 +457,10 @@ export const createInfoBox = (title: string, details: DetailRow[]): string => {
     <div class="detail-row" style="margin: 10px 0;">
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
         <tr>
-          <td class="detail-label" style="font-size: 18px; font-weight: 400; color: #000000; width: 50%;">
+          <td class="detail-label" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; width: 50%;">
             ${detail.label}
           </td>
-          <td class="detail-value" style="font-size: 18px; font-weight: 600; color: #000000; text-align: right; width: 50%;">
+          <td class="detail-value" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 600; color: #000000; text-align: right; width: 50%;">
             ${detail.value}
           </td>
         </tr>
@@ -465,7 +472,7 @@ export const createInfoBox = (title: string, details: DetailRow[]): string => {
 
   return `
     <div class="info-box" style="background: #F7F7F7; border-left: 5px solid #0D2BEC; border-radius: 15px; padding: 25px 30px; margin: 20px 0;">
-      <p class="info-box-title" style="font-size: 18px; font-weight: 600; color: #000000; margin: 0 0 20px 0;">
+      <p class="info-box-title" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 600; color: #000000; margin: 0 0 20px 0;">
         ${title}
       </p>
       ${detailRows}
@@ -478,7 +485,7 @@ export const createInfoBox = (title: string, details: DetailRow[]): string => {
  */
 export const createCodeBox = (code: string): string => {
   return `
-    <div class="code-box" style="background-color: #f5f5f5; padding: 20px; margin: 24px 0; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; border-radius: 8px; color: #2c3e50; border: 2px dashed #0D2BEC;">
+    <div class="code-box" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; padding: 20px; margin: 24px 0; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 8px; border-radius: 8px; color: #2c3e50; border: 2px dashed #0D2BEC;">
       ${code}
     </div>
   `;
@@ -489,7 +496,7 @@ export const createCodeBox = (code: string): string => {
  */
 export const createParagraph = (text: string): string => {
   return `
-    <p class="body-text" style="font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 0 0 20px 0;">
+    <p class="body-text" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 0 0 20px 0;">
       ${text}
     </p>
   `;
@@ -500,12 +507,12 @@ export const createParagraph = (text: string): string => {
  */
 export const createList = (items: string[], ordered: boolean = false): string => {
   const listItems = items
-    .map((item) => `<li style="margin: 8px 0;">${item}</li>`)
+    .map((item) => `<li style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; margin: 8px 0;">${item}</li>`)
     .join('');
   const listTag = ordered ? 'ol' : 'ul';
 
   return `
-    <${listTag} style="font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 0 0 20px 0; padding-left: 25px;">
+    <${listTag} style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 0 0 20px 0; padding-left: 25px;">
       ${listItems}
     </${listTag}>
   `;
@@ -524,7 +531,7 @@ export const createAlertBox = (message: string, type: 'info' | 'warning' | 'succ
 
   return `
     <div style="background: ${colors[type]}15; border-left: 5px solid ${colors[type]}; border-radius: 8px; padding: 20px; margin: 20px 0;">
-      <p style="font-size: 18px; font-weight: 500; color: #000000; margin: 0; line-height: 1.6;">
+      <p style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 500; color: #000000; margin: 0; line-height: 1.6;">
         ${message}
       </p>
     </div>
