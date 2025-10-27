@@ -124,8 +124,17 @@ const config = {
 
   // Assets config
   assets: {
-    emailBanner: envVars.EMAIL_BANNER || 'https://asset.cloudinary.com/dj8g798ed/1d70f4e84be394b93e812f9953037fd3',
-    logo: envVars.LOGO_URL || 'https://asset.cloudinary.com/dj8g798ed/support24-logo.png',
+    // Email banner - can be URL or local path (local will be base64 encoded)
+    emailBanner: envVars.EMAIL_BANNER || 'https://res.cloudinary.com/dj8g798ed/image/upload/v1761266846/Frame_2147224087_eylrev.png',
+    emailBannerLocal: envVars.EMAIL_BANNER_LOCAL || '', // Local path: 'src/assets/email-banner.png'
+    
+    // Logo - can be URL or local path
+    logo: envVars.LOGO_URL || 'https://res.cloudinary.com/dj8g798ed/image/upload/v1/email-assets/logo.png',
+    logoLocal: envVars.LOGO_LOCAL || '', // Local path: 'src/assets/logo.png'
+    
+    // Use base64 encoding for images (more reliable in emails)
+    useBase64Images: envVars.USE_BASE64_IMAGES === 'true' || true,
+    
     socialIcons: {
       facebook: envVars.FACEBOOK_ICON_URL || 'https://cdn-icons-png.flaticon.com/512/124/124010.png',
       instagram: envVars.INSTAGRAM_ICON_URL || 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png',
