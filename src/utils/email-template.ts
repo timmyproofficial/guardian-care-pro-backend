@@ -25,7 +25,7 @@ interface EmailTemplateOptions {
     //   showDashboardButton = true,
     //   dashboardUrl = '',
     //   unsubscribeUrl = '',
-      bannerImageUrl = '',
+      bannerImageUrl = 'https://asset.cloudinary.com/dj8g798ed/1d70f4e84be394b93e812f9953037fd3',
     } = options;
 
     const bannerUrl = bannerImageUrl || config.assets.emailBanner;
