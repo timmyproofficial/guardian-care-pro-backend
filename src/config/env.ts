@@ -44,6 +44,7 @@ const envVarsSchema = Joi.object()
     CLOUDINARY_CLOUD_NAME: Joi.string().required().description('Cloudinary cloud name'),
     CLOUDINARY_API_KEY: Joi.string().required().description('Cloudinary API key'),
     CLOUDINARY_API_SECRET: Joi.string().required().description('Cloudinary API secret'),
+    EMAIL_BANNER: Joi.string().description('Email banner'),
     
     // Storage (AWS S3)
     AWS_BUCKET_NAME: Joi.string().description('AWS S3 bucket name'),
@@ -110,6 +111,10 @@ const config = {
     cloudName: envVars.CLOUDINARY_CLOUD_NAME,
     apiKey: envVars.CLOUDINARY_API_KEY,
     apiSecret: envVars.CLOUDINARY_API_SECRET,
+  },
+
+  assets: {
+    emailBanner: envVars.EMAIL_BANNER || 'https://asset.cloudinary.com/dj8g798ed/1d70f4e84be394b93e812f9953037fd3',
   },
   
   // AWS S3 config

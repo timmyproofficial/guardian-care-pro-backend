@@ -6,6 +6,7 @@
 import nodemailer from 'nodemailer';
 import config from '../config/env';
 import logger from '../utils/logger';
+import { generateEmailTemplate } from '../utils/email-template';
 
 /**
  * Email transport configuration
@@ -74,23 +75,36 @@ export const emailService = {
       
       If you did not create an account with us, please ignore this email.
       
-      Thank you,
-      Support24 Team
     `;
     
-    const html = `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Welcome to Support24!</h2>
-        <p>Hello ${name},</p>
-        <p>Your verification code for Support24 is:</p>
-        <div style="background-color: #f5f5f5; padding: 12px; margin: 20px 0; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px;">
-          ${otpCode}
-        </div>
-        <p>This code will expire in 10 minutes.</p>
-        <p>If you did not create an account with us, please ignore this email.</p>
-        <p>Thank you,<br>Support24 Team</p>
-      </div>
-    `;
+    // const html = `
+    //   <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+    //     <h2>Welcome to Support24!</h2>
+    //     <p>Hello ${name},</p>
+    //     <p>Your verification code for Support24 is:</p>
+    //     <div style="background-color: #f5f5f5; padding: 12px; margin: 20px 0; text-align: center; font-size: 24px; font-weight: bold; letter-spacing: 5px; border-radius: 4px;">
+    //       ${otpCode}
+    //     </div>
+    //     <p>This code will expire in 10 minutes.</p>
+    //     <p>If you did not create an account with us, please ignore this email.</p>
+    //   </div>
+    // `;
+
+    const html = generateEmailTemplate({
+      preheader: 'Your verification code for Support24',
+      contentTitle: 'Email Verification Code',
+      greeting: 'Hello',
+      recipientName: name,
+      mainContent: `Your verification code for Support24 is: ${otpCode}
+                    
+      This code will expire in 10 minutes.
+      
+      If you did not create an account with us, please ignore this email.
+      `,
+      // footerText: 'This code will expire in 10 minutes.',
+      showDashboardButton: false,
+      bannerImageUrl: config.assets.emailBanner,
+    });
     
     await emailService.sendEmail(to, subject, text, html);
   },
