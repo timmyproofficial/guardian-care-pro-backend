@@ -636,5 +636,340 @@ sendBatchInvoicesEmail: async (
   });
   
   await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send shift confirmation notification to participant
+ */
+sendShiftConfirmationEmail: async (
+  to: string,
+  name: string,
+  shiftDetails: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    workerName: string;
+    serviceType: string;
+    location: string;
+  }
+): Promise<void> => {
+  const subject = 'Shift Confirmed - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    Good news! ${shiftDetails.workerName} has confirmed your shift.
+    
+    Date: ${shiftDetails.date}
+    Time: ${shiftDetails.startTime} - ${shiftDetails.endTime}
+    Service: ${shiftDetails.serviceType}
+    Location: ${shiftDetails.location}
+    
+    You can view the details in your Support24 dashboard.
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`Good news! <strong>${shiftDetails.workerName}</strong> has confirmed your shift.`)}
+    ${createInfoBox('Confirmed Shift Details', [
+      { label: '📅 Date:', value: shiftDetails.date },
+      { label: '⏰ Time:', value: `${shiftDetails.startTime} - ${shiftDetails.endTime}` },
+      { label: '👤 Worker:', value: shiftDetails.workerName },
+      { label: '🏥 Service:', value: shiftDetails.serviceType },
+      { label: '📍 Location:', value: shiftDetails.location },
+    ])}
+    ${createAlertBox('✅ Your shift is now confirmed and scheduled!', 'success')}
+    ${createParagraph('You can view all shift details in your Support24 dashboard.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: `${shiftDetails.workerName} confirmed your shift`,
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View Shift Details',
+    buttonUrl: `${config.clientUrl}/dashboard/shifts`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send shift decline notification to participant
+ */
+sendShiftDeclineEmail: async (
+  to: string,
+  name: string,
+  shiftDetails: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    workerName: string;
+    serviceType: string;
+    reason?: string;
+  }
+): Promise<void> => {
+  const subject = 'Shift Declined - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    ${shiftDetails.workerName} has declined your shift request.
+    
+    Date: ${shiftDetails.date}
+    Time: ${shiftDetails.startTime} - ${shiftDetails.endTime}
+    Service: ${shiftDetails.serviceType}
+    ${shiftDetails.reason ? `Reason: ${shiftDetails.reason}` : ''}
+    
+    The shift is now available for other workers to accept.
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`<strong>${shiftDetails.workerName}</strong> has declined your shift request.`)}
+    ${createInfoBox('Declined Shift Details', [
+      { label: '📅 Date:', value: shiftDetails.date },
+      { label: '⏰ Time:', value: `${shiftDetails.startTime} - ${shiftDetails.endTime}` },
+      { label: '👤 Worker:', value: shiftDetails.workerName },
+      { label: '🏥 Service:', value: shiftDetails.serviceType },
+    ])}
+    ${shiftDetails.reason ? createAlertBox(`<strong>Reason:</strong> ${shiftDetails.reason}`, 'info') : ''}
+    ${createAlertBox('⚠️ This shift is now available for other workers to accept.', 'warning')}
+    ${createParagraph('You can reassign this shift or post it as an open shift in your dashboard.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: 'Shift declined - action needed',
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'Reassign Shift',
+    buttonUrl: `${config.clientUrl}/dashboard/shifts`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send shift completion notification to participant
+ */
+sendShiftCompletionEmail: async (
+  to: string,
+  name: string,
+  shiftDetails: {
+    date: string;
+    workerName: string;
+    serviceType: string;
+    startTime: string;
+    endTime: string;
+  }
+): Promise<void> => {
+  const subject = 'Shift Completed - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    ${shiftDetails.workerName} has marked the shift as completed.
+    
+    Date: ${shiftDetails.date}
+    Service: ${shiftDetails.serviceType}
+    Time: ${shiftDetails.startTime} - ${shiftDetails.endTime}
+    
+    A timesheet will be submitted soon for your review.
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`<strong>${shiftDetails.workerName}</strong> has marked the shift as completed.`)}
+    ${createInfoBox('Completed Shift Details', [
+      { label: '📅 Date:', value: shiftDetails.date },
+      { label: '👤 Worker:', value: shiftDetails.workerName },
+      { label: '🏥 Service:', value: shiftDetails.serviceType },
+      { label: '⏰ Time:', value: `${shiftDetails.startTime} - ${shiftDetails.endTime}` },
+    ])}
+    ${createAlertBox('✅ Shift completed successfully!', 'success')}
+    ${createParagraph('A timesheet will be submitted soon for your review and approval.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: 'Shift completed - timesheet pending',
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View Shift',
+    buttonUrl: `${config.clientUrl}/dashboard/shifts`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send shift cancellation notification
+ */
+sendShiftCancellationEmail: async (
+  to: string,
+  name: string,
+  shiftDetails: {
+    date: string;
+    startTime: string;
+    endTime: string;
+    cancelledBy: string;
+    serviceType: string;
+    reason?: string;
+    note?: string;
+  },
+  isWorker: boolean = false
+): Promise<void> => {
+  const subject = 'Shift Cancelled - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    ${shiftDetails.cancelledBy} has cancelled the shift.
+    
+    Date: ${shiftDetails.date}
+    Time: ${shiftDetails.startTime} - ${shiftDetails.endTime}
+    Service: ${shiftDetails.serviceType}
+    ${shiftDetails.reason ? `Reason: ${shiftDetails.reason}` : ''}
+    ${shiftDetails.note ? `Note: ${shiftDetails.note}` : ''}
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`<strong>${shiftDetails.cancelledBy}</strong> has cancelled the shift.`)}
+    ${createInfoBox('Cancelled Shift Details', [
+      { label: '📅 Date:', value: shiftDetails.date },
+      { label: '⏰ Time:', value: `${shiftDetails.startTime} - ${shiftDetails.endTime}` },
+      { label: '🏥 Service:', value: shiftDetails.serviceType },
+      { label: '❌ Cancelled By:', value: shiftDetails.cancelledBy },
+    ])}
+    ${shiftDetails.reason ? createAlertBox(`<strong>Reason:</strong> ${shiftDetails.reason}`, 'info') : ''}
+    ${shiftDetails.note ? createAlertBox(`<strong>Note:</strong> ${shiftDetails.note}`, 'info') : ''}
+    ${createAlertBox('⚠️ This shift has been cancelled.', 'error')}
+    ${isWorker ? 
+      createParagraph('This shift has been removed from your schedule.') :
+      createParagraph('You may reschedule this shift or assign a different worker.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: 'Shift cancelled',
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'View Dashboard',
+    buttonUrl: `${config.clientUrl}/dashboard/shifts`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send timesheet submission notification to participant
+ */
+sendTimesheetSubmissionEmail: async (
+  to: string,
+  name: string,
+  timesheetDetails: {
+    shiftDate: string;
+    workerName: string;
+    hours: number;
+    amount: string;
+  }
+): Promise<void> => {
+  const subject = 'Timesheet Submitted - Review Required - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    ${timesheetDetails.workerName} has submitted a timesheet for your review.
+    
+    Shift Date: ${timesheetDetails.shiftDate}
+    Hours Worked: ${timesheetDetails.hours}
+    Amount: ${timesheetDetails.amount}
+    
+    Please review and approve or reject the timesheet.
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`<strong>${timesheetDetails.workerName}</strong> has submitted a timesheet for your review.`)}
+    ${createInfoBox('Timesheet Summary', [
+      { label: '📅 Shift Date:', value: timesheetDetails.shiftDate },
+      { label: '👤 Worker:', value: timesheetDetails.workerName },
+      { label: '⏱️ Hours Worked:', value: `${timesheetDetails.hours} hours` },
+      { label: '💰 Amount:', value: timesheetDetails.amount },
+    ])}
+    ${createAlertBox('📋 Action required: Please review and approve or reject this timesheet.', 'warning')}
+    ${createParagraph('Log in to your dashboard to review the details and take action.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: 'New timesheet submitted - review needed',
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'Review Timesheet',
+    buttonUrl: `${config.clientUrl}/dashboard/timesheets`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
+},
+
+/**
+ * Send timesheet revision notification to participant
+ */
+sendTimesheetRevisionEmail: async (
+  to: string,
+  name: string,
+  timesheetDetails: {
+    shiftDate: string;
+    workerName: string;
+    hours: number;
+    amount: string;
+  }
+): Promise<void> => {
+  const subject = 'Timesheet Revised - Review Required - Support24';
+  
+  const text = `
+    Hello ${name},
+    
+    ${timesheetDetails.workerName} has revised and resubmitted the timesheet.
+    
+    Shift Date: ${timesheetDetails.shiftDate}
+    Hours Worked: ${timesheetDetails.hours}
+    Amount: ${timesheetDetails.amount}
+    
+    Please review the updated timesheet.
+  `;
+  
+  const bodyContent = `
+    ${createParagraph(`<strong>${timesheetDetails.workerName}</strong> has revised and resubmitted the timesheet.`)}
+    ${createInfoBox('Revised Timesheet Summary', [
+      { label: '📅 Shift Date:', value: timesheetDetails.shiftDate },
+      { label: '👤 Worker:', value: timesheetDetails.workerName },
+      { label: '⏱️ Hours Worked:', value: `${timesheetDetails.hours} hours` },
+      { label: '💰 Amount:', value: timesheetDetails.amount },
+    ])}
+    ${createAlertBox('📋 The timesheet has been updated. Please review the changes.', 'info')}
+    ${createParagraph('Log in to your dashboard to review the revised timesheet and take action.')}
+  `;
+  
+  const html = generateEmailTemplate({
+    preheader: 'Timesheet revised - review needed',
+    greeting: 'Dear',
+    recipientName: name,
+    bodyContent,
+    showButton: true,
+    buttonText: 'Review Revised Timesheet',
+    buttonUrl: `${config.clientUrl}/dashboard/timesheets`,
+    includeTagline: true,
+  });
+  
+  await emailService.sendEmail(to, subject, text, html);
 }
 };

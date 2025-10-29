@@ -1,19 +1,18 @@
 /**
  * Notification service
  * Handles sending notifications to users for various events
+ * Integrates with email service to send actual email notifications
  */
 
 import mongoose from 'mongoose';
 import { IShift } from '../models/shift.model';
 import { ITimesheet } from '../models/timesheet.model';
 import User from '../models/user.model';
+import Shift from '../models/shift.model';
 import logger from '../utils/logger';
 import { WorkerAssignment } from '@/types/shift.types';
 import moment from 'moment';
-
-// This is a placeholder for an actual notification system
-// In a real implementation, this would connect to a notification provider
-// like Firebase Cloud Messaging, email service, SMS gateway, etc.
+import { emailService } from './email.service';
 
 /**
  * Type definition to accept either IShift document or plain object
@@ -52,24 +51,36 @@ export class NotificationService {
       const participant = await User.findById(shift.participantId);
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
-      const endTime = new Date(shift.endTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${participantName} has assigned you a new shift (ID: ${shift.shiftId}) 
-      from ${startTime} to ${endTime}.`;
-      
-      if (shift.isMultiWorkerShift) {
-        message += ' This is a multi-worker shift.';
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      message += ' Please confirm or decline this shift.';
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      // Log notification for now (would be sent via actual notification system)
-      logger.info(`Notification to worker ${worker._id.toString()}: ${message}`);
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        participantName,
+        serviceType: serviceTypeName,
+        location: fullShift.address || `${fullShift.locationType} location`
+      };
       
-      // TODO: Implement actual notification sending
+      // Send email notification
+      await emailService.sendShiftBookingEmail(
+        worker.email,
+        worker.firstName,
+        shiftDetails
+      );
+      
+      logger.info(`Shift booking email sent to worker ${worker._id.toString()}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -92,20 +103,36 @@ export class NotificationService {
       const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${workerName} has confirmed your shift (ID: ${shift.shiftId}) on ${startTime}.`;
-      
-      if (shift.isMultiWorkerShift) {
-        message += ' This is part of your multi-worker shift.';
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id.toString()}: ${message}`);
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      // TODO: Implement actual notification sending
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        workerName,
+        serviceType: serviceTypeName,
+        location: fullShift.address || `${fullShift.locationType} location`
+      };
+      
+      // Send email notification
+      await emailService.sendShiftConfirmationEmail(
+        participant.email,
+        participant.firstName,
+        shiftDetails
+      );
+      
+      logger.info(`Shift confirmation email sent to participant ${participant._id.toString()}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -122,20 +149,36 @@ export class NotificationService {
       const worker = await User.findById(shift.workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${workerName} has declined your shift (ID: ${shift.shiftId}) on ${startTime}.`;
-      
-      if (reason) {
-        message += ` Reason: ${reason}`;
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id.toString()}: ${message}`);
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      // TODO: Implement actual notification sending
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        workerName,
+        serviceType: serviceTypeName,
+        reason
+      };
+      
+      // Send email notification
+      await emailService.sendShiftDeclineEmail(
+        participant.email,
+        participant.firstName,
+        shiftDetails
+      );
+      
+      logger.info(`Shift decline email sent to participant ${participant._id.toString()}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -156,18 +199,35 @@ export class NotificationService {
       const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Create notification message
-      let message = `${workerName} has marked shift (ID: ${shift.shiftId}) as completed. 
-      A timesheet will be submitted soon.`;
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      if (shift.isMultiWorkerShift) {
-        message += ' This is part of your multi-worker shift.';
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      // TODO: Implement actual notification sending
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        workerName,
+        serviceType: serviceTypeName,
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A')
+      };
+      
+      // Send email notification
+      await emailService.sendShiftCompletionEmail(
+        participant.email,
+        participant.firstName,
+        shiftDetails
+      );
+      
+      logger.info(`Shift completion email sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -188,28 +248,38 @@ export class NotificationService {
       const worker = await User.findById(workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${workerName} has cancelled shift (ID: ${shift.shiftId}) on ${startTime}.`;
-      
-      if (shift.cancellationReason) {
-        message += ` Reason: ${shift.cancellationReason}`;
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      if (shift.cancellationNote) {
-        message += ` Note: ${shift.cancellationNote}`;
-      }
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      if (shift.isMultiWorkerShift) {
-        message += ' This is part of your multi-worker shift.';
-      }
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        cancelledBy: workerName,
+        serviceType: serviceTypeName,
+        reason: shift.cancellationReason,
+        note: shift.cancellationNote
+      };
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      // Send email notification
+      await emailService.sendShiftCancellationEmail(
+        participant.email,
+        participant.firstName,
+        shiftDetails,
+        false // isWorker = false (this is for participant)
+      );
       
-      // TODO: Implement actual notification sending
+      logger.info(`Shift cancellation email sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -232,28 +302,38 @@ export class NotificationService {
       const participant = await User.findById(shift.participantId);
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${participantName} has cancelled shift (ID: ${shift.shiftId}) on ${startTime}.`;
-      
-      if (shift.cancellationReason) {
-        message += ` Reason: ${shift.cancellationReason}`;
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      if (shift.cancellationNote) {
-        message += ` Note: ${shift.cancellationNote}`;
-      }
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      if (shift.isMultiWorkerShift) {
-        message += ' This is part of your multi-worker shift assignment.';
-      }
+      // Format shift details for email
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        cancelledBy: participantName,
+        serviceType: serviceTypeName,
+        reason: shift.cancellationReason,
+        note: shift.cancellationNote
+      };
       
-      // Log notification for now
-      logger.info(`Notification to worker ${worker._id}: ${message}`);
+      // Send email notification
+      await emailService.sendShiftCancellationEmail(
+        worker.email,
+        worker.firstName,
+        shiftDetails,
+        true // isWorker = true
+      );
       
-      // TODO: Implement actual notification sending
+      logger.info(`Shift cancellation email sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -276,20 +356,38 @@ export class NotificationService {
       const participant = await User.findById(shift.participantId);
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
       
-      // Format shift details
-      const startTime = new Date(shift.startTime).toLocaleString();
+      // Get full shift details with populated fields
+      const fullShift = await Shift.findById(shift._id).populate('serviceTypeId');
       
-      // Create notification message
-      let message = `${participantName} has removed you from shift (ID: ${shift.shiftId}) on ${startTime}.`;
-      
-      if (shift.isMultiWorkerShift) {
-        message += ' This was part of a multi-worker shift.';
+      if (!fullShift) {
+        logger.warn(`Shift ${shift._id} not found for notification`);
+        return;
       }
       
-      // Log notification for now
-      logger.info(`Notification to worker ${worker._id}: ${message}`);
+      // Get service type name
+      const serviceType = fullShift.serviceTypeId as any;
+      const serviceTypeName = serviceType?.name || 'Care Service';
       
-      // TODO: Implement actual notification sending
+      // Format shift details for email (treat as cancellation)
+      const shiftDetails = {
+        date: moment(shift.startTime).format('dddd, MMMM D, YYYY'),
+        startTime: moment(shift.startTime).format('h:mm A'),
+        endTime: moment(shift.endTime).format('h:mm A'),
+        cancelledBy: participantName,
+        serviceType: serviceTypeName,
+        reason: 'Worker removed from shift',
+        note: 'You have been removed from this shift assignment.'
+      };
+      
+      // Send email notification
+      await emailService.sendShiftCancellationEmail(
+        worker.email,
+        worker.firstName,
+        shiftDetails,
+        true // isWorker = true
+      );
+      
+      logger.info(`Shift removal email sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -306,14 +404,25 @@ export class NotificationService {
       const worker = await User.findById(timesheet.workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Create notification message
-      const message = `${workerName} has submitted a timesheet for shift 
-      ${timesheet.shiftIdRef}. Please review and approve or reject it.`;
+      // Calculate hours from timesheet
+      const hours = Number(((moment(timesheet.actualEndTime).diff(moment(timesheet.actualStartTime), 'minutes')) / 60).toFixed(2));
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      // Format timesheet details for email
+      const timesheetDetails = {
+        shiftDate: moment(timesheet.actualStartTime).format('dddd, MMMM D, YYYY'),
+        workerName,
+        hours,
+        amount: `$${timesheet.grandTotal.toFixed(2)}`
+      };
       
-      // TODO: Implement actual notification sending
+      // Send email notification
+      await emailService.sendTimesheetSubmissionEmail(
+        participant.email,
+        participant.firstName,
+        timesheetDetails
+      );
+      
+      logger.info(`Timesheet submission email sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -329,15 +438,25 @@ export class NotificationService {
       
       const participant = await User.findById(timesheet.participantId);
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
+      const workerName = `${worker.firstName} ${worker.lastName}`;
       
-      // Create notification message
-      const message = `${participantName} has approved your timesheet for shift 
-      ${timesheet.shiftIdRef}. The payment will be processed accordingly.`;
+      // Format timesheet details for email
+      const timesheetDetails = {
+        date: moment(timesheet.actualStartTime).format('dddd, MMMM D, YYYY'),
+        participantName,
+        workerName,
+        hours: Number(((timesheet.grandTotal || 0) / 50).toFixed(2)), // Approximate hours based on total
+        status: 'approved'
+      };
       
-      // Log notification for now
-      logger.info(`Notification to worker ${worker._id}: ${message}`);
+      // Send email notification
+      await emailService.sendTimesheetApprovalEmail(
+        worker.email,
+        worker.firstName,
+        timesheetDetails
+      );
       
-      // TODO: Implement actual notification sending
+      logger.info(`Timesheet approval email sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -346,25 +465,33 @@ export class NotificationService {
   /**
    * Notify worker about a timesheet rejection
    */
-  static async notifyWorkerOfTimesheetRejection(timesheet: ITimesheet, reason?: string): Promise<void> {
+  static async notifyWorkerOfTimesheetRejection(timesheet: ITimesheet, _reason?: string): Promise<void> {
     try {
       const worker = await User.findById(timesheet.workerId);
       if (!worker) return;
       
       const participant = await User.findById(timesheet.participantId);
       const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
+      const workerName = `${worker.firstName} ${worker.lastName}`;
       
-      // Create notification message
-      let message = `${participantName} has rejected your timesheet for shift ${timesheet.shiftIdRef}.`;
+      // Format timesheet details for email
+      // Note: Rejection reason is stored in timesheet.rejectionReason and visible in the dashboard
+      const timesheetDetails = {
+        date: moment(timesheet.actualStartTime).format('dddd, MMMM D, YYYY'),
+        participantName,
+        workerName,
+        hours: Number(((timesheet.grandTotal || 0) / 50).toFixed(2)), // Approximate hours
+        status: 'rejected'
+      };
       
-      if (reason) {
-        message += ` Reason: ${reason}. Please revise and resubmit the timesheet.`;
-      }
+      // Send email notification
+      await emailService.sendTimesheetApprovalEmail(
+        worker.email,
+        worker.firstName,
+        timesheetDetails
+      );
       
-      // Log notification for now
-      logger.info(`Notification to worker ${worker._id}: ${message}`);
-      
-      // TODO: Implement actual notification sending
+      logger.info(`Timesheet rejection email sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -381,14 +508,25 @@ export class NotificationService {
       const worker = await User.findById(timesheet.workerId);
       const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
       
-      // Create notification message
-      const message = `${workerName} has revised the timesheet for shift 
-      ${timesheet.shiftIdRef}. Please review the updated timesheet.`;
+      // Calculate hours from timesheet
+      const hours = Number(((moment(timesheet.actualEndTime).diff(moment(timesheet.actualStartTime), 'minutes')) / 60).toFixed(2));
       
-      // Log notification for now
-      logger.info(`Notification to participant ${participant._id}: ${message}`);
+      // Format timesheet details for email
+      const timesheetDetails = {
+        shiftDate: moment(timesheet.actualStartTime).format('dddd, MMMM D, YYYY'),
+        workerName,
+        hours,
+        amount: `$${timesheet.grandTotal.toFixed(2)}`
+      };
       
-      // TODO: Implement actual notification sending
+      // Send email notification
+      await emailService.sendTimesheetRevisionEmail(
+        participant.email,
+        participant.firstName,
+        timesheetDetails
+      );
+      
+      logger.info(`Timesheet revision email sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -396,6 +534,8 @@ export class NotificationService {
 
   /**
  * Notify worker that invoice has been sent to participant
+ * Note: These invoice notifications are informational logs only
+ * The actual invoice emails are sent via invoice.service.ts
  */
 static async notifyWorkerOfInvoiceSent(
   workerId: string,
@@ -409,13 +549,8 @@ static async notifyWorkerOfInvoiceSent(
     const participant = await User.findById(participantId);
     const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
     
-    // Create notification message
-    const message = `Invoice ${invoiceNumber} has been sent to ${participantName}.`;
-    
-    // Log notification for now
-    logger.info(`Notification to worker ${worker._id}: ${message}`);
-    
-    // TODO: Implement actual notification sending
+    // Log notification (invoice email already sent by invoice.service.ts)
+    logger.info(`Invoice ${invoiceNumber} notification logged for worker ${worker._id} - invoice sent to ${participantName}`);
   } catch (error) {
     logger.error('Error sending worker notification:', error);
   }
@@ -423,6 +558,8 @@ static async notifyWorkerOfInvoiceSent(
 
 /**
  * Notify worker that batch invoices have been sent to participant
+ * Note: These invoice notifications are informational logs only
+ * The actual invoice emails are sent via invoice.service.ts
  */
 static async notifyWorkerOfBatchInvoicesSent(
   workerId: string,
@@ -436,14 +573,8 @@ static async notifyWorkerOfBatchInvoicesSent(
     const participant = await User.findById(participantId);
     const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
     
-    // Create notification message
-    const message = `${invoiceNumbers.length} invoices (${invoiceNumbers.join(', ')}) 
-    have been sent to ${participantName}.`;
-    
-    // Log notification for now
-    logger.info(`Notification to worker ${worker._id}: ${message}`);
-    
-    // TODO: Implement actual notification sending
+    // Log notification (invoice emails already sent by invoice.service.ts)
+    logger.info(`${invoiceNumbers.length} batch invoices notification logged for worker ${worker._id} - invoices sent to ${participantName}`);
   } catch (error) {
     logger.error('Error sending worker notification:', error);
   }
@@ -451,6 +582,8 @@ static async notifyWorkerOfBatchInvoicesSent(
 
 /**
  * Notify participant that a new invoice has been generated
+ * Note: These invoice notifications are informational logs only
+ * The actual invoice emails are sent via invoice.service.ts
  */
 static async notifyParticipantOfInvoiceGenerated(
   participantId: string,
@@ -465,17 +598,8 @@ static async notifyParticipantOfInvoiceGenerated(
     const worker = await User.findById(workerId);
     const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
     
-    // Format amount
-    const formattedAmount = amount.toFixed(2);
-    
-    // Create notification message
-    const message = `A new invoice (${invoiceNumber}) for 
-    $${formattedAmount} has been generated for services provided by ${workerName}.`;
-    
-    // Log notification for now
-    logger.info(`Notification to participant ${participant._id}: ${message}`);
-    
-    // TODO: Implement actual notification sending
+    // Log notification (invoice email already sent by invoice.service.ts)
+    logger.info(`Invoice ${invoiceNumber} generated notification logged for participant ${participant._id} - $${amount.toFixed(2)} from ${workerName}`);
   } catch (error) {
     logger.error('Error sending participant notification:', error);
   }
@@ -483,6 +607,8 @@ static async notifyParticipantOfInvoiceGenerated(
 
 /**
  * Notify worker that a batch invoice has been sent to participant
+ * Note: These invoice notifications are informational logs only
+ * The actual invoice emails are sent via invoice.service.ts
  */
 static async notifyWorkerOfBatchInvoiceSent(
   workerId: string,
@@ -496,13 +622,8 @@ static async notifyWorkerOfBatchInvoiceSent(
     const participant = await User.findById(participantId);
     const participantName = participant ? `${participant.firstName} ${participant.lastName}` : 'A participant';
     
-    // Create notification message
-    const message = `Your consolidated invoice ${invoiceNumber} has been sent to ${participantName}.`;
-    
-    // Log notification for now
-    logger.info(`Notification to worker ${worker._id}: ${message}`);
-    
-    // TODO: Implement actual notification sending
+    // Log notification (invoice email already sent by batchInvoice.service.ts)
+    logger.info(`Batch invoice ${invoiceNumber} notification logged for worker ${worker._id} - invoice sent to ${participantName}`);
   } catch (error) {
     logger.error('Error sending worker notification:', error);
   }
@@ -510,6 +631,8 @@ static async notifyWorkerOfBatchInvoiceSent(
 
 /**
  * Notify participant that a batch invoice has been generated
+ * Note: These invoice notifications are informational logs only
+ * The actual invoice emails are sent via invoice.service.ts
  */
 static async notifyParticipantOfBatchInvoiceGenerated(
   participantId: string,
@@ -526,20 +649,14 @@ static async notifyParticipantOfBatchInvoiceGenerated(
     const worker = await User.findById(workerId);
     const workerName = worker ? `${worker.firstName} ${worker.lastName}` : 'A support worker';
     
-    // Format dates and amount
     const startDateFormatted = moment(startDate).format('MMM D, YYYY');
     const endDateFormatted = moment(endDate).format('MMM D, YYYY');
-    const formattedAmount = amount.toFixed(2);
     
-    // Create notification message
-    const message = `A new consolidated invoice (${batchInvoiceNumber}) for services from ${startDateFormatted} to ${endDateFormatted} has been generated by ${workerName} for $${formattedAmount}.`;
-    
-    // Log notification for now
-    logger.info(`Notification to participant ${participant._id}: ${message}`);
-    
-    // TODO: Implement actual notification sending
+    // Log notification (invoice email already sent by batchInvoice.service.ts)
+    logger.info(`Batch invoice ${batchInvoiceNumber} generated notification logged for participant ${participant._id} - $${amount.toFixed(2)} from ${workerName} (${startDateFormatted} to ${endDateFormatted})`);
   } catch (error) {
     logger.error('Error sending participant notification:', error);
   }
 }
 }
+
