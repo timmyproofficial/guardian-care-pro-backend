@@ -13,6 +13,7 @@ import logger from '../utils/logger';
 import { WorkerAssignment } from '@/types/shift.types';
 import moment from 'moment';
 import { emailService } from './email.service';
+import { PushNotificationService } from './push-notification.service';
 
 /**
  * Type definition to accept either IShift document or plain object
@@ -80,7 +81,21 @@ export class NotificationService {
         shiftDetails
       );
       
-      logger.info(`Shift booking email sent to worker ${worker._id.toString()}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(worker._id.toString(), {
+        title: '🔔 New Shift Assignment',
+        body: `You have been assigned a ${serviceTypeName} shift for ${participantName} on ${shiftDetails.date}`,
+        data: {
+          type: 'new_shift',
+          shiftId: shift.shiftId,
+          participantName,
+          date: shiftDetails.date,
+          screen: 'ShiftDetails', // For deep linking in the app
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift booking email and push sent to worker ${worker._id.toString()}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -132,7 +147,21 @@ export class NotificationService {
         shiftDetails
       );
       
-      logger.info(`Shift confirmation email sent to participant ${participant._id.toString()}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '✅ Shift Confirmed',
+        body: `${workerName} has confirmed your ${serviceTypeName} shift on ${shiftDetails.date}`,
+        data: {
+          type: 'shift_confirmed',
+          shiftId: shift.shiftId,
+          workerName,
+          date: shiftDetails.date,
+          screen: 'ShiftDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift confirmation email and push sent to participant ${participant._id.toString()}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -178,7 +207,22 @@ export class NotificationService {
         shiftDetails
       );
       
-      logger.info(`Shift decline email sent to participant ${participant._id.toString()}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '❌ Shift Declined',
+        body: `${workerName} has declined your ${serviceTypeName} shift on ${shiftDetails.date}`,
+        data: {
+          type: 'shift_declined',
+          shiftId: shift.shiftId,
+          workerName,
+          date: shiftDetails.date,
+          reason: reason || '',
+          screen: 'ShiftDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift decline email and push sent to participant ${participant._id.toString()}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -227,7 +271,21 @@ export class NotificationService {
         shiftDetails
       );
       
-      logger.info(`Shift completion email sent to participant ${participant._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '✅ Shift Completed',
+        body: `${workerName} has completed your ${serviceTypeName} shift. Timesheet will be submitted soon.`,
+        data: {
+          type: 'shift_completed',
+          shiftId: shift.shiftId,
+          workerName,
+          date: shiftDetails.date,
+          screen: 'ShiftDetails',
+        },
+        priority: 'normal',
+      });
+      
+      logger.info(`Shift completion email and push sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -279,7 +337,22 @@ export class NotificationService {
         false // isWorker = false (this is for participant)
       );
       
-      logger.info(`Shift cancellation email sent to participant ${participant._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '🚫 Shift Cancelled',
+        body: `Your ${serviceTypeName} shift on ${shiftDetails.date} has been cancelled by ${workerName}`,
+        data: {
+          type: 'shift_cancelled',
+          shiftId: shift.shiftId,
+          cancelledBy: workerName,
+          date: shiftDetails.date,
+          reason: shift.cancellationReason || '',
+          screen: 'ShiftDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift cancellation email and push sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -333,7 +406,22 @@ export class NotificationService {
         true // isWorker = true
       );
       
-      logger.info(`Shift cancellation email sent to worker ${worker._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(worker._id.toString(), {
+        title: '🚫 Shift Cancelled',
+        body: `Your ${serviceTypeName} shift on ${shiftDetails.date} has been cancelled by ${participantName}`,
+        data: {
+          type: 'shift_cancelled',
+          shiftId: shift.shiftId,
+          cancelledBy: participantName,
+          date: shiftDetails.date,
+          reason: shift.cancellationReason || '',
+          screen: 'ShiftDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift cancellation email and push sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -387,7 +475,21 @@ export class NotificationService {
         true // isWorker = true
       );
       
-      logger.info(`Shift removal email sent to worker ${worker._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(worker._id.toString(), {
+        title: '❌ Removed from Shift',
+        body: `You have been removed from the ${serviceTypeName} shift on ${shiftDetails.date}`,
+        data: {
+          type: 'shift_removed',
+          shiftId: shift.shiftId,
+          participantName,
+          date: shiftDetails.date,
+          screen: 'ShiftDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Shift removal email and push sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -422,7 +524,21 @@ export class NotificationService {
         timesheetDetails
       );
       
-      logger.info(`Timesheet submission email sent to participant ${participant._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '📋 New Timesheet for Review',
+        body: `${workerName} has submitted a timesheet for ${timesheetDetails.shiftDate} - ${timesheetDetails.amount}`,
+        data: {
+          type: 'timesheet_submitted',
+          timesheetId: timesheet._id.toString(),
+          workerName,
+          amount: timesheetDetails.amount,
+          screen: 'TimesheetDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Timesheet submission email and push sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }
@@ -456,7 +572,21 @@ export class NotificationService {
         timesheetDetails
       );
       
-      logger.info(`Timesheet approval email sent to worker ${worker._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(worker._id.toString(), {
+        title: '✅ Timesheet Approved',
+        body: `${participantName} has approved your timesheet for ${timesheetDetails.date}`,
+        data: {
+          type: 'timesheet_approved',
+          timesheetId: timesheet._id.toString(),
+          participantName,
+          date: timesheetDetails.date,
+          screen: 'TimesheetDetails',
+        },
+        priority: 'normal',
+      });
+      
+      logger.info(`Timesheet approval email and push sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -491,7 +621,22 @@ export class NotificationService {
         timesheetDetails
       );
       
-      logger.info(`Timesheet rejection email sent to worker ${worker._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(worker._id.toString(), {
+        title: '❌ Timesheet Rejected',
+        body: `${participantName} has rejected your timesheet for ${timesheetDetails.date}. Please revise and resubmit.`,
+        data: {
+          type: 'timesheet_rejected',
+          timesheetId: timesheet._id.toString(),
+          participantName,
+          date: timesheetDetails.date,
+          reason: timesheet.rejectionReason || '',
+          screen: 'TimesheetDetails',
+        },
+        priority: 'high',
+      });
+      
+      logger.info(`Timesheet rejection email and push sent to worker ${worker._id}`);
     } catch (error) {
       logger.error('Error sending worker notification:', error);
     }
@@ -526,7 +671,22 @@ export class NotificationService {
         timesheetDetails
       );
       
-      logger.info(`Timesheet revision email sent to participant ${participant._id}`);
+      // Send push notification
+      await PushNotificationService.sendToUser(participant._id.toString(), {
+        title: '📝 Timesheet Revised',
+        body: `${workerName} has revised and resubmitted the timesheet for ${timesheetDetails.shiftDate}`,
+        data: {
+          type: 'timesheet_revised',
+          timesheetId: timesheet._id.toString(),
+          workerName,
+          date: timesheetDetails.shiftDate,
+          amount: timesheetDetails.amount,
+          screen: 'TimesheetDetails',
+        },
+        priority: 'normal',
+      });
+      
+      logger.info(`Timesheet revision email and push sent to participant ${participant._id}`);
     } catch (error) {
       logger.error('Error sending participant notification:', error);
     }

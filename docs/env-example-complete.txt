@@ -1,0 +1,86 @@
+# =============================================================================
+# SUPPORT24 API - COMPLETE ENVIRONMENT CONFIGURATION
+# =============================================================================
+# Copy this to your .env file and update with your actual values
+# DO NOT commit .env file to version control!
+
+# =============================================================================
+# ENVIRONMENT
+# =============================================================================
+NODE_ENV=development
+PORT=5000
+API_PREFIX=/api/v1
+CLIENT_URL=http://localhost:3000
+CORS_ORIGIN=*
+
+# =============================================================================
+# DATABASE
+# =============================================================================
+MONGODB_URI=mongodb://localhost:27017/support24
+MONGODB_URI_TEST=mongodb://localhost:27017/support24_test
+
+# =============================================================================
+# JWT AUTHENTICATION
+# =============================================================================
+JWT_SECRET=your-super-secret-jwt-key-change-this-in-production-min-32-chars
+JWT_ACCESS_EXPIRATION_MINUTES=30
+JWT_REFRESH_EXPIRATION_DAYS=30
+
+# =============================================================================
+# EMAIL (SMTP Configuration)
+# =============================================================================
+EMAIL_FROM=noreply@support24.com
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-16-character-app-password
+
+# =============================================================================
+# CLOUDINARY (Image & File Storage)
+# =============================================================================
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=123456789012345
+CLOUDINARY_API_SECRET=your-cloudinary-api-secret
+
+# =============================================================================
+# EMAIL ASSETS
+# =============================================================================
+EMAIL_BANNER=https://res.cloudinary.com/your-cloud/image/upload/v1/email-banner.png
+EMAIL_BANNER_LOCAL=
+LOGO_URL=https://res.cloudinary.com/your-cloud/image/upload/v1/logo.png
+LOGO_LOCAL=
+USE_BASE64_IMAGES=true
+
+FACEBOOK_ICON_URL=https://cdn-icons-png.flaticon.com/512/124/124010.png
+INSTAGRAM_ICON_URL=https://cdn-icons-png.flaticon.com/512/2111/2111463.png
+LINKEDIN_ICON_URL=https://cdn-icons-png.flaticon.com/512/174/174857.png
+FACEBOOK_URL=https://facebook.com/support24
+INSTAGRAM_URL=https://instagram.com/support24
+LINKEDIN_URL=https://linkedin.com/company/support24
+
+# =============================================================================
+# FIREBASE ADMIN SDK (Push Notifications)
+# =============================================================================
+FIREBASE_PROJECT_ID=your-firebase-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com
+FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_KEY_HERE\n-----END PRIVATE KEY-----\n"
+
+# =============================================================================
+# AWS S3 (Optional)
+# =============================================================================
+AWS_BUCKET_NAME=your-s3-bucket-name
+AWS_ACCESS_KEY_ID=your-aws-access-key-id
+AWS_SECRET_ACCESS_KEY=your-aws-secret-access-key
+AWS_REGION=us-east-1
+
+# =============================================================================
+# STRIPE (Optional)
+# =============================================================================
+STRIPE_SECRET_KEY=sk_test_xxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxx
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+LOG_LEVEL=info
+
