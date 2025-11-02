@@ -33,6 +33,15 @@ export interface IUser extends Document {
   profileImage?: string | null;
   // bio?: string;
   notificationPreferences: NotificationPreference;
+  
+  // Push notification tokens
+  pushTokens?: {
+    token: string;
+    platform: 'ios' | 'android' | 'web';
+    deviceId: string;
+    lastUsed: Date;
+  }[];
+  
   isEmailVerified: boolean;
   emailVerificationToken?: string;
   emailVerificationExpires?: Date;
@@ -131,6 +140,28 @@ const userSchema = new Schema<IUser>(
       enum: Object.values(NotificationPreference),
       default: NotificationPreference.EMAIL,
     },
+    // Push notification tokens for FCM
+    pushTokens: [
+      {
+        token: {
+          type: String,
+          required: true,
+        },
+        platform: {
+          type: String,
+          enum: ['ios', 'android', 'web'],
+          required: true,
+        },
+        deviceId: {
+          type: String,
+          required: true,
+        },
+        lastUsed: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
     isEmailVerified: {
       type: Boolean,
       default: false,

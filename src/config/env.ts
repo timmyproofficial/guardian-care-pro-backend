@@ -63,7 +63,17 @@ const envVarsSchema = Joi.object()
     
     // Stripe (Payment Processing)
     STRIPE_SECRET_KEY: Joi.string().description('Stripe secret key'),
-    STRIPE_WEBHOOK_SECRET: Joi.string().description('Stripe webhook secret')
+    STRIPE_WEBHOOK_SECRET: Joi.string().description('Stripe webhook secret'),
+    
+    // Firebase (Push Notifications)
+    FIREBASE_PROJECT_ID: Joi.string().description('Firebase project ID'),
+    FIREBASE_PRIVATE_KEY: Joi.string().description('Firebase private key'),
+    FIREBASE_CLIENT_EMAIL: Joi.string().description('Firebase client email'),
+    
+    // Local image paths for email (optional)
+    EMAIL_BANNER_LOCAL: Joi.string().description('Local path to email banner image'),
+    LOGO_LOCAL: Joi.string().description('Local path to logo image'),
+    USE_BASE64_IMAGES: Joi.string().description('Use base64 encoding for email images (true/false)')
   })
   .unknown();
 
@@ -159,6 +169,13 @@ const config = {
   stripe: {
     secretKey: envVars.STRIPE_SECRET_KEY,
     webhookSecret: envVars.STRIPE_WEBHOOK_SECRET,
+  },
+  
+  // Firebase config (Push Notifications)
+  firebase: {
+    projectId: envVars.FIREBASE_PROJECT_ID || '',
+    privateKey: envVars.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n') || '',
+    clientEmail: envVars.FIREBASE_CLIENT_EMAIL || '',
   },
   
   // Logging config
