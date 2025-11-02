@@ -117,10 +117,14 @@ const config = {
     from: envVars.EMAIL_FROM,
     smtp: {
       host: envVars.SMTP_HOST,
-      port: envVars.SMTP_PORT,
+      port: Number(envVars.SMTP_PORT),
+      secure: Number(envVars.SMTP_PORT) === 465,
       auth: {
         user: envVars.SMTP_USERNAME,
         pass: envVars.SMTP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // Prevents GoDaddy SSL issues
       },
     },
   },
