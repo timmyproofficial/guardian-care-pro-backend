@@ -3,8 +3,7 @@
  * to include authenticated user information and other custom properties.
  */
 
-// import { Request } from 'express';
-import { IUser } from '../models/user.model';
+import type { IUser } from '../models/user.model';
 
 declare global {
   namespace Express {
