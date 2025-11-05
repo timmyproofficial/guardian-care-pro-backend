@@ -20,6 +20,7 @@ import incidentRoute from './incident.route';
 import analyticsRoute from './analytics.route';
 import routineRoute from './routine.route';
 import notificationRoute from './notification.routes';
+import locationRoute from './location.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -120,6 +121,11 @@ const routes: Route[] = [
   {
     path: '/notifications',
     route: notificationRoute,
+    authRequired: true,
+  },
+  {
+    path: '/location',
+    route: locationRoute,
     authRequired: true,
   }
 ];

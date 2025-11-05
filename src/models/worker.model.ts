@@ -69,6 +69,21 @@ export interface IWorker extends IUser {
     bsb: string;
     accountNumber: string;
   };
+  // Location fields
+  stateIds?: mongoose.Types.ObjectId[];
+  regionIds?: mongoose.Types.ObjectId[];
+  serviceAreaIds?: mongoose.Types.ObjectId[];
+  baseLocation?: {
+    type: 'Point';
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+  travelRadiusKm?: number;
+  baseAddress?: {
+    street?: string;
+    suburb?: string;
+    postcode?: string;
+    state?: string;
+  };
 }
 
 /**
@@ -202,6 +217,42 @@ const workerSchema = new Schema<IWorker>(
       bsb: { type: String },
       accountNumber: { type: String },
     },
+    
+    // Location fields
+    stateIds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'State'
+    }],
+    regionIds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Region'
+    }],
+    serviceAreaIds: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceArea'
+    }],
+    baseLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: false
+      }
+    },
+    travelRadiusKm: {
+      type: Number,
+      min: 0,
+      default: 20 // Default 20km travel radius
+    },
+    baseAddress: {
+      street: { type: String },
+      suburb: { type: String },
+      postcode: { type: String },
+      state: { type: String }
+    }
   }
 );
 
@@ -231,6 +282,13 @@ workerSchema.index({
   'verificationStatus.policeCheckVerified': 1, 
   'verificationStatus.ndisWorkerScreeningVerified': 1 
 });
+
+// Location indexes
+workerSchema.index({ stateIds: 1 });
+workerSchema.index({ regionIds: 1 });
+workerSchema.index({ serviceAreaIds: 1 });
+workerSchema.index({ baseLocation: '2dsphere' }); // Geospatial index
+workerSchema.index({ travelRadiusKm: 1 });
 
 /**
  * Create and export the Support Worker model
