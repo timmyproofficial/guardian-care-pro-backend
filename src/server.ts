@@ -18,14 +18,14 @@ const normalizePort = (val: string | number): number => {
   const port = parseInt(val as string, 10);
   
   if (isNaN(port)) {
-    return 5000; // Default port
+    return 3000; // Default port
   }
   
   if (port >= 0) {
     return port;
   }
   
-  return 5000;
+  return 3000;
 };
 
 /**
