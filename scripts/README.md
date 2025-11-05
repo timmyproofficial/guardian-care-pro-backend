@@ -1,0 +1,111 @@
+# Scripts Directory
+
+This directory contains one-time utility scripts for database operations and maintenance.
+
+## Available Scripts
+
+### 1. Location Data Cleanup
+
+**File:** `cleanup-locations.ts`
+
+**Purpose:** Drops all location-related collections to allow clean re-seeding.
+
+**Usage:**
+```bash
+npm run cleanup:locations
+```
+
+**What it does:**
+1. Connects to MongoDB
+2. Drops the following collections:
+   - `states`
+   - `regions`
+   - `suburbs`
+   - `serviceareas`
+3. Disconnects and exits
+
+**When to use:**
+- Before re-running location seeds after schema changes
+- To clean up test/development data
+- When you need to start fresh with location data
+
+---
+
+### 2. Location Data Seeder
+
+**File:** `seed-locations.ts`
+
+**Purpose:** Seeds the database with Australian location reference data including:
+- 8 States and Territories
+- 25+ Major Regions
+- 20+ Sample Suburbs with GPS coordinates
+- 15+ Service Areas
+
+**Usage:**
+```bash
+npm run seed:locations
+```
+
+**Or directly:**
+```bash
+ts-node scripts/seed-locations.ts
+```
+
+**What it does:**
+1. Connects to MongoDB
+2. Seeds Australian states and territories
+3. Seeds major regions for each state
+4. Seeds sample suburbs with real coordinates
+5. Seeds service areas for each region
+6. Disconnects and exits
+
+**Note:** The script is idempotent - it checks if data already exists before creating new records, so it's safe to run multiple times.
+
+**Expected Output:**
+```
+🌏 LOCATION DATA SEEDER
+📡 Connecting to MongoDB...
+✓ Connected to MongoDB successfully
+
+🚀 Starting location data seeding...
+Seeding Australian states...
+Created state: New South Wales
+Created state: Victoria
+...
+Seeded 8 states
+
+Seeding Australian regions...
+Created region: Greater Sydney
+Created region: Greater Melbourne
+...
+Seeded 25 regions
+
+Seeding sample suburbs...
+Created suburb: Sydney CBD, 2000
+Created suburb: Melbourne CBD, 3000
+...
+Seeded 20 suburbs
+
+Seeding service areas...
+Created service area: Sydney Inner West
+Created service area: Melbourne Inner City
+...
+Service areas seeded successfully
+
+✅ LOCATION DATA SEEDING COMPLETED SUCCESSFULLY!
+
+Seeded data includes:
+  • 8 Australian States and Territories
+  • 25+ Major Regions
+  • 20+ Sample Suburbs with GPS coordinates
+  • 15+ Service Areas
+```
+
+## Future Scripts
+
+Add new scripts here as needed for:
+- Data migrations
+- Database cleanup
+- One-time updates
+- Testing data generation
+

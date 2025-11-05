@@ -42,6 +42,21 @@ export interface IParticipant extends IUser {
   ndisNumber?: string;
   requiresSupervision: boolean;
   onboardingComplete: boolean;
+  // Location fields
+  stateId?: mongoose.Types.ObjectId;
+  regionId?: mongoose.Types.ObjectId;
+  suburbId?: mongoose.Types.ObjectId;
+  serviceAreaId?: mongoose.Types.ObjectId;
+  participantLocation?: {
+    type: 'Point';
+    coordinates: [number, number]; // [longitude, latitude]
+  };
+  residentialAddress?: {
+    street?: string;
+    suburb?: string;
+    postcode?: string;
+    state?: string;
+  };
 }
 
 /**
@@ -135,6 +150,40 @@ const participantSchema = new Schema<IParticipant>(
     onboardingComplete: {
       type: Boolean,
       default: false,
+    },
+    // Location fields
+    stateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'State'
+    },
+    regionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Region'
+    },
+    suburbId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Suburb'
+    },
+    serviceAreaId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceArea'
+    },
+    participantLocation: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point'
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        required: false
+      }
+    },
+    residentialAddress: {
+      street: { type: String },
+      suburb: { type: String },
+      postcode: { type: String },
+      state: { type: String }
     }
   }
 );
@@ -146,6 +195,13 @@ participantSchema.index({ guardianId: 1 });
 participantSchema.index({ supportCoordinators: 1 });
 participantSchema.index({ supportNeeds: 1 });
 participantSchema.index({ 'subscription.isActive': 1 });
+
+// Location indexes
+participantSchema.index({ stateId: 1 });
+participantSchema.index({ regionId: 1 });
+participantSchema.index({ suburbId: 1 });
+participantSchema.index({ serviceAreaId: 1 });
+participantSchema.index({ participantLocation: '2dsphere' }); // Geospatial index
 
 /**
  * Create and export the Participant model
