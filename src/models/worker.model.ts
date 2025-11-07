@@ -234,12 +234,10 @@ const workerSchema = new Schema<IWorker>(
     baseLocation: {
       type: {
         type: String,
-        enum: ['Point'],
-        default: 'Point'
+        enum: ['Point']
       },
       coordinates: {
-        type: [Number], // [longitude, latitude]
-        required: false
+        type: [Number] // [longitude, latitude]
       }
     },
     travelRadiusKm: {
@@ -287,7 +285,8 @@ workerSchema.index({
 workerSchema.index({ stateIds: 1 });
 workerSchema.index({ regionIds: 1 });
 workerSchema.index({ serviceAreaIds: 1 });
-workerSchema.index({ baseLocation: '2dsphere' }); // Geospatial index
+// Sparse 2dsphere index - only indexes documents with complete location data
+workerSchema.index({ baseLocation: '2dsphere' }, { sparse: true });
 workerSchema.index({ travelRadiusKm: 1 });
 
 /**

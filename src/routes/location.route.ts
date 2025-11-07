@@ -88,19 +88,19 @@ router.post('/geocode', authenticate, locationController.geocodeAddress);
 /**
  * @route   GET /api/location/workers/nearby
  * @desc    Search for workers near participant's location (geospatial search)
- * @query   participantId (required), maxDistanceKm, page, limit, skills[], languages[], minRating, maxHourlyRate, onlyVerified, keyword
- * @access  Private (Participant only)
- * @example GET /api/location/workers/nearby?participantId=123&maxDistanceKm=30&skills[]=skill1&skills[]=skill2&page=1&limit=10
+ * @query   maxDistanceKm, page, limit, skills[], languages[], minRating, maxHourlyRate, onlyVerified, keyword
+ * @access  Private (Participant only - uses authenticated user's ID)
+ * @example GET /api/location/workers/nearby?maxDistanceKm=30&skills[]=skill1&skills[]=skill2&page=1&limit=10
  */
 router.get('/workers/nearby', authenticate, locationController.searchNearbyWorkers);
 
 /**
  * @route   GET /api/location/workers/by-region
  * @desc    Search for workers by region/state/service area
- * @query   participantId (required), stateId, regionId, serviceAreaId, matchParticipantLocation, page, limit, + standard filters
- * @access  Private (Participant only)
- * @example GET /api/location/workers/by-region?participantId=123&regionId=456&skills[]=skill1&page=1&limit=10
- * @example GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=true&page=1&limit=10
+ * @query   stateId, regionId, serviceAreaId, matchParticipantLocation, page, limit, + standard filters
+ * @access  Private (Participant only - uses authenticated user's ID)
+ * @example GET /api/location/workers/by-region?regionId=456&skills[]=skill1&page=1&limit=10
+ * @example GET /api/location/workers/by-region?matchParticipantLocation=true&page=1&limit=10
  */
 router.get('/workers/by-region', authenticate, locationController.searchWorkersByRegion);
 

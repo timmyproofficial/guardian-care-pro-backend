@@ -14,6 +14,7 @@
     "seed": "ts-node src/utils/seeder.ts",
     "seed:locations": "ts-node scripts/seed-locations.ts",
     "cleanup:locations": "ts-node scripts/cleanup-locations.ts",
+    "cleanup:geojson": "ts-node scripts/cleanup-partial-geojson.ts",
     "heroku-postbuild": "npm run build"
   },
   "keywords": [
