@@ -101,6 +101,73 @@ Seeded data includes:
   • 15+ Service Areas
 ```
 
+---
+
+### 3. Partial GeoJSON Cleanup
+
+**File:** `cleanup-partial-geojson.ts`
+
+**Purpose:** Removes incomplete GeoJSON objects from existing participants and workers. This is a migration script to fix data from the old schema where GeoJSON fields could have `type: "Point"` without coordinates.
+
+**Usage:**
+```bash
+npm run cleanup:geojson
+```
+
+**What it does:**
+1. Connects to MongoDB
+2. Finds all participants with partial `participantLocation` (type exists but no coordinates)
+3. Finds all workers with partial `baseLocation` (type exists but no coordinates)
+4. Removes these incomplete GeoJSON fields completely
+5. Prevents MongoDB 2dsphere index errors
+
+**When to use:**
+- After upgrading to the new location schema
+- If you encounter "Point must be an array or object" errors
+- When existing users have incomplete location data
+
+**Expected Output:**
+```
+🚀 STARTING GEOJSON CLEANUP
+✅ Connected to MongoDB
+
+🔧 Cleaning up participant GeoJSON data...
+📊 Found 5 participants with partial GeoJSON
+✅ Cleaned up 5 participants
+
+🔧 Cleaning up worker GeoJSON data...
+📊 Found 3 workers with partial GeoJSON
+✅ Cleaned up 3 workers
+
+✅ GEOJSON CLEANUP COMPLETED SUCCESSFULLY
+```
+
+**Note:** This script is safe to run multiple times and won't affect users with complete location data.
+
+---
+
+## Workflow
+
+Typical workflow for location setup and maintenance:
+
+1. **Initial Setup:**
+   ```bash
+   npm run seed:locations
+   ```
+
+2. **Fix Existing User Data** (for existing applications):
+   ```bash
+   npm run cleanup:geojson
+   ```
+
+3. **Reset and Re-seed** (if needed):
+   ```bash
+   npm run cleanup:locations
+   npm run seed:locations
+   ```
+
+---
+
 ## Future Scripts
 
 Add new scripts here as needed for:

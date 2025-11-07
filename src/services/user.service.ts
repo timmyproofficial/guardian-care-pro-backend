@@ -232,7 +232,10 @@ export const userService = {
       if (onboardingData.serviceAreaIds && onboardingData.serviceAreaIds.length > 0) {
         updateData.serviceAreaIds = onboardingData.serviceAreaIds.map(id => new mongoose.Types.ObjectId(id));
       }
-      if (onboardingData.baseLocation) {
+      // Only save baseLocation if BOTH longitude and latitude are provided
+      if (onboardingData.baseLocation && 
+          onboardingData.baseLocation.longitude !== undefined && 
+          onboardingData.baseLocation.latitude !== undefined) {
         updateData.baseLocation = {
           type: 'Point',
           coordinates: [onboardingData.baseLocation.longitude, onboardingData.baseLocation.latitude]
@@ -354,7 +357,10 @@ export const userService = {
       if (onboardingData.serviceAreaId) {
         updateData.serviceAreaId = new mongoose.Types.ObjectId(onboardingData.serviceAreaId);
       }
-      if (onboardingData.location) {
+      // Only save participantLocation if BOTH longitude and latitude are provided
+      if (onboardingData.location && 
+          onboardingData.location.longitude !== undefined && 
+          onboardingData.location.latitude !== undefined) {
         updateData.participantLocation = {
           type: 'Point',
           coordinates: [onboardingData.location.longitude, onboardingData.location.latitude]

@@ -215,12 +215,20 @@ export const getLocationHierarchy = async (req: Request, res: Response): Promise
  */
 export const searchNearbyWorkers = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { participantId } = req.query;
     const { maxDistanceKm, page, limit, ...filters } = req.query;
 
-    if (!participantId || typeof participantId !== 'string') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'participantId is required');
+    // Extract participantId from authenticated user
+    const user = (req as any).user;
+    if (!user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authenticated');
     }
+
+    // Only participants can search for workers
+    if (user.role !== 'participant') {
+      throw new ApiError(httpStatus.FORBIDDEN, 'Only participants can search for workers');
+    }
+
+    const participantId = user._id.toString();
 
     // Parse query parameters
     const searchFilters: Partial<WorkerSearchFilters> = {};
@@ -276,7 +284,6 @@ export const searchNearbyWorkers = async (req: Request, res: Response): Promise<
  */
 export const searchWorkersByRegion = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { participantId } = req.query;
     const { 
       stateId, 
       regionId, 
@@ -287,9 +294,18 @@ export const searchWorkersByRegion = async (req: Request, res: Response): Promis
       ...filters 
     } = req.query;
 
-    if (!participantId || typeof participantId !== 'string') {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'participantId is required');
+    // Extract participantId from authenticated user
+    const user = (req as any).user;
+    if (!user) {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not authenticated');
     }
+
+    // Only participants can search for workers
+    if (user.role !== 'participant') {
+      throw new ApiError(httpStatus.FORBIDDEN, 'Only participants can search for workers');
+    }
+
+    const participantId = user._id.toString();
 
     // Location filters
     const locationFilters = {

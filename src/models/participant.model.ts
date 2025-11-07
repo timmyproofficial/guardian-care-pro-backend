@@ -171,12 +171,10 @@ const participantSchema = new Schema<IParticipant>(
     participantLocation: {
       type: {
         type: String,
-        enum: ['Point'],
-        default: 'Point'
+        enum: ['Point']
       },
       coordinates: {
-        type: [Number], // [longitude, latitude]
-        required: false
+        type: [Number] // [longitude, latitude]
       }
     },
     residentialAddress: {
@@ -201,7 +199,8 @@ participantSchema.index({ stateId: 1 });
 participantSchema.index({ regionId: 1 });
 participantSchema.index({ suburbId: 1 });
 participantSchema.index({ serviceAreaId: 1 });
-participantSchema.index({ participantLocation: '2dsphere' }); // Geospatial index
+// Sparse 2dsphere index - only indexes documents with complete location data
+participantSchema.index({ participantLocation: '2dsphere' }, { sparse: true });
 
 /**
  * Create and export the Participant model
