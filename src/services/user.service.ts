@@ -156,6 +156,21 @@ export const userService = {
         }[];
         unavailableDates?: Date[];
       };
+      // Location fields
+      stateIds?: string[];
+      regionIds?: string[];
+      serviceAreaIds?: string[];
+      baseLocation?: {
+        longitude: number;
+        latitude: number;
+      };
+      travelRadiusKm?: number;
+      baseAddress?: {
+        street?: string;
+        suburb?: string;
+        postcode?: string;
+        state?: string;
+      };
     }
   ): Promise<IWorker | null> => {
     try {
@@ -207,6 +222,32 @@ export const userService = {
         }
       };
 
+      // Add location data if provided
+      if (onboardingData.stateIds && onboardingData.stateIds.length > 0) {
+        updateData.stateIds = onboardingData.stateIds.map(id => new mongoose.Types.ObjectId(id));
+      }
+      if (onboardingData.regionIds && onboardingData.regionIds.length > 0) {
+        updateData.regionIds = onboardingData.regionIds.map(id => new mongoose.Types.ObjectId(id));
+      }
+      if (onboardingData.serviceAreaIds && onboardingData.serviceAreaIds.length > 0) {
+        updateData.serviceAreaIds = onboardingData.serviceAreaIds.map(id => new mongoose.Types.ObjectId(id));
+      }
+      // Only save baseLocation if BOTH longitude and latitude are provided
+      if (onboardingData.baseLocation && 
+          onboardingData.baseLocation.longitude !== undefined && 
+          onboardingData.baseLocation.latitude !== undefined) {
+        updateData.baseLocation = {
+          type: 'Point',
+          coordinates: [onboardingData.baseLocation.longitude, onboardingData.baseLocation.latitude]
+        };
+      }
+      if (onboardingData.travelRadiusKm !== undefined) {
+        updateData.travelRadiusKm = onboardingData.travelRadiusKm;
+      }
+      if (onboardingData.baseAddress) {
+        updateData.baseAddress = onboardingData.baseAddress;
+      }
+
       // Update worker with onboarding data
       const updatedWorker = await Worker.findByIdAndUpdate(
         workerId,
@@ -214,7 +255,10 @@ export const userService = {
         { new: true, runValidators: true }
       )
       .populate('skills', 'name code')
-      .populate('shiftRates.rateTimeBandId', 'name code startTime endTime');
+      .populate('shiftRates.rateTimeBandId', 'name code startTime endTime')
+      .populate('stateIds', 'name code')
+      .populate('regionIds', 'name code')
+      .populate('serviceAreaIds', 'name code');
 
       return updatedWorker;
     } catch (error) {
@@ -245,6 +289,21 @@ export const userService = {
       };
       preferredLanguages?: string[];
       ndisNumber?: string;
+      // Location fields
+      stateId?: string;
+      regionId?: string;
+      suburbId?: string;
+      serviceAreaId?: string;
+      location?: {
+        longitude: number;
+        latitude: number;
+      };
+      address?: {
+        street?: string;
+        suburb?: string;
+        postcode?: string;
+        state?: string;
+      };
     }
   ): Promise<IParticipant | null> => {
     try {
@@ -285,13 +344,43 @@ export const userService = {
         onboardingComplete: true
       };
 
+      // Add location data if provided
+      if (onboardingData.stateId) {
+        updateData.stateId = new mongoose.Types.ObjectId(onboardingData.stateId);
+      }
+      if (onboardingData.regionId) {
+        updateData.regionId = new mongoose.Types.ObjectId(onboardingData.regionId);
+      }
+      if (onboardingData.suburbId) {
+        updateData.suburbId = new mongoose.Types.ObjectId(onboardingData.suburbId);
+      }
+      if (onboardingData.serviceAreaId) {
+        updateData.serviceAreaId = new mongoose.Types.ObjectId(onboardingData.serviceAreaId);
+      }
+      // Only save participantLocation if BOTH longitude and latitude are provided
+      if (onboardingData.location && 
+          onboardingData.location.longitude !== undefined && 
+          onboardingData.location.latitude !== undefined) {
+        updateData.participantLocation = {
+          type: 'Point',
+          coordinates: [onboardingData.location.longitude, onboardingData.location.latitude]
+        };
+      }
+      if (onboardingData.address) {
+        updateData.residentialAddress = onboardingData.address;
+      }
+
       // Update participant with onboarding data
       const updatedParticipant = await Participant.findByIdAndUpdate(
         participantId,
         updateData,
         { new: true, runValidators: true }
       )
-      .populate('supportNeeds', 'name code');
+      .populate('supportNeeds', 'name code')
+      .populate('stateId', 'name code')
+      .populate('regionId', 'name code')
+      .populate('suburbId', 'name postcode')
+      .populate('serviceAreaId', 'name code');
 
       return updatedParticipant;
     } catch (error) {

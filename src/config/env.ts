@@ -16,7 +16,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
 const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
-    PORT: Joi.number().default(5000),
+    PORT: Joi.number().default(3000),
     API_PREFIX: Joi.string().default('/api/v1'),
     CLIENT_URL: Joi.string().required().description('Client application URL'),
     CORS_ORIGIN: Joi.string().default('*'),
@@ -117,10 +117,14 @@ const config = {
     from: envVars.EMAIL_FROM,
     smtp: {
       host: envVars.SMTP_HOST,
-      port: envVars.SMTP_PORT,
+      port: Number(envVars.SMTP_PORT),
+      secure: Number(envVars.SMTP_PORT) === 465,
       auth: {
         user: envVars.SMTP_USERNAME,
         pass: envVars.SMTP_PASSWORD,
+      },
+      tls: {
+        rejectUnauthorized: false, // Prevents GoDaddy SSL issues
       },
     },
   },

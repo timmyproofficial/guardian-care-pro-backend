@@ -3,6 +3,8 @@
  * Entry point for the API application
  */
 
+/// <reference path="./types/express.d.ts" />
+
 import express, { Express } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
