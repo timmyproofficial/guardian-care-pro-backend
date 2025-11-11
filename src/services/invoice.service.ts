@@ -91,7 +91,7 @@ export const invoiceService = {
         email: participantUser.email,
         phone: participantUser.phone || '',
         ndisNumber: participant.ndisNumber,
-        address: participantUser.address
+        address: participant.address
       };
       
       // Format worker details

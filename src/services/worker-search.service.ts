@@ -64,10 +64,17 @@ export interface WorkerSummary {
 
 /**
  * Search for workers with filters and pagination
+ * Now supports both location-based and general filters
  */
 export const searchWorkers = async (
   participantId: string,
   filters: WorkerSearchFilters = {},
+  locationFilters?: {
+    stateId?: string;
+    regionId?: string;
+    serviceAreaId?: string;
+    matchParticipantLocation?: boolean;
+  },
   page: number = 1,
   limit: number = 10
 ): Promise<PaginatedWorkerResult> => {
@@ -79,6 +86,58 @@ export const searchWorkers = async (
       'verificationStatus.onboardingComplete': true
     };
 
+    // === LOCATION FILTERS ===
+    if (locationFilters) {
+      // If matchParticipantLocation is true, get participant's location data
+      if (locationFilters.matchParticipantLocation) {
+        const participant = await mongoose.model('Participant').findById(participantId)
+          .select('stateId regionId serviceAreaId')
+          .lean() as any;
+        
+        if (participant) {
+          const locationOrConditions: any[] = [];
+          
+          if (participant.stateId) {
+            locationOrConditions.push({ stateIds: participant.stateId });
+          }
+          if (participant.regionId) {
+            locationOrConditions.push({ regionIds: participant.regionId });
+          }
+          if (participant.serviceAreaId) {
+            locationOrConditions.push({ serviceAreaIds: participant.serviceAreaId });
+          }
+          
+          if (locationOrConditions.length > 0) {
+            query.$or = locationOrConditions;
+          }
+        }
+      } else {
+        // Manual location filters
+        const locationOrConditions: any[] = [];
+        
+        if (locationFilters.stateId) {
+          locationOrConditions.push({ 
+            stateIds: new mongoose.Types.ObjectId(locationFilters.stateId) 
+          });
+        }
+        if (locationFilters.regionId) {
+          locationOrConditions.push({ 
+            regionIds: new mongoose.Types.ObjectId(locationFilters.regionId) 
+          });
+        }
+        if (locationFilters.serviceAreaId) {
+          locationOrConditions.push({ 
+            serviceAreaIds: new mongoose.Types.ObjectId(locationFilters.serviceAreaId) 
+          });
+        }
+        
+        if (locationOrConditions.length > 0) {
+          query.$or = locationOrConditions;
+        }
+      }
+    }
+
+    // === EXISTING FILTERS ===
     // Apply filters
     if (filters.skills && filters.skills.length > 0) {
       // Convert string ObjectIds to actual ObjectIds
@@ -137,14 +196,30 @@ export const searchWorkers = async (
       }
     }
 
-    // Keyword search in name and bio (removed skills since they're ObjectIds now)
+    // Keyword search in name and bio
     if (filters.keyword) {
       const keywordRegex = new RegExp(filters.keyword, 'i');
-      query.$or = [
-        { firstName: keywordRegex },
-        { lastName: keywordRegex },
-        { bio: keywordRegex }
-      ];
+      
+      // Merge with existing $or if present (from location filters)
+      if (query.$or) {
+        query.$and = [
+          { $or: query.$or },
+          {
+            $or: [
+              { firstName: keywordRegex },
+              { lastName: keywordRegex },
+              { bio: keywordRegex }
+            ]
+          }
+        ];
+        delete query.$or;
+      } else {
+        query.$or = [
+          { firstName: keywordRegex },
+          { lastName: keywordRegex },
+          { bio: keywordRegex }
+        ];
+      }
     }
 
     // Get organizations for the participant
@@ -170,23 +245,42 @@ export const searchWorkers = async (
 
     // Execute main query with pagination
     // Use projection to only return essential fields
-    const workers = await Worker.find(query)
-      .select({
-        firstName: 1,
-        lastName: 1,
-        profileImage: 1,
-        skills: 1,
-        'hourlyRate.baseRate': 1,
-        ratings: 1,
-        serviceAreas: 1,
-        languages: 1,
-        bio: 1,
-        'verificationStatus.profileSetupComplete': 1,
-        'verificationStatus.identityVerified': 1,
-        'verificationStatus.policeCheckVerified': 1,
-        'verificationStatus.ndisWorkerScreeningVerified': 1
-      })
-      .populate('skills', 'name code')
+    const selectFields: any = {
+      firstName: 1,
+      lastName: 1,
+      profileImage: 1,
+      skills: 1,
+      'hourlyRate.baseRate': 1,
+      ratings: 1,
+      serviceAreas: 1,
+      languages: 1,
+      bio: 1,
+      'verificationStatus.profileSetupComplete': 1,
+      'verificationStatus.identityVerified': 1,
+      'verificationStatus.policeCheckVerified': 1,
+      'verificationStatus.ndisWorkerScreeningVerified': 1
+    };
+
+    // Include location fields if location filters are used
+    if (locationFilters) {
+      selectFields.stateIds = 1;
+      selectFields.regionIds = 1;
+      selectFields.serviceAreaIds = 1;
+    }
+
+    let workersQuery = Worker.find(query)
+      .select(selectFields)
+      .populate('skills', 'name code');
+
+    // Conditionally populate location fields if location filters are used
+    if (locationFilters) {
+      workersQuery = workersQuery
+        .populate('stateIds', 'name code')
+        .populate('regionIds', 'name code')
+        .populate('serviceAreaIds', 'name code');
+    }
+
+    const workers = await workersQuery
       .sort({ 'ratings.average': -1, 'hourlyRate.baseRate': 1 })
       .skip(skip)
       .limit(limit)

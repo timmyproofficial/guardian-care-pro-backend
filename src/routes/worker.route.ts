@@ -12,7 +12,13 @@ const router = express.Router();
 /**
  * @route GET /api/workers/search
  * @desc Search for support workers with filtering and pagination
- * @access Private (Participants only)
+ * @query General filters: skills[], serviceAreas[], languages[], availabilityDays[], availabilityStartTime, availabilityEndTime, availabilityDate, minRating, maxHourlyRate, onlyVerified, keyword, page, limit
+ * @query Location filters: stateId, regionId, serviceAreaId, matchParticipantLocation
+ * @access Private (Participants only - uses authenticated user's ID)
+ * @example GET /api/workers/search?skills[]=skill1&skills[]=skill2&page=1&limit=10
+ * @example GET /api/workers/search?regionId=456&minRating=4&page=1
+ * @example GET /api/workers/search?matchParticipantLocation=true&skills[]=skill1
+ * @example GET /api/workers/search?stateId=123&languages[]=English&onlyVerified=true
  */
 router.get(
   '/search',
