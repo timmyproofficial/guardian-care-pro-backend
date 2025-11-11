@@ -15,6 +15,11 @@ import { uploadProfileImage } from '../utils/cloudinary';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 import Admin, { IAdmin } from '../models/admin.model';
+// Import location models to register them with Mongoose for population
+import '../models/location/state.model';
+import '../models/location/region.model';
+import '../models/location/suburb.model';
+import '../models/location/serviceArea.model';
 
 
 /**
