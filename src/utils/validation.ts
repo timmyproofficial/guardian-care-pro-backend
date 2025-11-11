@@ -145,6 +145,16 @@ export const participantValidation = {
     }),
     preferredLanguages: Joi.array().items(Joi.string()),
     ndisNumber: Joi.string().trim(),
+    // Location fields
+    stateId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    regionId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    suburbId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    serviceAreaId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    location: Joi.object({
+      longitude: Joi.number().min(-180).max(180).required(),
+      latitude: Joi.number().min(-90).max(90).required(),
+    }),
+    address: Joi.string().trim(),
   }),
 
   // Link guardian
@@ -261,6 +271,16 @@ export const workerValidation = {
         .required(),
       unavailableDates: Joi.array().items(Joi.date()),
     }).required(),
+    // Location fields
+    stateIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)),
+    regionIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)),
+    serviceAreaIds: Joi.array().items(Joi.string().regex(/^[0-9a-fA-F]{24}$/)),
+    baseLocation: Joi.object({
+      longitude: Joi.number().min(-180).max(180).required(),
+      latitude: Joi.number().min(-90).max(90).required(),
+    }),
+    travelRadiusKm: Joi.number().min(0),
+    address: Joi.string().trim(),
   }),
 
   // Update availability
