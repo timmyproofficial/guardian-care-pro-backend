@@ -39,6 +39,12 @@ export const workerSearchController = {
       
       // Extract query parameters
       const {
+        // Location filters (NEW)
+        stateId,
+        regionId,
+        serviceAreaId,
+        matchParticipantLocation,
+        // Existing filters
         skills,
         serviceAreas,
         languages,
@@ -53,6 +59,23 @@ export const workerSearchController = {
         page = '1',
         limit = '10'
       } = req.query;
+
+      // Build location filter object (NEW)
+      let locationFilters: {
+        stateId?: string;
+        regionId?: string;
+        serviceAreaId?: string;
+        matchParticipantLocation?: boolean;
+      } | undefined;
+
+      if (stateId || regionId || serviceAreaId || matchParticipantLocation === 'true') {
+        locationFilters = {
+          stateId: stateId as string | undefined,
+          regionId: regionId as string | undefined,
+          serviceAreaId: serviceAreaId as string | undefined,
+          matchParticipantLocation: matchParticipantLocation === 'true'
+        };
+      }
 
       // Build filter object
       const filters: WorkerSearchFilters = {};
@@ -130,10 +153,11 @@ export const workerSearchController = {
         );
       }
 
-      // Execute search
+      // Execute search (now with location filters)
       const result = await searchWorkers(
         participantId,
         filters,
+        locationFilters,
         pageNum,
         limitNum
       );

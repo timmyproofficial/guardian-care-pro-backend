@@ -165,12 +165,7 @@ export const userService = {
         latitude: number;
       };
       travelRadiusKm?: number;
-      baseAddress?: {
-        street?: string;
-        suburb?: string;
-        postcode?: string;
-        state?: string;
-      };
+      address?: string;
     }
   ): Promise<IWorker | null> => {
     try {
@@ -244,8 +239,8 @@ export const userService = {
       if (onboardingData.travelRadiusKm !== undefined) {
         updateData.travelRadiusKm = onboardingData.travelRadiusKm;
       }
-      if (onboardingData.baseAddress) {
-        updateData.baseAddress = onboardingData.baseAddress;
+      if (onboardingData.address) {
+        updateData.address = onboardingData.address;
       }
 
       // Update worker with onboarding data
@@ -298,12 +293,7 @@ export const userService = {
         longitude: number;
         latitude: number;
       };
-      address?: {
-        street?: string;
-        suburb?: string;
-        postcode?: string;
-        state?: string;
-      };
+      address?: string;
     }
   ): Promise<IParticipant | null> => {
     try {
@@ -367,7 +357,7 @@ export const userService = {
         };
       }
       if (onboardingData.address) {
-        updateData.residentialAddress = onboardingData.address;
+        updateData.address = onboardingData.address;
       }
 
       // Update participant with onboarding data

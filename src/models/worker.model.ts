@@ -78,12 +78,7 @@ export interface IWorker extends IUser {
     coordinates: [number, number]; // [longitude, latitude]
   };
   travelRadiusKm?: number;
-  baseAddress?: {
-    street?: string;
-    suburb?: string;
-    postcode?: string;
-    state?: string;
-  };
+  address?: string;
 }
 
 /**
@@ -245,11 +240,9 @@ const workerSchema = new Schema<IWorker>(
       min: 0,
       default: 20 // Default 20km travel radius
     },
-    baseAddress: {
-      street: { type: String },
-      suburb: { type: String },
-      postcode: { type: String },
-      state: { type: String }
+    address: {
+      type: String,
+      trim: true
     }
   }
 );
