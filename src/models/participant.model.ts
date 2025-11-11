@@ -51,12 +51,7 @@ export interface IParticipant extends IUser {
     type: 'Point';
     coordinates: [number, number]; // [longitude, latitude]
   };
-  residentialAddress?: {
-    street?: string;
-    suburb?: string;
-    postcode?: string;
-    state?: string;
-  };
+  address?: string;
 }
 
 /**
@@ -177,11 +172,9 @@ const participantSchema = new Schema<IParticipant>(
         type: [Number] // [longitude, latitude]
       }
     },
-    residentialAddress: {
-      street: { type: String },
-      suburb: { type: String },
-      postcode: { type: String },
-      state: { type: String }
+    address: {
+      type: String,
+      trim: true
     }
   }
 );

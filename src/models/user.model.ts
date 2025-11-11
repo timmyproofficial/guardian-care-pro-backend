@@ -23,13 +23,13 @@ export interface IUser extends Document {
   phone?: string;
   gender?: Gender;
   dateOfBirth?: Date;
-  address?: {
-    street: string;
-    city: string;
-    state: string;
-    postalCode: string;
-    country: string;
-  };
+  // address?: {
+  //   street: string;
+  //   city: string;
+  //   state: string;
+  //   postalCode: string;
+  //   country: string;
+  // };
   profileImage?: string | null;
   // bio?: string;
   notificationPreferences: NotificationPreference;
@@ -120,13 +120,13 @@ const userSchema = new Schema<IUser>(
     dateOfBirth: {
       type: Date,
     },
-    address: {
-      street: String,
-      city: String,
-      state: String,
-      postalCode: String,
-      country: String,
-    },
+    // address: {
+    //   street: String,
+    //   city: String,
+    //   state: String,
+    //   postalCode: String,
+    //   country: String,
+    // },
     profileImage: {
       type: String,
       default: null,
