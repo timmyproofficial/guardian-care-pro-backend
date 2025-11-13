@@ -106,6 +106,11 @@ export const userValidation = {
     currentPassword: Joi.string().required(),
     newPassword: password.required(),
   }),
+
+  // Update address only
+  updateAddress: Joi.object({
+    address: Joi.string().required().trim().min(5).max(500),
+  }),
 };
 
 /**
