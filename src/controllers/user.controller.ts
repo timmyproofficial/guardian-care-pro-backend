@@ -276,6 +276,45 @@ export const userController = {
       return;
     }
   },
+
+  /**
+   * Update user address
+   * @route PATCH /api/users/profile/address
+   */
+  updateAddress: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
+      }
+
+      const userId = req.user._id.toString();
+      const { address } = req.body;
+
+      const updatedUser = await userService.updateAddress(userId, address);
+
+      if (!updatedUser) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('User not found', httpStatus.NOT_FOUND));
+      }
+
+      return res.json(
+        successResponse(
+          {
+            user:
+              updatedUser && typeof updatedUser.profileImage === 'undefined'
+                ? { ...updatedUser, profileImage: null }
+                : updatedUser,
+          },
+          'Address updated successfully',
+        ),
+      );
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
   /**
    * Delete user by ID
    * @route DELETE /api/users/:userId

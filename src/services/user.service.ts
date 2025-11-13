@@ -10,7 +10,7 @@ import Participant, { IParticipant } from '../models/participant.model';
 import Guardian from '../models/guardian.model';
 import Worker, { IWorker } from '../models/worker.model';
 import Coordinator from '../models/coordinator.model';
-import { UserStatus } from '../types/user.types';
+import { UserStatus, UserRole } from '../types/user.types';
 import { uploadProfileImage } from '../utils/cloudinary';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
@@ -448,6 +448,48 @@ export const userService = {
       return updatedAdmin;
     } catch (error) {
       logger.error(`Error updating admin ${adminId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update user address only
+   * Works for both participants and support workers
+   */
+  updateAddress: async (userId: string, address: string): Promise<IParticipant | IWorker | null> => {
+    try {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid userId');
+      }
+
+      // First, get the user to determine their role
+      const user = await User.findById(userId);
+      if (!user) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+      }
+
+      let updatedUser: IParticipant | IWorker | null = null;
+
+      // Update address based on user role
+      if (user.role === UserRole.PARTICIPANT) {
+        updatedUser = await Participant.findByIdAndUpdate(
+          userId,
+          { address },
+          { new: true, runValidators: true }
+        ).populate('supportNeeds', 'name code');
+      } else if (user.role === UserRole.SUPPORT_WORKER) {
+        updatedUser = await Worker.findByIdAndUpdate(
+          userId,
+          { address },
+          { new: true, runValidators: true }
+        ).populate('skills', 'name code');
+      } else {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Address update is only available for participants and support workers');
+      }
+
+      return updatedUser;
+    } catch (error) {
+      logger.error(`Error updating address for user ${userId}:`, error);
       throw error;
     }
   },

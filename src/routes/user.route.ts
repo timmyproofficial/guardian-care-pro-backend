@@ -26,6 +26,8 @@ router.post('/profile-image', authenticate, profileUpload.single('image'), userC
 
 router.post('/change-password', authenticate, validate(userValidation.updatePassword), userController.changePassword);
 
+router.patch('/profile/address', authenticate, validate(userValidation.updateAddress), userController.updateAddress);
+
 // User-specific account management routes
 /**
  * @route DELETE /api/users/profile
