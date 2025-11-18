@@ -113,15 +113,31 @@ const config = {
   },
   
   // Email config
+  // email: {
+  //   from: envVars.EMAIL_FROM,
+  //   smtp: {
+  //     host: envVars.SMTP_HOST,
+  //     port: Number(envVars.SMTP_PORT),
+  //     secure: Number(envVars.SMTP_PORT) === 465,
+  //     auth: {
+  //       user: envVars.SMTP_USERNAME,
+  //       pass: envVars.SMTP_PASSWORD,
+  //     },
+  //     tls: {
+  //       rejectUnauthorized: false, // Prevents GoDaddy SSL issues
+  //     },
+  //   },
+  // },
+
   email: {
-    from: envVars.EMAIL_FROM,
+    from: 'support@support24.com.au',
     smtp: {
-      host: envVars.SMTP_HOST,
-      port: Number(envVars.SMTP_PORT),
-      secure: Number(envVars.SMTP_PORT) === 465,
+      host: 'mail.support24.com.au',
+      port: Number(465),
+      secure: Number(465) === 465,
       auth: {
-        user: envVars.SMTP_USERNAME,
-        pass: envVars.SMTP_PASSWORD,
+        user: 'support@support24.com.au',
+        pass: 'U6%6U*]X-7h5',
       },
       tls: {
         rejectUnauthorized: false, // Prevents GoDaddy SSL issues
