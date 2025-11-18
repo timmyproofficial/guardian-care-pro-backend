@@ -31,7 +31,7 @@ const allowedOrigins = [
   'https://guardian-pro-webapp-git-main-timmyproofficials-projects.vercel.app',
   'https://support24.vercel.app',
   'https://support-24.netlify.app',
-  'https://support24.com.au/'
+  'https://support24.com.au'
 ];
 
 // Set security headers
