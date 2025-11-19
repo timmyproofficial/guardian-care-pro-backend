@@ -113,37 +113,37 @@ const config = {
   },
   
   // Email config
-  // email: {
-  //   from: envVars.EMAIL_FROM,
-  //   smtp: {
-  //     host: envVars.SMTP_HOST,
-  //     port: Number(envVars.SMTP_PORT),
-  //     secure: Number(envVars.SMTP_PORT) === 465,
-  //     auth: {
-  //       user: envVars.SMTP_USERNAME,
-  //       pass: envVars.SMTP_PASSWORD,
-  //     },
-  //     tls: {
-  //       rejectUnauthorized: false, // Prevents GoDaddy SSL issues
-  //     },
-  //   },
-  // },
-
   email: {
-    from: 'support@support24.com.au',
+    from: envVars.EMAIL_FROM,
     smtp: {
-      host: 'mail.support24.com.au',
-      port: Number(465),
-      secure: Number(465) === 465,
+      host: envVars.SMTP_HOST,
+      port: Number(envVars.SMTP_PORT),
+      // secure: Number(envVars.SMTP_PORT) === 587,
       auth: {
-        user: 'support@support24.com.au',
-        pass: 'U6%6U*]X-7h5',
+        user: envVars.SMTP_USERNAME,
+        pass: envVars.SMTP_PASSWORD,
       },
       tls: {
         rejectUnauthorized: false, // Prevents GoDaddy SSL issues
       },
     },
   },
+
+  // email: {
+  //   from: 'support@support24.com.au',
+  //   smtp: {
+  //     host: 'mail.support24.com.au',
+  //     port: Number(465),
+  //     secure: Number(465) === 465,
+  //     auth: {
+  //       user: 'support@support24.com.au',
+  //       pass: 'U6%6U*]X-7h5',
+  //     },
+  //     tls: {
+  //       rejectUnauthorized: false, // Prevents GoDaddy SSL issues
+  //     },
+  //   },
+  // },
 
   // Cloudinary config
   cloudinary: {
