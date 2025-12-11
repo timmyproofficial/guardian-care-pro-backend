@@ -124,3 +124,107 @@ export const uploadMultipleDocuments = (fieldName: string, maxCount: number = 5)
 export const uploadProfileImage = (fieldName: string = 'profileImage') => {
   return imageUpload.single(fieldName);
 };
+
+/**
+ * Roster file filter configuration
+ * Accepts CSV, Excel, and optionally PDF/images for OCR
+ */
+const rosterFileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = [
+    'text/csv',
+    'application/csv',
+    'text/plain', // Some systems send CSV as text/plain
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/jpg'
+  ];
+  
+  // Also check file extension for CSV files
+  const extension = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = ['.csv', '.xls', '.xlsx', '.pdf', '.png', '.jpg', '.jpeg'];
+  
+  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
+    cb(null, true);
+  } else {
+    cb(new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Invalid file type. Allowed types: CSV, XLS, XLSX, PDF, PNG, JPG.'
+    ));
+  }
+};
+
+/**
+ * Roster upload configuration using memory storage
+ * Files are kept in memory buffer for processing
+ */
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: rosterFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max for roster files
+  },
+});
+
+/**
+ * Job attachment file filter configuration
+ * Accepts PDF and common document formats for resume/cover letter
+ */
+const jobAttachmentFileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'text/plain',
+  ];
+  
+  const extension = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
+  
+  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
+    cb(null, true);
+  } else {
+    cb(new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed for job applications.'
+    ));
+  }
+};
+
+/**
+ * Job attachments storage configuration
+ */
+const jobAttachmentStorage = multer.diskStorage({
+  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
+    cb(null, 'uploads/jobs/');
+  },
+  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
+    const randomName = crypto.randomBytes(16).toString('hex');
+    const extension = path.extname(file.originalname);
+    cb(null, `${randomName}${extension}`);
+  },
+});
+
+/**
+ * Job attachment upload configuration
+ */
+export const jobAttachmentUpload = multer({
+  storage: jobAttachmentStorage,
+  fileFilter: jobAttachmentFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB max per file
+  },
+});
+
+/**
+ * Job application upload middleware for resume and cover letter
+ * Handles multipart/form-data with resume (required) and coverLetter (optional)
+ */
+export const uploadJobAttachments = () => {
+  return jobAttachmentUpload.fields([
+    { name: 'resume', maxCount: 1 },
+    { name: 'coverLetter', maxCount: 1 },
+  ]);
+};
