@@ -169,58 +169,15 @@ export const upload = multer({
 });
 
 /**
- * Job attachment file filter configuration
- * Accepts PDF and common document formats for resume/cover letter
+ * Job attachment upload configuration using Cloudinary
+ * Resume and cover letter files are stored in Cloudinary
  */
-const jobAttachmentFileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedTypes = [
-    'application/pdf',
-    'application/msword',
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    'text/plain',
-  ];
-  
-  const extension = path.extname(file.originalname).toLowerCase();
-  const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt'];
-  
-  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
-    cb(null, true);
-  } else {
-    cb(new ApiError(
-      httpStatus.BAD_REQUEST,
-      'Invalid file type. Only PDF, DOC, DOCX, and TXT files are allowed for job applications.'
-    ));
-  }
-};
-
-/**
- * Job attachments storage configuration
- */
-const jobAttachmentStorage = multer.diskStorage({
-  destination: (_req: Request, _file: Express.Multer.File, cb: (error: Error | null, destination: string) => void) => {
-    cb(null, 'uploads/jobs/');
-  },
-  filename: (_req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
-    const randomName = crypto.randomBytes(16).toString('hex');
-    const extension = path.extname(file.originalname);
-    cb(null, `${randomName}${extension}`);
-  },
-});
-
-/**
- * Job attachment upload configuration
- */
-export const jobAttachmentUpload = multer({
-  storage: jobAttachmentStorage,
-  fileFilter: jobAttachmentFileFilter,
-  limits: {
-    fileSize: 5 * 1024 * 1024, // 5MB max per file
-  },
-});
+import { jobAttachmentUpload } from '../utils/cloudinary';
 
 /**
  * Job application upload middleware for resume and cover letter
  * Handles multipart/form-data with resume (required) and coverLetter (optional)
+ * Files are uploaded to Cloudinary in the 'job-attachments' folder
  */
 export const uploadJobAttachments = () => {
   return jobAttachmentUpload.fields([

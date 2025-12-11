@@ -239,30 +239,31 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
     location: req.body.location,
   };
 
-  // Process uploaded files
+  // Process uploaded files from Cloudinary
+  // multer-storage-cloudinary adds 'path' as the Cloudinary URL
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
   const attachments: IJobAttachment[] = [];
 
   if (files?.resume?.[0]) {
-    const resumeFile = files.resume[0];
+    const resumeFile = files.resume[0] as Express.Multer.File & { path: string };
     attachments.push({
       fieldName: 'resume',
       fileName: resumeFile.originalname,
-      fileUrl: resumeFile.path || `/uploads/jobs/${resumeFile.filename}`,
+      fileUrl: resumeFile.path, // Cloudinary URL
       fileType: resumeFile.mimetype,
-      fileSize: resumeFile.size,
+      fileSize: resumeFile.size || 0,
       uploadedAt: new Date(),
     });
   }
 
   if (files?.coverLetter?.[0]) {
-    const coverLetterFile = files.coverLetter[0];
+    const coverLetterFile = files.coverLetter[0] as Express.Multer.File & { path: string };
     attachments.push({
       fieldName: 'coverLetter',
       fileName: coverLetterFile.originalname,
-      fileUrl: coverLetterFile.path || `/uploads/jobs/${coverLetterFile.filename}`,
+      fileUrl: coverLetterFile.path, // Cloudinary URL
       fileType: coverLetterFile.mimetype,
-      fileSize: coverLetterFile.size,
+      fileSize: coverLetterFile.size || 0,
       uploadedAt: new Date(),
     });
   }
