@@ -181,4 +181,56 @@ export const deleteJobAttachment = async (publicId: string): Promise<any> => {
   }
 };
 
+// Configure CloudinaryStorage for event images
+const eventImageStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'event-images',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+    transformation: [{ width: 1200, height: 630, crop: 'limit' }], // Optimized for social sharing
+  } as any,
+});
+
+// Multer upload configuration for event images
+export const eventImageUpload = multer({ storage: eventImageStorage });
+
+/**
+ * Upload an event image to Cloudinary
+ * @param filePath - Path to the local file
+ * @param eventId - Event ID for naming the file
+ * @returns Promise with Cloudinary upload result
+ */
+export const uploadEventImage = async (
+  filePath: string,
+  eventId: string
+): Promise<UploadApiResponse> => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'event-images',
+      public_id: `event-${eventId}`,
+      overwrite: true,
+      transformation: [{ width: 1200, height: 630, crop: 'limit' }],
+    });
+    return result;
+  } catch (error) {
+    logger.error('Error uploading event image to Cloudinary:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete an event image from Cloudinary
+ * @param publicId - The public ID of the image to delete
+ * @returns Promise with deletion result
+ */
+export const deleteEventImage = async (publicId: string): Promise<any> => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    logger.error('Error deleting event image from Cloudinary:', error);
+    throw error;
+  }
+};
+
 export default cloudinary;

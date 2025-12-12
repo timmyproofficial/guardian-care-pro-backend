@@ -31,8 +31,50 @@ export const authValidation = {
     lastName: Joi.string().required(),
     role: Joi.string()
       .required()
-      .valid(UserRole.PARTICIPANT, UserRole.GUARDIAN, UserRole.SUPPORT_WORKER, UserRole.ADMIN),
+      .valid(UserRole.PARTICIPANT, UserRole.GUARDIAN, UserRole.SUPPORT_WORKER, UserRole.ADMIN, UserRole.PROVIDER),
     phone: Joi.string().required(),
+    
+    // Provider-specific fields (required when role is 'provider')
+    organizationName: Joi.string().max(200).when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    abn: Joi.string().pattern(/^\d{11}$/).message('ABN must be an 11-digit number').when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    businessAddress: Joi.object({
+      street: Joi.string().required(),
+      city: Joi.string().required(),
+      state: Joi.string().required(),
+      postcode: Joi.string().pattern(/^\d{4}$/).message('Postcode must be a 4-digit number').required(),
+    }).when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    providerType: Joi.string().valid('AGED_CARE', 'DISABILITY_SUPPORT', 'HOME_CARE', 'COMMUNITY_SUPPORT').when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    primaryContactName: Joi.string().when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    primaryContactPhone: Joi.string().when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
+    primaryContactEmail: Joi.string().email().when('role', {
+      is: UserRole.PROVIDER,
+      then: Joi.required(),
+      otherwise: Joi.forbidden(),
+    }),
   }),
 
   // Login with email/password

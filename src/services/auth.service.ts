@@ -17,8 +17,10 @@ import Admin from '../models/admin.model';
 import Participant from '../models/participant.model';
 import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
+import Provider from '../models/provider.model';
 // import Coordinator from '../models/coordinator.model';
 import { UserRole, UserStatus, UserRegistrationInput } from '../types/user.types';
+import { ProviderSubscriptionTier, ProviderSubscriptionStatus } from '../types/roster.types';
 import { organizationService } from './organization.service';
 import { emailService } from './email.service';
 import ApiError from '../utils/api-error';
@@ -317,6 +319,24 @@ export const authService = {
             ...userInput,
             adminType: 'superAdmin',
             status: UserStatus.PENDING,
+          });
+          break;
+        case UserRole.PROVIDER:
+          user = await Provider.create({
+            ...userInput,
+            status: UserStatus.PENDING,
+            subscriptionTier: ProviderSubscriptionTier.TRIAL,
+            subscriptionStatus: ProviderSubscriptionStatus.ACTIVE,
+            subscriptionStartDate: new Date(),
+            settings: {
+              autoCreateWorkers: true,
+              autoCreateParticipants: true,
+              requireWorkerApproval: false,
+              enableAutoCancellationReplacement: true,
+              smsNotifications: false,
+            },
+            totalRostersUploaded: 0,
+            totalShiftsManaged: 0,
           });
           break;
         default:
