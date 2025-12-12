@@ -126,4 +126,59 @@ export const receiptUpload = multer({ storage: receiptStorage });
 // Multer upload configuration for documents
 export const documentUpload = multer({ storage: documentStorage });
 
+// Configure CloudinaryStorage for job attachments (resume, cover letter)
+const jobAttachmentStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'job-attachments',
+    allowed_formats: ['pdf', 'doc', 'docx', 'txt'],
+    resource_type: 'auto',
+  } as any,
+});
+
+// Multer upload configuration for job attachments
+export const jobAttachmentUpload = multer({ storage: jobAttachmentStorage });
+
+/**
+ * Upload a job attachment (resume/cover letter) to Cloudinary
+ * @param filePath - Path to the local file or buffer
+ * @param attachmentId - Unique ID for the attachment
+ * @param attachmentType - Type of attachment ('resume' or 'coverLetter')
+ * @returns Promise with Cloudinary upload result
+ */
+export const uploadJobAttachment = async (
+  filePath: string,
+  attachmentId: string,
+  attachmentType: 'resume' | 'coverLetter'
+): Promise<UploadApiResponse> => {
+  try {
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'job-attachments',
+      public_id: `${attachmentType}-${attachmentId}`,
+      resource_type: 'auto',
+    });
+    return result;
+  } catch (error) {
+    logger.error('Error uploading job attachment to Cloudinary:', error);
+    throw error;
+  }
+};
+
+/**
+ * Delete a job attachment from Cloudinary
+ * @param publicId - The public ID of the file to delete
+ * @returns Promise with deletion result
+ */
+export const deleteJobAttachment = async (publicId: string): Promise<any> => {
+  try {
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'raw',
+    });
+    return result;
+  } catch (error) {
+    logger.error('Error deleting job attachment from Cloudinary:', error);
+    throw error;
+  }
+};
+
 export default cloudinary;

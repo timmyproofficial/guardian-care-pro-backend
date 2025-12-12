@@ -12,7 +12,8 @@ export enum UserRole {
     GUARDIAN = 'guardian',
     SUPPORT_WORKER = 'supportWorker',
     // COORDINATOR = 'coordinator',
-    ADMIN = 'admin'
+    ADMIN = 'admin',
+    PROVIDER = 'provider'  // Enterprise providers (aged care, disability support agencies)
   }
 
 // Admin types enumeration (sub-roles)

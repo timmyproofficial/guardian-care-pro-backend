@@ -124,3 +124,64 @@ export const uploadMultipleDocuments = (fieldName: string, maxCount: number = 5)
 export const uploadProfileImage = (fieldName: string = 'profileImage') => {
   return imageUpload.single(fieldName);
 };
+
+/**
+ * Roster file filter configuration
+ * Accepts CSV, Excel, and optionally PDF/images for OCR
+ */
+const rosterFileFilter = (_req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedTypes = [
+    'text/csv',
+    'application/csv',
+    'text/plain', // Some systems send CSV as text/plain
+    'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'application/pdf',
+    'image/jpeg',
+    'image/png',
+    'image/jpg'
+  ];
+  
+  // Also check file extension for CSV files
+  const extension = path.extname(file.originalname).toLowerCase();
+  const allowedExtensions = ['.csv', '.xls', '.xlsx', '.pdf', '.png', '.jpg', '.jpeg'];
+  
+  if (allowedTypes.includes(file.mimetype) || allowedExtensions.includes(extension)) {
+    cb(null, true);
+  } else {
+    cb(new ApiError(
+      httpStatus.BAD_REQUEST,
+      'Invalid file type. Allowed types: CSV, XLS, XLSX, PDF, PNG, JPG.'
+    ));
+  }
+};
+
+/**
+ * Roster upload configuration using memory storage
+ * Files are kept in memory buffer for processing
+ */
+export const upload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: rosterFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max for roster files
+  },
+});
+
+/**
+ * Job attachment upload configuration using Cloudinary
+ * Resume and cover letter files are stored in Cloudinary
+ */
+import { jobAttachmentUpload } from '../utils/cloudinary';
+
+/**
+ * Job application upload middleware for resume and cover letter
+ * Handles multipart/form-data with resume (required) and coverLetter (optional)
+ * Files are uploaded to Cloudinary in the 'job-attachments' folder
+ */
+export const uploadJobAttachments = () => {
+  return jobAttachmentUpload.fields([
+    { name: 'resume', maxCount: 1 },
+    { name: 'coverLetter', maxCount: 1 },
+  ]);
+};
