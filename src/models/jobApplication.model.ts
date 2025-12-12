@@ -111,7 +111,7 @@ const JobApplicationSchema = new Schema<IJobApplicationDocument>(
       virtuals: true,
       transform: (_doc, ret) => {
         ret.id = ret._id;
-        delete ret.__v;
+        ret.__v = undefined;
         return ret;
       },
     },
