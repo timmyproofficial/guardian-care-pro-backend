@@ -141,8 +141,8 @@ const shiftReferenceSchema = new Schema<IShiftReference>(
     },
     assignedWorkerPhone: {
       type: String,
-      trim: true,
-      index: true
+      trim: true
+      // Index defined separately via schema.index() for SMS lookup
     },
     assignedWorkerEmail: {
       type: String,
