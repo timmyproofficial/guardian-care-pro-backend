@@ -27,6 +27,7 @@ import catchAsync from '../utils/catchAsync';
 /**
  * Create a new event
  * POST /api/events
+ * Supports multipart/form-data with eventImage file upload
  */
 export const createEvent = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -37,8 +38,15 @@ export const createEvent = catchAsync(async (req: Request, res: Response) => {
     throw new ApiError(httpStatus.FORBIDDEN, 'Only providers can create events');
   }
 
+  // Handle eventImage from Cloudinary upload (multer-storage-cloudinary sets path as URL)
+  let eventImageUrl: string | undefined;
+  if (req.file) {
+    const file = req.file as Express.Multer.File & { path: string };
+    eventImageUrl = file.path; // Cloudinary URL
+  }
+
   const input: CreateEventInput = {
-    eventImage: req.body.eventImage,
+    eventImage: eventImageUrl,
     eventName: req.body.eventName,
     eventStartTime: req.body.eventStartTime,
     eventEndTime: req.body.eventEndTime,
@@ -146,14 +154,22 @@ export const getMyEvents = catchAsync(async (req: Request, res: Response) => {
 /**
  * Update an event
  * PUT /api/events/:eventId
+ * Supports multipart/form-data with eventImage file upload
  */
 export const updateEvent = catchAsync(async (req: Request, res: Response) => {
   const { eventId } = req.params;
   const userId = req.user!._id;
   const isAdmin = req.user!.role === UserRole.ADMIN;
 
+  // Handle eventImage from Cloudinary upload
+  let eventImageUrl: string | undefined;
+  if (req.file) {
+    const file = req.file as Express.Multer.File & { path: string };
+    eventImageUrl = file.path; // Cloudinary URL
+  }
+
   const input: UpdateEventInput = {
-    eventImage: req.body.eventImage,
+    eventImage: eventImageUrl,
     eventName: req.body.eventName,
     eventStartTime: req.body.eventStartTime,
     eventEndTime: req.body.eventEndTime,

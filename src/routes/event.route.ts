@@ -6,6 +6,7 @@
 import { Router } from 'express';
 import * as eventController from '../controllers/event.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
+import { eventImageUpload } from '../utils/cloudinary';
 import { UserRole } from '../types/user.types';
 
 const router = Router();
@@ -57,25 +58,27 @@ router.get(
 
 /**
  * @route   POST /api/events
- * @desc    Create a new event
+ * @desc    Create a new event (multipart/form-data with eventImage)
  * @access  Private (Provider only)
  */
 router.post(
   '/',
   authenticate,
   authorize([UserRole.PROVIDER, UserRole.ADMIN]),
+  eventImageUpload.single('eventImage'),
   eventController.createEvent
 );
 
 /**
  * @route   PUT /api/events/:eventId
- * @desc    Update an event
+ * @desc    Update an event (multipart/form-data with eventImage)
  * @access  Private (Owner or Admin)
  */
 router.put(
   '/:eventId',
   authenticate,
   authorize([UserRole.PROVIDER, UserRole.ADMIN]),
+  eventImageUpload.single('eventImage'),
   eventController.updateEvent
 );
 
