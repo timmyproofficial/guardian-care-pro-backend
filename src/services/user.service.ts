@@ -11,7 +11,7 @@ import Guardian from '../models/guardian.model';
 import Worker, { IWorker } from '../models/worker.model';
 import Coordinator from '../models/coordinator.model';
 import { UserStatus, UserRole } from '../types/user.types';
-import { uploadProfileImage } from '../utils/cloudinary';
+import { uploadDocument, uploadProfileImage } from '../utils/cloudinary';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
 import Admin, { IAdmin } from '../models/admin.model';
@@ -21,23 +21,22 @@ import '../models/location/region.model';
 import '../models/location/suburb.model';
 import '../models/location/serviceArea.model';
 
-
 /**
  * User service implementation
-*/
+ */
 export const userService = {
   /**
    * Get user by ID
    */
   getUserById: async (id: string): Promise<IUser | null> => {
-    try{
-      if(!mongoose.Types.ObjectId.isValid(id)){
+    try {
+      if (!mongoose.Types.ObjectId.isValid(id)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid userID');
       }
 
       const user = await User.findById(id);
       return user;
-    } catch(error){
+    } catch (error) {
       logger.error(`Error getting user by ID ${id}:`, error);
       throw error;
     }
@@ -47,10 +46,10 @@ export const userService = {
    * Get user by email
    */
   getUserByEmail: async (email: string): Promise<IUser | null> => {
-    try{
+    try {
       const user = await User.findOne({ email });
       return user;
-    } catch(error){
+    } catch (error) {
       logger.error(`Error getting user by email ${email}:`, error);
       throw error;
     }
@@ -60,11 +59,11 @@ export const userService = {
    * Update user by ID
    */
   updateUserById: async (userId: string, updateData: Partial<IUser>): Promise<IUser | null> => {
-    try{
+    try {
       // Check if email is being updated and is taken
-      if(updateData.email){
+      if (updateData.email) {
         const emailTaken = await User.isEmailTaken(updateData.email, new mongoose.Types.ObjectId(userId));
-        if(emailTaken) {
+        if (emailTaken) {
           throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
         }
       }
@@ -82,12 +81,12 @@ export const userService = {
         runValidators: true,
       });
 
-      if(!user) {
+      if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
       }
 
       return user;
-    }catch (error) {
+    } catch (error) {
       logger.error(`Error updating user ${userId}:`, error);
       throw error;
     }
@@ -111,17 +110,11 @@ export const userService = {
 
       // Process skills if provided - convert strings to ObjectIds
       if (updateData.skills) {
-        updateData.skills = (updateData.skills as any[]).map(skillId => 
-          new mongoose.Types.ObjectId(skillId)
-        );
+        updateData.skills = (updateData.skills as any[]).map((skillId) => new mongoose.Types.ObjectId(skillId));
       }
 
       // Update worker with role-specific fields
-      const updatedWorker = await Worker.findByIdAndUpdate(
-        workerId,
-        updateData,
-        { new: true, runValidators: true }
-      );
+      const updatedWorker = await Worker.findByIdAndUpdate(workerId, updateData, { new: true, runValidators: true });
 
       return updatedWorker;
     } catch (error) {
@@ -171,7 +164,9 @@ export const userService = {
       };
       travelRadiusKm?: number;
       address?: string;
-    }
+      resume?: string;
+      serviceCategories: string[];
+    },
   ): Promise<IWorker | null> => {
     try {
       // Validate workerId
@@ -196,49 +191,54 @@ export const userService = {
       }
 
       // Convert rateTimeBandId strings to ObjectIds
-      const shiftRates = onboardingData.shiftRates.map(rate => ({
+      const shiftRates = onboardingData.shiftRates.map((rate) => ({
         rateTimeBandId: new mongoose.Types.ObjectId(rate.rateTimeBandId),
-        hourlyRate: rate.hourlyRate
+        hourlyRate: rate.hourlyRate,
       }));
 
-      // Convert skill strings to ObjectIds
-      const skills = onboardingData.skills.map(skillId => new mongoose.Types.ObjectId(skillId));
+      // Convert services-categories to ObjectIds
+      const serviceCategories = onboardingData.serviceCategories?.map(
+        (categoryId) => new mongoose.Types.ObjectId(categoryId),
+      );
 
       // Prepare update data
       const updateData: Partial<IWorker> = {
         bio: onboardingData.bio,
-        skills,
+        serviceCategories,
         languages: onboardingData.languages,
         experience: onboardingData.experience || [],
+        resume: onboardingData.resume,
         shiftRates,
         availability: {
           ...onboardingData.availability,
-          unavailableDates: onboardingData.availability.unavailableDates || []
+          unavailableDates: onboardingData.availability.unavailableDates || [],
         },
         verificationStatus: {
           ...worker.verificationStatus,
           profileSetupComplete: true,
-          onboardingComplete: true
-        }
+          onboardingComplete: true,
+        },
       };
 
       // Add location data if provided
       if (onboardingData.stateIds && onboardingData.stateIds.length > 0) {
-        updateData.stateIds = onboardingData.stateIds.map(id => new mongoose.Types.ObjectId(id));
+        updateData.stateIds = onboardingData.stateIds.map((id) => new mongoose.Types.ObjectId(id));
       }
       if (onboardingData.regionIds && onboardingData.regionIds.length > 0) {
-        updateData.regionIds = onboardingData.regionIds.map(id => new mongoose.Types.ObjectId(id));
+        updateData.regionIds = onboardingData.regionIds.map((id) => new mongoose.Types.ObjectId(id));
       }
       if (onboardingData.serviceAreaIds && onboardingData.serviceAreaIds.length > 0) {
-        updateData.serviceAreaIds = onboardingData.serviceAreaIds.map(id => new mongoose.Types.ObjectId(id));
+        updateData.serviceAreaIds = onboardingData.serviceAreaIds.map((id) => new mongoose.Types.ObjectId(id));
       }
       // Only save baseLocation if BOTH longitude and latitude are provided
-      if (onboardingData.baseLocation && 
-          onboardingData.baseLocation.longitude !== undefined && 
-          onboardingData.baseLocation.latitude !== undefined) {
+      if (
+        onboardingData.baseLocation &&
+        onboardingData.baseLocation.longitude !== undefined &&
+        onboardingData.baseLocation.latitude !== undefined
+      ) {
         updateData.baseLocation = {
           type: 'Point',
-          coordinates: [onboardingData.baseLocation.longitude, onboardingData.baseLocation.latitude]
+          coordinates: [onboardingData.baseLocation.longitude, onboardingData.baseLocation.latitude],
         };
       }
       if (onboardingData.travelRadiusKm !== undefined) {
@@ -249,17 +249,25 @@ export const userService = {
       }
 
       // Update worker with onboarding data
-      const updatedWorker = await Worker.findByIdAndUpdate(
-        workerId,
-        updateData,
-        { new: true, runValidators: true }
-      )
-      .populate('skills', 'name code')
-      .populate('shiftRates.rateTimeBandId', 'name code startTime endTime')
-      .populate('stateIds', 'name code')
-      .populate('regionIds', 'name code')
-      .populate('serviceAreaIds', 'name code');
+      const updatedWorker = await Worker.findByIdAndUpdate(workerId, updateData, { new: true, runValidators: true })
+        .populate('seriviceCategories', 'name code')
+        .populate('shiftRates.rateTimeBandId', 'name code startTime endTime')
+        .populate('stateIds', 'name code')
+        .populate('regionIds', 'name code')
+        .populate('serviceAreaIds', 'name code');
 
+      // update the skills based on serviceCategories populated data
+      const populatedWorker = await Worker.findById(workerId).populate('serviceCategories', 'skills');
+      if (populatedWorker && populatedWorker.serviceCategories) {
+        const skillsSet = new Set<string>();
+        populatedWorker.serviceCategories.forEach((category) => {
+          if ((category as any).skills && Array.isArray((category as any).skills)) {
+            (category as any).skills.forEach((skill: any) => skillsSet.add(skill.toString()));
+          }
+        });
+        updatedWorker!.skills = Array.from(skillsSet).map((skillId) => new mongoose.Types.ObjectId(skillId));
+        await updatedWorker!.save();
+      }
       return updatedWorker;
     } catch (error) {
       logger.error(`Error completing worker onboarding ${workerId}:`, error);
@@ -273,7 +281,7 @@ export const userService = {
   completeParticipantOnboarding: async (
     participantId: string,
     onboardingData: {
-      supportNeeds: string[];
+      serviceCategories: string[];
       emergencyContact?: {
         name: string;
         relationship: string;
@@ -284,6 +292,10 @@ export const userService = {
         email: string;
       };
       coordinator?: {
+        name: string;
+        email: string;
+      };
+      behaviorSupportPractitioner?: {
         name: string;
         email: string;
       };
@@ -299,7 +311,7 @@ export const userService = {
         latitude: number;
       };
       address?: string;
-    }
+    },
   ): Promise<IParticipant | null> => {
     try {
       // Validate participantId
@@ -323,20 +335,21 @@ export const userService = {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Onboarding already completed');
       }
 
-      // Convert supportNeeds strings to ObjectIds
-      const supportNeeds = onboardingData.supportNeeds.map(serviceTypeId => 
-        new mongoose.Types.ObjectId(serviceTypeId)
+      // Conver serviceCategories strings to ObjectIds
+      const serviceCategories = onboardingData.serviceCategories.map(
+        (categoryId) => new mongoose.Types.ObjectId(categoryId),
       );
 
       // Prepare update data
       const updateData: Partial<IParticipant> = {
-        supportNeeds,
+        serviceCategories,
         emergencyContact: onboardingData.emergencyContact,
         planManager: onboardingData.planManager,
         coordinator: onboardingData.coordinator,
+        behaviorSupportPractitioner: onboardingData.behaviorSupportPractitioner,
         preferredLanguages: onboardingData.preferredLanguages || [],
         ndisNumber: onboardingData.ndisNumber,
-        onboardingComplete: true
+        onboardingComplete: true,
       };
 
       // Add location data if provided
@@ -353,12 +366,14 @@ export const userService = {
         updateData.serviceAreaId = new mongoose.Types.ObjectId(onboardingData.serviceAreaId);
       }
       // Only save participantLocation if BOTH longitude and latitude are provided
-      if (onboardingData.location && 
-          onboardingData.location.longitude !== undefined && 
-          onboardingData.location.latitude !== undefined) {
+      if (
+        onboardingData.location &&
+        onboardingData.location.longitude !== undefined &&
+        onboardingData.location.latitude !== undefined
+      ) {
         updateData.participantLocation = {
           type: 'Point',
-          coordinates: [onboardingData.location.longitude, onboardingData.location.latitude]
+          coordinates: [onboardingData.location.longitude, onboardingData.location.latitude],
         };
       }
       if (onboardingData.address) {
@@ -366,16 +381,33 @@ export const userService = {
       }
 
       // Update participant with onboarding data
-      const updatedParticipant = await Participant.findByIdAndUpdate(
-        participantId,
-        updateData,
-        { new: true, runValidators: true }
-      )
-      .populate('supportNeeds', 'name code')
-      .populate('stateId', 'name code')
-      .populate('regionId', 'name code')
-      .populate('suburbId', 'name postcode')
-      .populate('serviceAreaId', 'name code');
+      const updatedParticipant = await Participant.findByIdAndUpdate(participantId, updateData, {
+        new: true,
+        runValidators: true,
+      })
+        .populate('serviceCategories', 'name code')
+        .populate('stateId', 'name code')
+        .populate('regionId', 'name code')
+        .populate('suburbId', 'name postcode')
+        .populate('serviceAreaId', 'name code');
+
+      // update the supportNeeds based on serviceCategories populated data
+      const populatedParticipant = await Participant.findById(participantId).populate(
+        'serviceCategories',
+        'supportNeeds',
+      );
+      if (populatedParticipant && populatedParticipant.serviceCategories) {
+        const supportNeedsSet = new Set<string>();
+        populatedParticipant.serviceCategories.forEach((category) => {
+          if ((category as any).supportNeeds && Array.isArray((category as any).supportNeeds)) {
+            (category as any).supportNeeds.forEach((need: any) => supportNeedsSet.add(need.toString()));
+          }
+        });
+        updatedParticipant!.supportNeeds = Array.from(supportNeedsSet).map(
+          (needId) => new mongoose.Types.ObjectId(needId),
+        );
+        await updatedParticipant!.save();
+      }
 
       return updatedParticipant;
     } catch (error) {
@@ -388,7 +420,8 @@ export const userService = {
    * Update participant profile by ID
    */
   updateParticipantById: async (
-    participantId: string, updateData: Partial<IParticipant>
+    participantId: string,
+    updateData: Partial<IParticipant>,
   ): Promise<IParticipant | null> => {
     try {
       // Similar implementation to updateWorkerById but for Participant model
@@ -403,17 +436,15 @@ export const userService = {
 
       // Process supportNeeds if provided - convert strings to ObjectIds
       if (updateData.supportNeeds) {
-        updateData.supportNeeds = (updateData.supportNeeds as any[]).map(serviceTypeId => 
-          new mongoose.Types.ObjectId(serviceTypeId)
+        updateData.supportNeeds = (updateData.supportNeeds as any[]).map(
+          (serviceTypeId) => new mongoose.Types.ObjectId(serviceTypeId),
         );
       }
 
-      const updatedParticipant = await Participant.findByIdAndUpdate(
-        participantId,
-        updateData,
-        { new: true, runValidators: true }
-      )
-      .populate('supportNeeds', 'name code');
+      const updatedParticipant = await Participant.findByIdAndUpdate(participantId, updateData, {
+        new: true,
+        runValidators: true,
+      }).populate('supportNeeds', 'name code');
 
       return updatedParticipant;
     } catch (error) {
@@ -425,9 +456,7 @@ export const userService = {
   /**
    * Update admin profile by ID
    */
-  updateAdminById: async (
-    adminId: string, updateData: Partial<IAdmin>): Promise<IAdmin | null> => {
-
+  updateAdminById: async (adminId: string, updateData: Partial<IAdmin>): Promise<IAdmin | null> => {
     try {
       // Similar implementation for Admin model
       if (!mongoose.Types.ObjectId.isValid(adminId)) {
@@ -439,11 +468,7 @@ export const userService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Admin not found');
       }
 
-      const updatedAdmin = await Admin.findByIdAndUpdate(
-        adminId,
-        updateData,
-        { new: true, runValidators: true }
-      );
+      const updatedAdmin = await Admin.findByIdAndUpdate(adminId, updateData, { new: true, runValidators: true });
 
       return updatedAdmin;
     } catch (error) {
@@ -475,16 +500,18 @@ export const userService = {
         updatedUser = await Participant.findByIdAndUpdate(
           userId,
           { address },
-          { new: true, runValidators: true }
+          { new: true, runValidators: true },
         ).populate('supportNeeds', 'name code');
       } else if (user.role === UserRole.SUPPORT_WORKER) {
-        updatedUser = await Worker.findByIdAndUpdate(
-          userId,
-          { address },
-          { new: true, runValidators: true }
-        ).populate('skills', 'name code');
+        updatedUser = await Worker.findByIdAndUpdate(userId, { address }, { new: true, runValidators: true }).populate(
+          'skills',
+          'name code',
+        );
       } else {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Address update is only available for participants and support workers');
+        throw new ApiError(
+          httpStatus.BAD_REQUEST,
+          'Address update is only available for participants and support workers',
+        );
       }
 
       return updatedUser;
@@ -494,7 +521,6 @@ export const userService = {
     }
   },
 
-
   /**
    * Update user password
    */
@@ -502,14 +528,14 @@ export const userService = {
     try {
       const user = await User.findById(userId).select('+password');
 
-      if(!user) {
+      if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
       }
 
       // Check current password
       const isPasswordMatch = await user.isPasswordMatch(currentPassword);
 
-      if(!isPasswordMatch) {
+      if (!isPasswordMatch) {
         throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect password');
       }
 
@@ -549,15 +575,15 @@ export const userService = {
       sortBy?: string;
       limit?: number;
       page?: number;
-    } = {}
+    } = {},
   ): Promise<{
-    users: IUser[],
+    users: IUser[];
     page: number;
     limit: number;
     totalPages: number;
     totalResults: number;
   }> => {
-    try{
+    try {
       const { sortBy, limit = 10, page = 1 } = options;
 
       // Set up pagination
@@ -565,7 +591,7 @@ export const userService = {
 
       // Create sort object
       const sort: Record<string, 1 | -1> = {};
-      if(sortBy) {
+      if (sortBy) {
         const [sortField, sortOrder] = sortBy.split(':');
         sort[sortField] = sortOrder === 'desc' ? -1 : 1;
       } else {
@@ -573,10 +599,7 @@ export const userService = {
       }
 
       // Execute query
-      const users = await User.find(filter)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit);
+      const users = await User.find(filter).sort(sort).skip(skip).limit(limit);
 
       // Get total count
       const totalResults = await User.countDocuments(filter);
@@ -598,9 +621,8 @@ export const userService = {
    * Get participant by ID
    */
   getParticipantById: async (participantId: string): Promise<IUser | null> => {
-    try{
-      const participant = await Participant.findById(participantId)
-        .populate('supportNeeds', 'name code');
+    try {
+      const participant = await Participant.findById(participantId).populate('supportNeeds', 'name code');
       return participant;
     } catch (error) {
       logger.error(`Error getting participant ${participantId}:`, error);
@@ -612,7 +634,7 @@ export const userService = {
    * Get support worker by ID
    */
   getWorkerById: async (workerId: string): Promise<IUser | null> => {
-    try{
+    try {
       const worker = await Worker.findById(workerId)
         .populate('skills', 'name code')
         .populate('shiftRates.rateTimeBandId', 'name code startTime endTime');
@@ -643,7 +665,7 @@ export const userService = {
     try {
       const user = await User.findByIdAndUpdate(userId, { status }, { new: true });
 
-      if(!user) {
+      if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
       }
 
@@ -656,26 +678,36 @@ export const userService = {
 
   /**
    * Update user profile image
-  */
+   */
   updateProfileImage: async (userId: string, filePath: string): Promise<IUser | null> => {
     try {
       // Upload the image to Cloudinary
       const uploadResult = await uploadProfileImage(filePath, userId);
-      
+
       // Update the user with the new profile image URL
-      const user = await User.findByIdAndUpdate(
-        userId,
-        { profileImage: uploadResult.secure_url },
-        { new: true }
-      );
-      
+      const user = await User.findByIdAndUpdate(userId, { profileImage: uploadResult.secure_url }, { new: true });
+
       if (!user) {
         throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
       }
-      
+
       return user;
     } catch (error) {
       logger.error(`Error updating profile image for user ${userId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Upload resume document
+   */
+  uploadResume: async (docId: string, filePath: string) => {
+    try {
+      const uploadedResume = await uploadDocument(filePath, docId);
+
+      return uploadedResume.secure_url;
+    } catch (error) {
+      logger.error('Error uploading resume', error);
       throw error;
     }
   },
@@ -688,20 +720,20 @@ export const userService = {
       const session = await mongoose.startSession();
       session.startTransaction();
 
-      try{
+      try {
         // Check that both users exist and have correct roles
         const guardian = await Guardian.findById(guardianId).session(session);
-        if(!guardian) {
+        if (!guardian) {
           throw new ApiError(httpStatus.NOT_FOUND, 'Guardian not found');
         }
 
         const participant = await Participant.findById(participantId).session(session);
-        if(!participant) {
+        if (!participant) {
           throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
         }
 
         // Update guardian's participants array
-        if(!guardian.participants.includes(new mongoose.Types.ObjectId(participantId))){
+        if (!guardian.participants.includes(new mongoose.Types.ObjectId(participantId))) {
           guardian.participants.push(new mongoose.Types.ObjectId(participantId));
           await guardian.save({ session });
         }
@@ -734,23 +766,23 @@ export const userService = {
       try {
         // Check that both users exist
         const guardian = await Guardian.findById(guardianId).session(session);
-        if(!guardian) {
+        if (!guardian) {
           throw new ApiError(httpStatus.NOT_FOUND, 'Guardian not found');
         }
 
         const participant = await Participant.findById(participantId).session(session);
-        if(!participant) {
+        if (!participant) {
           throw new ApiError(httpStatus.NOT_FOUND, 'Participant not found');
         }
 
         // Remove participant from guardian's array
         guardian.participants = guardian.participants.filter(
-          (id) => !id.equals(new mongoose.Types.ObjectId(participantId))
+          (id) => !id.equals(new mongoose.Types.ObjectId(participantId)),
         );
         await guardian.save({ session });
 
         // Remove guardianId from participant if it matches
-        if (participant.guardianId && participant.guardianId.equals(new mongoose.Types.ObjectId(guardianId))){
+        if (participant.guardianId && participant.guardianId.equals(new mongoose.Types.ObjectId(guardianId))) {
           participant.guardianId = undefined;
           await participant.save({ session });
         }
@@ -763,8 +795,8 @@ export const userService = {
         session.endSession();
       }
     } catch (error) {
-        logger.error(`Error unlinking guardian ${guardianId} from participant ${participantId}:`, error);
-        throw error;
+      logger.error(`Error unlinking guardian ${guardianId} from participant ${participantId}:`, error);
+      throw error;
     }
-  }
+  },
 };

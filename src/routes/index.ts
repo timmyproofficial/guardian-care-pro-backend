@@ -21,6 +21,7 @@ import analyticsRoute from './analytics.route';
 import routineRoute from './routine.route';
 import notificationRoute from './notification.routes';
 import locationRoute from './location.route';
+import serviceCategoryRoute from './serviceCategory.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -126,6 +127,11 @@ const routes: Route[] = [
   {
     path: '/location',
     route: locationRoute,
+    authRequired: true,
+  },
+  {
+    path: '/service-categories',
+    route: serviceCategoryRoute,
     authRequired: true,
   }
 ];

@@ -9,7 +9,7 @@ import { userService } from '../services/user.service';
 import { successResponse, errorResponse } from '../utils/api-response';
 import { AuthenticatedRequest } from '@/middlewares/auth.middleware';
 import { UserRole, UserStatus } from '../types/user.types';
-import fs from 'fs';
+
 
 export const userController = {
   /**
@@ -233,26 +233,48 @@ export const userController = {
       }
 
       const userId = req.user._id;
-      const filePath = req.file.path;
+      const fileBuffer = req.file.buffer;
 
-      // Update profile image
-      const user = await userService.updateProfileImage(userId.toString(), filePath);
-
-      // Clean up temporary file if needed
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
+      // Update profile image using buffer (memory storage)
+      const user = await userService.updateProfileImage(userId.toString(), fileBuffer);
 
       return res.json(successResponse({ user }, 'Profile image updated successfully'));
     } catch (error) {
-      // Clean up temporary file in case of error
-      if (req.file?.path && fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
-      }
       next(error);
       return;
     }
   },
+/** 
+ * update the resume of the user
+ * 
+  * @route POST /api/users/upload-resume
+*/
+  uploadResume: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    try {
+      if (!req.user) {
+        return res
+          .status(httpStatus.UNAUTHORIZED)
+          .json(errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED));
+      }
+
+      if (!req.file) {
+        return res.status(httpStatus.BAD_REQUEST).json(errorResponse('No resume file provided', httpStatus.BAD_REQUEST));
+      }
+
+      const userId = req.user._id;
+      const fileBuffer = req.file.buffer;
+
+      // Update resume using buffer (memory storage)
+      const user = await userService.uploadResume(userId.toString(), fileBuffer);
+
+      return res.json(successResponse({ user }, 'Resume updated successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  }
+
+,
   /**
    * Update user password
    * @route POST /api/users/change-password

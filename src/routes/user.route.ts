@@ -7,7 +7,7 @@ import { userController } from '../controllers/user.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import validate from '../middlewares/validate.middleware';
 import { userValidation, workerValidation, participantValidation } from '../utils/validation';
-import { profileUpload } from '../utils/cloudinary';
+import { profileUpload, documentUpload } from '../utils/cloudinary';
 import { UserRole } from '../types/user.types';
 
 const router = express.Router();
@@ -23,6 +23,7 @@ router.patch(
 );
 
 router.post('/profile-image', authenticate, profileUpload.single('image'), userController.updateProfileImage);
+router.post('/upload-resume', authenticate, documentUpload.single('file'), authorize([UserRole.SUPPORT_WORKER]), userController.uploadResume);
 
 router.post('/change-password', authenticate, validate(userValidation.updatePassword), userController.changePassword);
 
