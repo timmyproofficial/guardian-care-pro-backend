@@ -21,17 +21,10 @@ export const serviceCategoryValidation = {
         .messages({
           'any.only': 'Invalid status value',
         }),
-      subCategories: Joi.array()
-        .items(
-          Joi.string().hex().length(24).messages({
-            'string.hex': 'Invalid subcategory ID format',
-            'string.length': 'Invalid subcategory ID length',
-          }),
-        )
-        .required()
-        .messages({
-          'array.base': 'Subcategories must be an array',
-        }),
+      
+      description: Joi.string().trim().max(500).messages({
+        'string.max': 'Description cannot exceed 500 characters',
+      }),
     }),
   },
 
@@ -54,17 +47,9 @@ export const serviceCategoryValidation = {
         .messages({
           'any.only': 'Invalid status value',
         }),
-      subCategories: Joi.array()
-        .items(
-          Joi.string().hex().length(24).messages({
-            'string.hex': 'Invalid subcategory ID format',
-            'string.length': 'Invalid subcategory ID length',
-          }),
-        )
-        .min(1)
-        .messages({
-          'array.min': 'At least one subcategory is required',
-        }),
+      description: Joi.string().trim().max(500).messages({
+        'string.max': 'Description cannot exceed 500 characters',
+      }),
     }).min(1),
   },
 

@@ -18,13 +18,6 @@ router.get(
   serviceTypeController.getAllServiceTypes
 );
 
-// Get service types grouped by category (all authenticated users can read)
-router.get(
-  '/by-category',
-  authenticate,
-  serviceTypeController.getServiceTypesGroupedByCategory
-);
-
 // Get active service types (all authenticated users can read)
 router.get(
   '/active',

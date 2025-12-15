@@ -17,13 +17,13 @@ const serviceCategoryController = {
    */
   createServiceCategory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
-      const { name, status, subCategories } = req.body;
+      const { name, status, description } = req.body;
 
       const category = await serviceCategoryService.createServiceCategory(
         {
           name,
           status,
-          subCategories,
+          description,
         },
         { id: req.user!.id, role: req.user!.role },
       );

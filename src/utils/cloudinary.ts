@@ -11,7 +11,6 @@
  */
 
 import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
-const { CloudinaryStorage } = require('multer-storage-cloudinary');
 import multer from 'multer';
 import config from '../config/env';
 import logger from './logger';
@@ -195,18 +194,24 @@ export const documentUpload = multer({
   },
 });
 
-// Configure CloudinaryStorage for job attachments (resume, cover letter)
-const jobAttachmentStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'job-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt'],
-    resource_type: 'auto',
-  } as any,
-});
+// File filter for job attachments
+const jobAttachmentFileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedMimes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only PDF, DOC, DOCX and TXT are allowed.'));
+  }
+};
 
 // Multer upload configuration for job attachments
-export const jobAttachmentUpload = multer({ storage: jobAttachmentStorage });
+export const jobAttachmentUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: jobAttachmentFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
 
 /**
  * Upload a job attachment (resume/cover letter) to Cloudinary
@@ -216,11 +221,21 @@ export const jobAttachmentUpload = multer({ storage: jobAttachmentStorage });
  * @returns Promise with Cloudinary upload result
  */
 export const uploadJobAttachment = async (
-  filePath: string,
+  filePath: string | Buffer,
   attachmentId: string,
   attachmentType: 'resume' | 'coverLetter'
 ): Promise<UploadApiResponse> => {
   try {
+    // If it's a buffer (from multer memory storage)
+    if (Buffer.isBuffer(filePath)) {
+      return await uploadBufferToCloudinary(filePath, {
+        folder: 'job-attachments',
+        public_id: `${attachmentType}-${attachmentId}`,
+        resource_type: 'auto',
+      });
+    }
+
+    // If it's a file path (existing functionality)
     const result = await cloudinary.uploader.upload(filePath, {
       folder: 'job-attachments',
       public_id: `${attachmentType}-${attachmentId}`,
@@ -250,30 +265,47 @@ export const deleteJobAttachment = async (publicId: string): Promise<any> => {
   }
 };
 
-// Configure CloudinaryStorage for event images
-const eventImageStorage = new CloudinaryStorage({
-  cloudinary: cloudinary,
-  params: {
-    folder: 'event-images',
-    allowed_formats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
-    transformation: [{ width: 1200, height: 630, crop: 'limit' }], // Optimized for social sharing
-  } as any,
-});
+// File filter for event images
+const eventImageFileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only JPG, JPEG, PNG, GIF and WEBP are allowed.'));
+  }
+};
 
 // Multer upload configuration for event images
-export const eventImageUpload = multer({ storage: eventImageStorage });
+export const eventImageUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: eventImageFileFilter,
+  limits: {
+    fileSize: 5 * 1024 * 1024, // 5MB limit
+  },
+});
 
 /**
  * Upload an event image to Cloudinary
- * @param filePath - Path to the local file
+ * @param filePath - Path to the local file or buffer
  * @param eventId - Event ID for naming the file
  * @returns Promise with Cloudinary upload result
  */
 export const uploadEventImage = async (
-  filePath: string,
+  filePath: string | Buffer,
   eventId: string
 ): Promise<UploadApiResponse> => {
   try {
+    // If it's a buffer (from multer memory storage)
+    if (Buffer.isBuffer(filePath)) {
+      return await uploadBufferToCloudinary(filePath, {
+        folder: 'event-images',
+        public_id: `event-${eventId}`,
+        overwrite: true,
+        transformation: [{ width: 1200, height: 630, crop: 'limit' }],
+      });
+    }
+
+    // If it's a file path (existing functionality)
     const result = await cloudinary.uploader.upload(filePath, {
       folder: 'event-images',
       public_id: `event-${eventId}`,

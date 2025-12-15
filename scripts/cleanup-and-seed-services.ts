@@ -133,7 +133,7 @@ const displaySummary = async (): Promise<void> => {
   try {
     logger.info('=== Seed Summary ===');
     
-    const categories = await ServiceCategory.find({}).populate('subCategories');
+    const categories = await ServiceCategory.find({});
     const totalTypes = await ServiceType.countDocuments();
     
     logger.info(`Total Categories: ${categories.length}`);
@@ -143,15 +143,15 @@ const displaySummary = async (): Promise<void> => {
     for (const category of categories) {
       logger.info(`📁 ${category.name}`);
       logger.info(`   Description: ${category.description}`);
-      logger.info(`   Service Types: ${category.subCategories.length}`);
-      
-      // Get service types for this category
-      const serviceTypes = await ServiceType.find({ category: category._id });
-      serviceTypes.forEach(st => {
-        logger.info(`      - ${st.name} (${st.code})`);
-      });
       logger.info('');
     }
+    
+    // List all service types
+    const serviceTypes = await ServiceType.find({});
+    logger.info('📋 Service Types:');
+    serviceTypes.forEach(st => {
+      logger.info(`   - ${st.name} (${st.code})`);
+    });
   } catch (error) {
     logger.error('Error displaying summary:', error);
   }

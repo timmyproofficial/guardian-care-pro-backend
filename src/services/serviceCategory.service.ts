@@ -16,7 +16,7 @@ import { UserRole } from '../types/user.types';
 interface CreateServiceCategoryInput {
   name: string;
   status?: ServiceCategoryStatus;
-  subCategories: string[];
+  description?: string;
 }
 
 /**
@@ -59,16 +59,8 @@ export const serviceCategoryService = {
         ...categoryData,
       });
 
-      // Populate subCategories
-      /**
-       * The service category document with populated subcategories.
-       * Retrieves the full category data including all associated subcategory documents.
-       * @returns A promise that resolves to the populated ServiceCategory document or null if not found.
-       */
-      const populatedCategory = await ServiceCategory.findById(category._id).populate('subCategories');
-
       logger.info(`New service category created: ${category._id}`);
-      return populatedCategory!;
+      return category;
     } catch (error) {
       logger.error('Error creating service category:', error);
       throw error;
@@ -102,7 +94,6 @@ export const serviceCategoryService = {
       // Execute query with pagination
       const [categories, totalCount] = await Promise.all([
         ServiceCategory.find(query)
-          .populate('subCategories')
           .sort(sort)
           .skip(skip)
           .limit(limit)
@@ -133,7 +124,7 @@ export const serviceCategoryService = {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid service category ID format');
       }
 
-      const category = await ServiceCategory.findById(categoryId).populate('subCategories');
+      const category = await ServiceCategory.findById(categoryId);
 
       if (!category) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service category not found');
@@ -152,7 +143,6 @@ export const serviceCategoryService = {
   getServiceCategoriesByStatus: async (status: ServiceCategoryStatus): Promise<IServiceCategory[]> => {
     try {
       const categories = await ServiceCategory.find({ status })
-        .populate('subCategories')
         .sort({ name: 1 });
 
       return categories;
@@ -189,7 +179,7 @@ export const serviceCategoryService = {
       const updateData: any = {
         ...(data.name && { name: data.name }),
         ...(data.status && { status: data.status }),
-        ...(data.subCategories && { subCategories: data.subCategories }),
+        ...(data.description && { description: data.description }),
         updatedAt: new Date(),
       };
 
@@ -198,7 +188,7 @@ export const serviceCategoryService = {
         categoryId,
         updateData,
         { new: true, runValidators: true },
-      ).populate('subCategories');
+      );
 
       if (!updatedCategory) {
         throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update service category');
@@ -246,19 +236,13 @@ export const serviceCategoryService = {
   getServiceCategoryStatistics: async (): Promise<{
     totalCategories: number;
     byStatus: Record<string, number>;
-    totalSubCategories: number;
   }> => {
     try {
-      const [totalCategories, statusStats, subCategoryStats] = await Promise.all([
+      const [totalCategories, statusStats] = await Promise.all([
         ServiceCategory.countDocuments(),
 
         ServiceCategory.aggregate([
           { $group: { _id: '$status', count: { $sum: 1 } } },
-        ]),
-
-        ServiceCategory.aggregate([
-          { $unwind: '$subCategories' },
-          { $group: { _id: null, count: { $sum: 1 } } },
         ]),
       ]);
 
@@ -271,12 +255,9 @@ export const serviceCategoryService = {
         {} as Record<string, number>,
       );
 
-      const totalSubCategories = subCategoryStats[0]?.count || 0;
-
       return {
         totalCategories,
         byStatus,
-        totalSubCategories,
       };
     } catch (error) {
       logger.error('Error fetching service category statistics:', error);

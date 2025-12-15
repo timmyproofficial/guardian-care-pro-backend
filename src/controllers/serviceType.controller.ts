@@ -14,7 +14,7 @@ export const serviceTypeController = {
   /**
    * Create a new service type
    * @route POST /api/service-types
-   * @body { name, code, categoryId, status }
+   * @body { name, code, status }
    */
   createServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -24,19 +24,18 @@ export const serviceTypeController = {
         );
       }
       
-      const { name, code, categoryId, status } = req.body;
+      const { name, code, status } = req.body;
       
       // Validate required fields
-      if (!name || !code || !categoryId) {
+      if (!name || !code) {
         return res.status(httpStatus.BAD_REQUEST).json(
-          errorResponse('Missing required fields: name, code, categoryId', httpStatus.BAD_REQUEST)
+          errorResponse('Missing required fields: name, code', httpStatus.BAD_REQUEST)
         );
       }
       
       const serviceType = await serviceTypeService.createServiceType({
         name,
         code,
-        categoryId,
         status
       });
       
@@ -51,7 +50,7 @@ export const serviceTypeController = {
   /**
    * Get all service types with optional filtering
    * @route GET /api/service-types
-   * @query status, categoryId, activeOnly
+   * @query status, activeOnly
    */
   getAllServiceTypes: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -61,40 +60,14 @@ export const serviceTypeController = {
         );
       }
       
-      const { status, categoryId, activeOnly } = req.query;
+      const { status, activeOnly } = req.query;
       
       const serviceTypes = await serviceTypeService.getAllServiceTypes({
         status: status as ServiceTypeStatus,
-        categoryId: categoryId as string,
         activeOnly: activeOnly === 'true'
       });
       
       return res.json(successResponse({ serviceTypes }, 'Service types retrieved successfully'));
-    } catch (error) {
-      return next(error);
-    }
-  },
-
-  /**
-   * Get service types grouped by category
-   * @route GET /api/service-types/by-category
-   */
-  getServiceTypesGroupedByCategory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    try {
-      if (!req.user) {
-        return res.status(httpStatus.UNAUTHORIZED).json(
-          errorResponse('Unauthorized: User not found on request', httpStatus.UNAUTHORIZED)
-        );
-      }
-      
-      const grouped = await serviceTypeService.getServiceTypesGroupedByCategory();
-      
-      return res.json(
-        successResponse(
-          { categories: grouped }, 
-          'Service types grouped by category retrieved successfully'
-        )
-      );
     } catch (error) {
       return next(error);
     }
@@ -165,7 +138,7 @@ export const serviceTypeController = {
   /**
    * Update service type
    * @route PATCH /api/service-types/:serviceTypeId
-   * @body { name?, code?, categoryId?, status? }
+   * @body { name?, code?, status? }
    */
   updateServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -176,12 +149,11 @@ export const serviceTypeController = {
       }
       
       const { serviceTypeId } = req.params;
-      const { name, code, categoryId, status } = req.body;
+      const { name, code, status } = req.body;
       
       const serviceType = await serviceTypeService.updateServiceType(serviceTypeId, {
         name,
         code,
-        categoryId,
         status
       });
       

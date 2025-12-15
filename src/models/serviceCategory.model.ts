@@ -9,7 +9,6 @@ export interface IServiceCategory extends Document {
   _id: mongoose.Types.ObjectId;
   name: string;
   status: ServiceCategoryStatus;
-  subCategories: mongoose.Types.ObjectId[]; // References to service types IDs
   description?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -32,13 +31,6 @@ const serviceCategorySchema = new Schema<IServiceCategory>(
       default: ServiceCategoryStatus.ACTIVE,
       required: true,
     },
-    subCategories: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'ServiceType',
-        required: true,
-      },
-    ],
     description: {
       type: String,
       trim: true,

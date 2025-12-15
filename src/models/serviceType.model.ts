@@ -20,7 +20,6 @@ export interface IServiceType extends Document {
   _id: mongoose.Types.ObjectId;
   name: string; // Display name (e.g., "Personal Care")
   code: string; // Unique code (e.g., "PERSONAL_CARE")
-  category: mongoose.Types.ObjectId; // Reference to ServiceCategory
   status: ServiceTypeStatus; // Active or inactive status
   createdAt: Date;
   updatedAt: Date;
@@ -45,11 +44,6 @@ const serviceTypeSchema = new Schema<IServiceType>(
       trim: true,
       maxlength: 50,
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'ServiceCategory',
-      required: true,
-    },
     status: {
       type: String,
       enum: Object.values(ServiceTypeStatus),
@@ -67,7 +61,7 @@ const serviceTypeSchema = new Schema<IServiceType>(
  */
 serviceTypeSchema.index({ status: 1 });
 serviceTypeSchema.index({ name: 1 });
-serviceTypeSchema.index({ category: 1 });
+serviceTypeSchema.index({ code: 1 });
 
 // Compound indexes for optimized queries
 serviceTypeSchema.index(
@@ -78,16 +72,6 @@ serviceTypeSchema.index(
   {
     name: 'idx_status_name_search',
     partialFilterExpression: { status: 'active' },
-  },
-);
-
-serviceTypeSchema.index(
-  {
-    category: 1,
-    status: 1,
-  },
-  {
-    name: 'idx_category_status',
   },
 );
 

@@ -1031,9 +1031,6 @@ export const serviceTypeValidation = {
   // Create service type
   createServiceType: Joi.object({
     name: Joi.string().required().trim().min(2).max(100),
-    categoryId: Joi.string()
-      .required()
-      .regex(/^[0-9a-fA-F]{24}$/),
     code: Joi.string().required().trim().min(2).max(50).uppercase(),
     status: Joi.string().valid('active', 'inactive').default('active'),
   }),
