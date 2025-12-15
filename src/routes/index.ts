@@ -24,6 +24,7 @@ import locationRoute from './location.route';
 import rosterRoute from './roster.route';
 import jobRoute from './job.route';
 import eventRoute from './event.route';
+import serviceCategoryRoute from './serviceCategory.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -148,6 +149,11 @@ const routes: Route[] = [
     path: '/events',
     route: eventRoute,
     authRequired: false, // Public endpoints available, auth handled per-route
+  },
+  {
+    path: '/service-categories',
+    route: serviceCategoryRoute,
+    authRequired: true,
   }
 ];
 

@@ -14,6 +14,7 @@ export const serviceTypeController = {
   /**
    * Create a new service type
    * @route POST /api/service-types
+   * @body { name, code, status }
    */
   createServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -24,6 +25,13 @@ export const serviceTypeController = {
       }
       
       const { name, code, status } = req.body;
+      
+      // Validate required fields
+      if (!name || !code) {
+        return res.status(httpStatus.BAD_REQUEST).json(
+          errorResponse('Missing required fields: name, code', httpStatus.BAD_REQUEST)
+        );
+      }
       
       const serviceType = await serviceTypeService.createServiceType({
         name,
@@ -40,8 +48,9 @@ export const serviceTypeController = {
   },
 
   /**
-   * Get all service types
+   * Get all service types with optional filtering
    * @route GET /api/service-types
+   * @query status, activeOnly
    */
   getAllServiceTypes: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -129,6 +138,7 @@ export const serviceTypeController = {
   /**
    * Update service type
    * @route PATCH /api/service-types/:serviceTypeId
+   * @body { name?, code?, status? }
    */
   updateServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -173,4 +183,4 @@ export const serviceTypeController = {
       return next(error);
     }
   }
-}; 
+};

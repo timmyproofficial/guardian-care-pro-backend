@@ -146,6 +146,106 @@ npm run cleanup:geojson
 
 ---
 
+### 4. Service Categories and Types - Cleanup and Seed
+
+**File:** `cleanup-and-seed-services.ts`
+
+**Purpose:** Completely refreshes the service categories and service types data by:
+- Cleaning up all existing service types and categories
+- Seeding fresh data with proper relationships
+- Verifying data integrity
+
+**Usage:**
+```bash
+npm run seed:services
+```
+
+**Or directly:**
+```bash
+ts-node scripts/cleanup-and-seed-services.ts
+```
+
+**What it does:**
+1. Connects to MongoDB
+2. **Cleans up existing data:**
+   - Deletes all existing ServiceType documents
+   - Deletes all existing ServiceCategory documents
+3. **Seeds fresh data:**
+   - Creates 7 main service categories
+   - Creates 35+ service types with proper category relationships
+   - Establishes bidirectional references between categories and types
+4. **Verifies data integrity:**
+   - Checks all references are correctly linked
+   - Validates category-to-type relationships
+5. Displays a summary of seeded data
+6. Disconnects and exits
+
+**What's seeded:**
+- **Assistance with Daily Life (Core)** - 8 service types
+- **Community & Social Participation** - 4 service types
+- **Transport & Travel Support** - 3 service types
+- **Household & Domestic Support** - 4 service types
+- **Capacity Building, Therapy & Daily Living Skills** - 4 service types
+- **Supported / Shared Living & Group / Centre-Based Supports** - 4 service types
+- **Assistive Technology (AT), Consumables & Equipment Support** - 4 service types
+
+**Expected Output:**
+```
+╔════════════════════════════════════════════════════════════╗
+║   Service Categories & Types - Cleanup and Seed Script     ║
+╚════════════════════════════════════════════════════════════╝
+
+✓ MongoDB connected successfully
+
+=== Starting cleanup of existing data ===
+Found 10 service types and 5 service categories
+✓ Deleted 10 service types
+✓ Deleted 5 service categories
+=== Cleanup completed successfully ===
+
+=== Starting seed process ===
+Starting service categories and types seeding...
+Processing category: Assistance with Daily Life (Core)
+Created category: Assistance with Daily Life (Core) (64a5b2c...)
+  - Created service type: Personal Care (PERSONAL_CARE)
+  - Created service type: Community Access (COMMUNITY_ACCESS)
+  ...
+✓ Successfully seeded 7 categories and 35 service types
+
+=== Verifying data integrity ===
+Category: Assistance with Daily Life (Core)
+  - SubCategories count: 8
+✓ All seed data verified successfully
+
+=== Seed Summary ===
+Total Categories: 7
+Total Service Types: 35
+
+📁 Assistance with Daily Life (Core)
+   Description: This is one of the most used and highest-billing areas.
+   Service Types: 8
+      - Personal Care (PERSONAL_CARE)
+      - Community Access (COMMUNITY_ACCESS)
+      ...
+
+╔════════════════════════════════════════════════════════════╗
+║              ✓ Script completed successfully!              ║
+╚════════════════════════════════════════════════════════════╝
+```
+
+**When to use:**
+- Initial setup of service categories and types
+- After making changes to service categories schema
+- To refresh service data to match current business requirements
+- When service types need to be reorganized
+
+**⚠️ WARNING:**
+This script will **DELETE ALL** existing service types and categories. Make sure you have a backup if you have important data that shouldn't be lost.
+
+**Note:** This script is idempotent in the sense that running it multiple times will produce the same result, but it will delete and recreate all data each time.
+
+---
+
 ## Workflow
 
 Typical workflow for location setup and maintenance:

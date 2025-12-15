@@ -12,6 +12,7 @@ import User, { IUser } from './user.model';
  */
 export interface IWorker extends IUser {
   skills?: mongoose.Types.ObjectId[];
+  serviceCategories?:mongoose.Types.ObjectId[];
   bio?: string;
   qualifications: {
     title: string;
@@ -27,6 +28,7 @@ export interface IWorker extends IUser {
     endDate?: Date;
     description?: string;
   }[];
+  resume?:string;
   hourlyRate?: {
     baseRate: number;
     weekendRate?: number;
@@ -93,6 +95,11 @@ const workerSchema = new Schema<IWorker>(
       ref: 'ServiceType',
     }],
 
+    serviceCategories: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceCategory',
+    }],
+
     bio: {
       type: String,
       maxlength: 500,
@@ -124,28 +131,40 @@ const workerSchema = new Schema<IWorker>(
       endDate: { type: Date },
       description: { type: String },
     }],
+
+    resume: {
+      type: String,
+      validate: {
+        validator: function(value: string) {
+          // Basic URL validation for resume link
+          return /^(https?:\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?$/.test(value);
+        },
+        message: 'Please provide a valid URL for the resume',
+      },
+    },
     
     // Hourly rates
     hourlyRate: {
       baseRate: { 
-        type: Number, 
-        // required: true 
+      type: Number,
+      default: 38
+      // required: true 
       },
-      weekendRate: { type: Number },
-      holidayRate: { type: Number },
-      overnightRate: { type: Number },
+      weekendRate: { type: Number, default:38},
+      holidayRate: { type: Number, default:38},
+      overnightRate: { type: Number, default:38},
     },
 
     shiftRates: [{
       rateTimeBandId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'RateTimeBand',
-        required: true
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'RateTimeBand',
+      required: true
       },
       hourlyRate: {
-        type: Number,
-        required: true,
-        min: 0
+      type: Number,
+      required: true,
+      default: 38
       }
     }],
 

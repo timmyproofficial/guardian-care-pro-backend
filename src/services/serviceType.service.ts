@@ -4,7 +4,7 @@
  */
 
 import httpStatus from 'http-status';
-// import mongoose from 'mongoose';
+import mongoose from 'mongoose';
 import ServiceType, { IServiceType, ServiceTypeStatus } from '../models/serviceType.model';
 import ApiError from '../utils/api-error';
 import logger from '../utils/logger';
@@ -52,6 +52,8 @@ export const serviceTypeService = {
         status: serviceTypeData.status || ServiceTypeStatus.ACTIVE
       });
       
+      logger.info(`Created service type: ${serviceType.name}`);
+      
       return serviceType;
     } catch (error) {
       logger.error('Error creating service type:', error);
@@ -60,7 +62,7 @@ export const serviceTypeService = {
   },
 
   /**
-   * Get all service types
+   * Get all service types with optional filtering
    */
   getAllServiceTypes: async (filter: {
     status?: ServiceTypeStatus;
@@ -76,7 +78,8 @@ export const serviceTypeService = {
         query.status = ServiceTypeStatus.ACTIVE;
       }
       
-      const serviceTypes = await ServiceType.find(query).sort({ name: 1 });
+      const serviceTypes = await ServiceType.find(query)
+        .sort({ name: 1 });
       
       return serviceTypes;
     } catch (error) {
@@ -90,6 +93,10 @@ export const serviceTypeService = {
    */
   getServiceTypeById: async (serviceTypeId: string): Promise<IServiceType> => {
     try {
+      if (!mongoose.Types.ObjectId.isValid(serviceTypeId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid service type ID format');
+      }
+
       const serviceType = await ServiceType.findById(serviceTypeId);
       
       if (!serviceType) {
@@ -108,7 +115,9 @@ export const serviceTypeService = {
    */
   getServiceTypeByCode: async (code: string): Promise<IServiceType> => {
     try {
-      const serviceType = await ServiceType.findOne({ code: code.toUpperCase() });
+      const serviceType = await ServiceType.findOne({ 
+        code: code.toUpperCase() 
+      });
       
       if (!serviceType) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found');
@@ -129,6 +138,10 @@ export const serviceTypeService = {
     updateData: UpdateServiceTypeInput
   ): Promise<IServiceType> => {
     try {
+      if (!mongoose.Types.ObjectId.isValid(serviceTypeId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid service type ID format');
+      }
+
       // Get the service type
       const serviceType = await ServiceType.findById(serviceTypeId);
       
@@ -151,17 +164,9 @@ export const serviceTypeService = {
       // Prepare update object
       const updateObj: any = {};
       
-      if (updateData.name) {
-        updateObj.name = updateData.name;
-      }
-      
-      if (updateData.code) {
-        updateObj.code = updateData.code.toUpperCase();
-      }
-      
-      if (updateData.status) {
-        updateObj.status = updateData.status;
-      }
+      if (updateData.name) updateObj.name = updateData.name;
+      if (updateData.code) updateObj.code = updateData.code.toUpperCase();
+      if (updateData.status) updateObj.status = updateData.status;
       
       // Update the service type
       const updatedServiceType = await ServiceType.findByIdAndUpdate(
@@ -174,6 +179,7 @@ export const serviceTypeService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found');
       }
       
+      logger.info(`Updated service type: ${updatedServiceType.name}`);
       return updatedServiceType;
     } catch (error) {
       logger.error(`Error updating service type ${serviceTypeId}:`, error);
@@ -186,6 +192,10 @@ export const serviceTypeService = {
    */
   deleteServiceType: async (serviceTypeId: string): Promise<IServiceType> => {
     try {
+      if (!mongoose.Types.ObjectId.isValid(serviceTypeId)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid service type ID format');
+      }
+
       // Check if service type exists
       const serviceType = await ServiceType.findById(serviceTypeId);
       
@@ -193,8 +203,7 @@ export const serviceTypeService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found');
       }
       
-      // TODO: Check if service type is being used in any shifts
-      // This would require checking the Shift model once it's updated
+      // TODO: Check if service type is being used in any shifts/bookings
       
       // Set status to inactive instead of hard delete
       const updatedServiceType = await ServiceType.findByIdAndUpdate(
@@ -207,6 +216,7 @@ export const serviceTypeService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Service type not found');
       }
       
+      logger.info(`Soft deleted service type: ${updatedServiceType.name}`);
       return updatedServiceType;
     } catch (error) {
       logger.error(`Error deleting service type ${serviceTypeId}:`, error);
@@ -225,4 +235,4 @@ export const serviceTypeService = {
       throw error;
     }
   }
-}; 
+};

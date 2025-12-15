@@ -176,19 +176,30 @@ export const participantValidation = {
 
   // Participant onboarding
   onboarding: Joi.object({
-    supportNeeds: Joi.array().items(Joi.string().required().regex(/^[0-9a-fA-F]{24}$/)).required().min(1),
+    serviceCategories: Joi.array()
+      .items(
+        Joi.string()
+          .required()
+          .regex(/^[0-9a-fA-F]{24}$/),
+      )
+      .required()
+      .min(1),
     emergencyContact: Joi.object({
       name: Joi.string().required(),
       relationship: Joi.string().required(),
       phone: Joi.string().required(),
     }),
     planManager: Joi.object({
-      name: Joi.string().required(),
-      email: Joi.string().required().email(),
+      name: Joi.string(),
+      email: Joi.string().email(),
     }),
     coordinator: Joi.object({
-      name: Joi.string().required(),
-      email: Joi.string().required().email(),
+      name: Joi.string(),
+      email: Joi.string().email(),
+    }),
+    behaviorSupportPractitioner: Joi.object({
+      name: Joi.string(),
+      email: Joi.string().email(),
     }),
     preferredLanguages: Joi.array().items(Joi.string()),
     ndisNumber: Joi.string().trim(),
@@ -241,15 +252,70 @@ export const workerValidation = {
         title: Joi.string().required(),
         organization: Joi.string().required(),
         startDate: Joi.date().required(),
-        endDate: Joi.date().allow(null),
+        endDate: Joi.date().allow(null).min(Joi.ref('startDate')),
         description: Joi.string(),
       }),
     ),
+    resume: Joi.string().uri(),
+    // availability: Joi.object({
+    //   weekdays: Joi.array()
+    //     .items(
+    //       Joi.object({
+    //         day: Joi.string()
+    //           .required()
+    //           .valid('monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'),
+    //         available: Joi.boolean().required(),
+    //         slots: Joi.array().items(
+    //           Joi.object({
+    //             start: Joi.string()
+    //               .required()
+    //               .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    //             end: Joi.string()
+    //               .required()
+    //               .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+    //           }).custom((slot, helpers) => {
+    //             const [startHour, startMin] = slot.start.split(':').map(Number);
+    //             const [endHour, endMin] = slot.end.split(':').map(Number);
+    //             const startMinutes = startHour * 60 + startMin;
+    //             const endMinutes = endHour * 60 + endMin;
+
+    //             if (startMinutes >= endMinutes) {
+    //               return helpers.error('Start time must be before end time');
+    //             }
+    //             return slot;
+    //           }),
+    //         ),
+    //       }).custom((daySchedule, helpers) => {
+    //         if (daySchedule.available && daySchedule.slots && daySchedule.slots.length > 1) {
+    //           const timeToMinutes = (time: string): number => {
+    //             const [hour, min] = time.split(':').map(Number);
+    //             return hour * 60 + min;
+    //           };
+
+    //           for (let i = 0; i < daySchedule.slots.length; i++) {
+    //             for (let j = i + 1; j < daySchedule.slots.length; j++) {
+    //               const slot1Start = timeToMinutes(daySchedule.slots[i].start);
+    //               const slot1End = timeToMinutes(daySchedule.slots[i].end);
+    //               const slot2Start = timeToMinutes(daySchedule.slots[j].start);
+    //               const slot2End = timeToMinutes(daySchedule.slots[j].end);
+
+    //               if (slot1Start < slot2End && slot1End > slot2Start) {
+    //                 return helpers.error(`Time slots cannot overlap on ${daySchedule.day}`);
+    //               }
+    //             }
+    //           }
+    //         }
+    //         return daySchedule;
+    //       }),
+    //     )
+    //     .required(),
+    //   unavailableDates: Joi.array().items(Joi.date()),
+    // }).required(),
     hourlyRate: Joi.object({
-      baseRate: Joi.number().required().min(0),
-      weekendRate: Joi.number().min(0),
-      holidayRate: Joi.number().min(0),
-      overnightRate: Joi.number().min(0),
+      baseRate: Joi.number().required().min(38),
+      weekendRate: Joi.number().min(38),
+      holidayRate: Joi.number().min(38),
+      overnightRate: Joi.number().min(38),
     }),
     serviceAreas: Joi.array().items(Joi.string()),
     languages: Joi.array().items(Joi.string()),
@@ -264,7 +330,7 @@ export const workerValidation = {
   // Worker onboarding
   onboarding: Joi.object({
     bio: Joi.string().max(500).required(),
-    skills: Joi.array()
+    serviceCategories: Joi.array()
       .items(
         Joi.string()
           .required()
@@ -279,18 +345,19 @@ export const workerValidation = {
           title: Joi.string().required(),
           organization: Joi.string().required(),
           startDate: Joi.date().required(),
-          endDate: Joi.date().allow(null),
+          endDate: Joi.date().allow(null).min(Joi.ref('startDate')),
           description: Joi.string(),
         }),
       )
-      .optional(),
+      .required(),
+    resume: Joi.string().uri().required(),
     shiftRates: Joi.array()
       .items(
         Joi.object({
           rateTimeBandId: Joi.string()
             .required()
             .regex(/^[0-9a-fA-F]{24}$/),
-          hourlyRate: Joi.number().required().min(0),
+          hourlyRate: Joi.number().required().min(38),
         }),
       )
       .required()
@@ -311,8 +378,39 @@ export const workerValidation = {
                 end: Joi.string()
                   .required()
                   .pattern(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+              }).custom((slot, helpers) => {
+                const [startHour, startMin] = slot.start.split(':').map(Number);
+                const [endHour, endMin] = slot.end.split(':').map(Number);
+                const startMinutes = startHour * 60 + startMin;
+                const endMinutes = endHour * 60 + endMin;
+
+                if (startMinutes >= endMinutes) {
+                  return helpers.error('Start time must be before end time');
+                }
+                return slot;
               }),
             ),
+          }).custom((daySchedule, helpers) => {
+            if (daySchedule.available && daySchedule.slots && daySchedule.slots.length > 1) {
+              const timeToMinutes = (time: string): number => {
+                const [hour, min] = time.split(':').map(Number);
+                return hour * 60 + min;
+              };
+
+              for (let i = 0; i < daySchedule.slots.length; i++) {
+                for (let j = i + 1; j < daySchedule.slots.length; j++) {
+                  const slot1Start = timeToMinutes(daySchedule.slots[i].start);
+                  const slot1End = timeToMinutes(daySchedule.slots[i].end);
+                  const slot2Start = timeToMinutes(daySchedule.slots[j].start);
+                  const slot2End = timeToMinutes(daySchedule.slots[j].end);
+
+                  if (slot1Start < slot2End && slot1End > slot2Start) {
+                    return helpers.error(`Time slots cannot overlap on ${daySchedule.day}`);
+                  }
+                }
+              }
+            }
+            return daySchedule;
           }),
         )
         .required(),
@@ -528,7 +626,9 @@ export const shiftValidation = {
       .required(),
     requiresSupervision: Joi.boolean().default(false),
     specialInstructions: Joi.string().optional(),
-    routineId: Joi.string().pattern(/^RTN-[A-Z0-9]{10}$/).optional(),
+    routineId: Joi.string()
+      .pattern(/^RTN-[A-Z0-9]{10}$/)
+      .optional(),
     routineRequired: Joi.boolean().default(false),
     recurrence: Joi.object({
       pattern: Joi.string()
@@ -558,7 +658,10 @@ export const shiftValidation = {
     address: Joi.string().optional(),
     requiresSupervision: Joi.boolean().optional(),
     specialInstructions: Joi.string().optional(),
-    routineId: Joi.string().pattern(/^RTN-[A-Z0-9]{10}$/).allow(null).optional(),
+    routineId: Joi.string()
+      .pattern(/^RTN-[A-Z0-9]{10}$/)
+      .allow(null)
+      .optional(),
     routineRequired: Joi.boolean().optional(),
     status: Joi.string()
       .valid(...Object.values(ShiftStatus))
