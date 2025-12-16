@@ -109,7 +109,12 @@ const userSchema = new Schema<IUser>(
       type: String,
       trim: true,
       validate: {
-        validator: (value: string) => validator.isMobilePhone(value),
+        validator: (value: string) => {
+          // Allow empty/null values (phone is optional for some roles)
+          if (!value) return true;
+          // Accept mobile phones from any locale, or landline numbers in E.164 format
+          return validator.isMobilePhone(value, 'any') || /^\+?[1-9]\d{6,14}$/.test(value);
+        },
         message: 'Phone number must be valid',
       },
     },
