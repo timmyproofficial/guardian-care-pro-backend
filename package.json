@@ -13,6 +13,7 @@
     "test:watch": "jest --watch",
     "seed": "ts-node src/utils/seeder.ts",
     "seed:locations": "ts-node scripts/seed-locations.ts",
+    "seed:roster": "ts-node src/seed/roster-snapshot.seed.ts",
     "cleanup:locations": "ts-node scripts/cleanup-locations.ts",
     "cleanup:geojson": "ts-node scripts/cleanup-partial-geojson.ts",
     "heroku-postbuild": "npm run build"
