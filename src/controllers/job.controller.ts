@@ -8,6 +8,7 @@ import httpStatus from 'http-status';
 import * as jobService from '../services/job.service';
 import * as jobApplicationService from '../services/jobApplication.service';
 import * as savedJobService from '../services/savedJob.service';
+import logger from '../utils/logger';
 import {
   CreateJobInput,
   UpdateJobInput,
@@ -241,15 +242,40 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
 
   // Process uploaded files from Cloudinary
   // multer-storage-cloudinary adds 'path' as the Cloudinary URL
+  // Some versions may use 'secure_url' or 'url' instead
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
   const attachments: IJobAttachment[] = [];
 
+  // Log file upload details for debugging
+  logger.info('Job application file upload', {
+    hasFiles: !!files,
+    fileFields: files ? Object.keys(files) : [],
+    resumeCount: files?.resume?.length || 0,
+    coverLetterCount: files?.coverLetter?.length || 0,
+  });
+
+  // Helper to extract Cloudinary URL from file object
+  const getCloudinaryUrl = (file: any): string | undefined => {
+    return file.path || file.secure_url || file.url || file.location;
+  };
+
   if (files?.resume?.[0]) {
-    const resumeFile = files.resume[0] as Express.Multer.File & { path: string };
+    const resumeFile = files.resume[0] as any;
+    const fileUrl = getCloudinaryUrl(resumeFile);
+    
+    if (!fileUrl) {
+      logger.error('Resume file upload failed - no URL returned from Cloudinary', { 
+        fileKeys: Object.keys(resumeFile),
+        filename: resumeFile.filename,
+        originalname: resumeFile.originalname 
+      });
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Resume upload failed. Please try again.');
+    }
+    
     attachments.push({
       fieldName: 'resume',
       fileName: resumeFile.originalname,
-      fileUrl: resumeFile.path, // Cloudinary URL
+      fileUrl: fileUrl,
       fileType: resumeFile.mimetype,
       fileSize: resumeFile.size || 0,
       uploadedAt: new Date(),
@@ -257,11 +283,22 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
   }
 
   if (files?.coverLetter?.[0]) {
-    const coverLetterFile = files.coverLetter[0] as Express.Multer.File & { path: string };
+    const coverLetterFile = files.coverLetter[0] as any;
+    const fileUrl = getCloudinaryUrl(coverLetterFile);
+    
+    if (!fileUrl) {
+      logger.error('Cover letter file upload failed - no URL returned from Cloudinary', { 
+        fileKeys: Object.keys(coverLetterFile),
+        filename: coverLetterFile.filename,
+        originalname: coverLetterFile.originalname 
+      });
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Cover letter upload failed. Please try again.');
+    }
+    
     attachments.push({
       fieldName: 'coverLetter',
       fileName: coverLetterFile.originalname,
-      fileUrl: coverLetterFile.path, // Cloudinary URL
+      fileUrl: fileUrl,
       fileType: coverLetterFile.mimetype,
       fileSize: coverLetterFile.size || 0,
       uploadedAt: new Date(),
