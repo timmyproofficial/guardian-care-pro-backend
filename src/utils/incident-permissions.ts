@@ -58,14 +58,28 @@ const checkIncidentPermissions = {
     return reportedByUserId === userId;
   },
 
-  canResolveIncident: (userRole: UserRole) => {
-    return userRole === UserRole.ADMIN;
-    // If you want to allow participants to resolve, add:
-    // || userRole === UserRole.PARTICIPANT
+  // changed signatures: now accept the incident + userId + role so we can check "reportedAgainst"
+  canResolveIncident: (incident: IIncident, userId: string, userRole: UserRole) => {
+    // Admin can always resolve
+    if (userRole === UserRole.ADMIN) return true;
+
+    // The participant the incident is reported against can resolve
+    const reportedAgainstUserId = extractUserId(incident.reportedAgainst);
+    if (reportedAgainstUserId && reportedAgainstUserId === userId) return true;
+
+    return false;
+    // If you want to allow other roles later, extend here
   },
 
-  canChangeStatus: (userRole: UserRole) => {
-    return userRole === UserRole.ADMIN;
+  canChangeStatus: (incident: IIncident, userId: string, userRole: UserRole) => {
+    // Admin can change status
+    if (userRole === UserRole.ADMIN) return true;
+
+    // The participant the incident is reported against can also change status
+    const reportedAgainstUserId = extractUserId(incident.reportedAgainst);
+    if (reportedAgainstUserId && reportedAgainstUserId === userId) return true;
+
+    return false;
   },
 };
 

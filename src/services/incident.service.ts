@@ -89,10 +89,11 @@ export const incidentService = {
       // Manually attach the shift details instead of population
       const incidentObj = incident.toObject();
 
-      // Populate user details normally
+      // Populate user details fully (no limited select)
       const populatedIncident = await Incident.findById(incident._id).populate([
-        { path: 'reportedBy', select: 'firstName lastName email' },
-        { path: 'reportedAgainst', select: 'firstName lastName email' },
+        { path: 'reportedBy' },
+        { path: 'reportedAgainst' },
+        { path: 'resolvedBy' },
       ]);
 
       logger.info(`New incident created: ${incident._id}`);
@@ -144,18 +145,9 @@ export const incidentService = {
       const [incidents, totalCount] = await Promise.all([
         Incident.find(query)
           .populate([
-            {
-              path: 'reportedBy',
-              select: 'firstName lastName email',
-            },
-            {
-              path: 'reportedAgainst',
-              select: 'firstName lastName email',
-            },
-            {
-              path: 'resolvedBy',
-              select: 'firstName lastName email',
-            },
+            { path: 'reportedBy' },
+            { path: 'reportedAgainst' },
+            { path: 'resolvedBy' },
           ])
           .sort(sort)
           .skip(skip)
@@ -213,9 +205,9 @@ export const incidentService = {
       }
 
       const incidents = await Incident.find({ shiftId })
-        .populate('reportedBy', 'firstName lastName email')
-        .populate('reportedAgainst', 'firstName lastName email')
-        .populate('resolvedBy', 'firstName lastName email')
+        .populate('reportedBy')
+        .populate('reportedAgainst')
+        .populate('resolvedBy')
         .sort({ createdAt: -1 });
 
       // Filter incidents based on user permissions
@@ -233,8 +225,9 @@ export const incidentService = {
     try {
       const incidents = await Incident.find({ reportedBy: userId })
         .populate('shiftId', 'title startTime endTime')
-        .populate('reportedAgainst', 'firstName lastName email')
-        .populate('resolvedBy', 'firstName lastName email')
+        .populate('reportedAgainst')
+        .populate('resolvedBy')
+        .populate('reportedBy') // full reporter doc
         .sort({ createdAt: -1 });
 
       return incidents;
@@ -251,8 +244,9 @@ export const incidentService = {
     try {
       const incidents = await Incident.find({ reportedAgainst: userId })
         .populate('shiftId', 'title startTime endTime')
-        .populate('reportedBy', 'firstName lastName email')
-        .populate('resolvedBy', 'firstName lastName email')
+        .populate('reportedBy')
+        .populate('resolvedBy')
+        .populate('reportedAgainst') // full reportedAgainst doc
         .sort({ createdAt: -1 });
 
       return incidents;
@@ -272,9 +266,9 @@ export const incidentService = {
       }
 
       const incident = await Incident.findById(incidentId)
-        .populate('reportedBy', 'firstName lastName email')
-        .populate('reportedAgainst', 'firstName lastName email')
-        .populate('resolvedBy', 'firstName lastName email');
+        .populate('reportedBy')
+        .populate('reportedAgainst')
+        .populate('resolvedBy');
 
       if (!incident) {
         throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
@@ -304,11 +298,6 @@ export const incidentService = {
     user: { id: string; role: UserRole },
   ): Promise<IIncident> => {
     try {
-      // Check if user can change status
-      if (!checkIncidentPermissions.canChangeStatus(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to change incident status');
-      }
-
       // Basic validation
       if (!mongoose.Types.ObjectId.isValid(incidentId)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid incident ID');
@@ -317,6 +306,17 @@ export const incidentService = {
       const validStatuses = ['OPEN', 'IN_REVIEW', 'RESOLVED', 'REJECTED'];
       if (!validStatuses.includes(payload.status)) {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid status value');
+      }
+
+      // Load incident to check permissions (allow admin OR reportedAgainst user)
+      const incident = await Incident.findById(incidentId);
+      if (!incident) {
+        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
+      }
+
+      // Check if user can change status for this incident
+      if (!checkIncidentPermissions.canChangeStatus(incident, user.id, user.role)) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to change incident status');
       }
 
       // Prepare update data
@@ -330,14 +330,18 @@ export const incidentService = {
       }
 
       // Simple find and update
-      const incident = await Incident.findByIdAndUpdate(incidentId, updateData, { new: true });
+      const updated = await Incident.findByIdAndUpdate(incidentId, updateData, { new: true }).populate([
+        { path: 'reportedBy' },
+        { path: 'reportedAgainst' },
+        { path: 'resolvedBy' },
+      ]);
 
-      if (!incident) {
-        throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
+      if (!updated) {
+        throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update incident');
       }
 
       logger.info(`Incident ${incidentId} status updated to ${payload.status}`);
-      return incident;
+      return updated;
     } catch (error) {
       logger.error('Error updating incident status:', error);
       throw error;
@@ -353,11 +357,6 @@ export const incidentService = {
     user: { id: string; role: UserRole },
   ): Promise<IIncident> => {
     try {
-      // Check if user can resolve incidents
-      if (!checkIncidentPermissions.canResolveIncident(user.role)) {
-        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to resolve incidents');
-      }
-
       // Validate resolver matches the authenticated user
       if (resolvedBy !== user.id) {
         throw new ApiError(httpStatus.FORBIDDEN, 'You can only resolve incidents as yourself');
@@ -379,6 +378,11 @@ export const incidentService = {
         throw new ApiError(httpStatus.NOT_FOUND, 'Incident not found');
       }
 
+      // Check if user can resolve incidents (admin OR reportedAgainst user)
+      if (!checkIncidentPermissions.canResolveIncident(incident, user.id, user.role)) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'You are not authorized to resolve incidents');
+      }
+
       if (incident.status === 'RESOLVED') {
         throw new ApiError(httpStatus.BAD_REQUEST, 'Incident is already resolved');
       }
@@ -392,9 +396,9 @@ export const incidentService = {
       };
 
       const updatedIncident = await Incident.findByIdAndUpdate(incidentId, updateData, { new: true }).populate([
-        { path: 'reportedBy', select: 'firstName lastName email' },
-        { path: 'reportedAgainst', select: 'firstName lastName email' },
-        { path: 'resolvedBy', select: 'firstName lastName email' },
+        { path: 'reportedBy' },
+        { path: 'reportedAgainst' },
+        { path: 'resolvedBy' },
       ]);
 
       if (!updatedIncident) {
@@ -448,8 +452,8 @@ export const incidentService = {
         updateData,
         { new: true, runValidators: true }, // Return updated doc and run validators
       ).populate([
-        { path: 'reportedBy', select: 'firstName lastName email' },
-        { path: 'reportedAgainst', select: 'firstName lastName email' },
+        { path: 'reportedBy' },
+        { path: 'reportedAgainst' },
       ]);
 
       if (!updatedIncident) {

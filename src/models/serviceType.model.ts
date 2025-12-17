@@ -10,7 +10,7 @@ import mongoose, { Document, Schema } from 'mongoose';
  */
 export enum ServiceTypeStatus {
   ACTIVE = 'active',
-  INACTIVE = 'inactive'
+  INACTIVE = 'inactive',
 }
 
 /**
@@ -18,9 +18,9 @@ export enum ServiceTypeStatus {
  */
 export interface IServiceType extends Document {
   _id: mongoose.Types.ObjectId;
-  name: string;                    // Display name (e.g., "Personal Care")
-  code: string;                    // Unique code (e.g., "PERSONAL_CARE")
-  status: ServiceTypeStatus;       // Active or inactive status
+  name: string; // Display name (e.g., "Personal Care")
+  code: string; // Unique code (e.g., "PERSONAL_CARE")
+  status: ServiceTypeStatus; // Active or inactive status
   createdAt: Date;
   updatedAt: Date;
 }
@@ -34,7 +34,7 @@ const serviceTypeSchema = new Schema<IServiceType>(
       type: String,
       required: true,
       trim: true,
-      maxlength: 100
+      maxlength: 100,
     },
     code: {
       type: String,
@@ -42,46 +42,42 @@ const serviceTypeSchema = new Schema<IServiceType>(
       unique: true,
       uppercase: true,
       trim: true,
-      maxlength: 50
+      maxlength: 50,
     },
     status: {
       type: String,
       enum: Object.values(ServiceTypeStatus),
       default: ServiceTypeStatus.ACTIVE,
-      required: true
-    }
+      required: true,
+    },
   },
   {
-    timestamps: true // Adds createdAt and updatedAt fields
-  }
+    timestamps: true,
+  },
 );
 
 /**
  * Add indexes for faster queries
- * Note: 'code' field already has unique: true in field definition, so no need for explicit index
  */
 serviceTypeSchema.index({ status: 1 });
 serviceTypeSchema.index({ name: 1 });
+serviceTypeSchema.index({ code: 1 });
 
 // Compound indexes for optimized queries
-serviceTypeSchema.index({ 
-  status: 1, 
-  name: 1 
-}, { 
-  name: 'idx_status_name_search',
-  partialFilterExpression: { status: 'active' }
-});
-
-serviceTypeSchema.index({ 
-  status: 1, 
-  createdAt: -1 
-}, { 
-  name: 'idx_status_created_pagination' 
-});
+serviceTypeSchema.index(
+  {
+    status: 1,
+    name: 1,
+  },
+  {
+    name: 'idx_status_name_search',
+    partialFilterExpression: { status: 'active' },
+  },
+);
 
 /**
  * Create and export the ServiceType model
  */
 const ServiceType = mongoose.model<IServiceType>('ServiceType', serviceTypeSchema);
 
-export default ServiceType; 
+export default ServiceType;

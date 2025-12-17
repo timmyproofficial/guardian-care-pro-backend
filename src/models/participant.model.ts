@@ -13,6 +13,7 @@ import { SubscriptionTier } from '../types/payment.types';
  */
 export interface IParticipant extends IUser {
   supportNeeds: mongoose.Types.ObjectId[];
+  serviceCategories?: mongoose.Types.ObjectId[];
   emergencyContact?: {
     name: string;
     relationship: string;
@@ -23,6 +24,14 @@ export interface IParticipant extends IUser {
     email: string;
   };
   coordinator?: {
+    name: string;
+    email: string;
+  }
+  supportCoordinator?:{
+    name: string;
+    email: string;
+  };
+  behaviorSupportPractitioner?:{
     name: string;
     email: string;
   };
@@ -65,6 +74,11 @@ const participantSchema = new Schema<IParticipant>(
       ref: 'ServiceType',
       required: true
     }],
+    serviceCategories: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ServiceCategory',
+    }],
+    
     emergencyContact: {
       name: { type: String },
       relationship: { type: String },
@@ -93,6 +107,32 @@ const participantSchema = new Schema<IParticipant>(
             return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
           },
           message: 'Please provide a valid email address for coordinator'
+        }
+      }
+    },
+    supportCoordinator: {
+      name: { type: String },
+      email: { 
+        type: String,
+        validate: {
+          validator: function(value: string) {
+            // Email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+          },
+          message: 'Please provide a valid email address for support coordinator'
+        }
+      }
+    },
+    behaviorSupportPractitioner: {
+      name: { type: String },
+      email: { 
+        type: String,
+        validate: {
+          validator: function(value: string) {
+            // Email validation
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+          },
+          message: 'Please provide a valid email address for behavior support practitioner'
         }
       }
     },
