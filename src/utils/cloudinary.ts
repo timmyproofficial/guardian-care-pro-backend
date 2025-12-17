@@ -129,11 +129,16 @@ export const documentUpload = multer({ storage: documentStorage });
 // Configure CloudinaryStorage for job attachments (resume, cover letter)
 const jobAttachmentStorage = new CloudinaryStorage({
   cloudinary: cloudinary,
-  params: {
-    folder: 'job-attachments',
-    allowed_formats: ['pdf', 'doc', 'docx', 'txt'],
-    resource_type: 'auto',
-  } as any,
+  params: async (_req: any, file: Express.Multer.File) => {
+    const originalName = file.originalname.replace(/\.[^/.]+$/, ''); // Remove extension
+    const extension = file.originalname.split('.').pop(); // Get extension
+    return {
+      folder: 'job-attachments',
+      resource_type: 'raw', // Use 'raw' for PDFs/documents, not 'auto'
+      public_id: `${Date.now()}-${originalName}`,
+      format: extension, // Preserve original extension
+    };
+  },
 });
 
 // Multer upload configuration for job attachments
