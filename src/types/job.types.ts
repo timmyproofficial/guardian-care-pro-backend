@@ -75,6 +75,10 @@ export interface IJobAttachment {
 /**
  * Job Interface
  */
+import { IState } from '../models/location/state.model';
+import { IRegion } from '../models/location/region.model';
+import { IServiceArea } from '../models/location/serviceArea.model';
+
 export interface IJob {
   _id: Types.ObjectId;
   postedBy: Types.ObjectId;
@@ -84,6 +88,9 @@ export interface IJob {
   keyResponsibilities: string; // Markdown content
   requiredCompetencies: IRequiredCompetencies;
   location: string;
+  stateId: Types.ObjectId;
+  regionId: Types.ObjectId;
+  serviceAreaIds?: Types.ObjectId[]; // Optional array of service area IDs
   price: number;
   jobType: JobType;
   additionalNote?: string;
@@ -135,6 +142,9 @@ export interface CreateJobInput {
   keyResponsibilities: string;
   requiredCompetencies: IRequiredCompetencies;
   location: string;
+  stateId: Types.ObjectId;
+  regionId: Types.ObjectId;
+  serviceAreaIds?: Types.ObjectId[];
   price: number;
   jobType: JobType;
   additionalNote?: string;
@@ -150,6 +160,9 @@ export interface UpdateJobInput {
   keyResponsibilities?: string;
   requiredCompetencies?: Partial<IRequiredCompetencies>;
   location?: string;
+  stateId?: Types.ObjectId;
+  regionId?: Types.ObjectId;
+  serviceAreaIds?: Types.ObjectId[];
   price?: number;
   jobType?: JobType;
   additionalNote?: string;
@@ -188,12 +201,15 @@ export interface JobSearchParams {
 /**
  * Job Response with Poster Info
  */
-export interface JobWithPoster extends Omit<IJob, 'postedBy'> {
+export interface JobWithPoster extends Omit<IJob, 'postedBy' | 'stateId' | 'regionId' | 'serviceAreaIds'> {
   postedBy: {
     _id: Types.ObjectId;
     firstName: string;
     lastName: string;
     profileImage?: string;
   };
+  state: IState;
+  region: IRegion;
+  serviceAreas?: IServiceArea[];
 }
 

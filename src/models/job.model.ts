@@ -96,6 +96,24 @@ const JobSchema = new Schema<IJobDocument>(
       trim: true,
       index: true,
     },
+    stateId: {
+      type: Schema.Types.ObjectId,
+      ref: 'State',
+      required: [true, 'State is required'],
+      index: true,
+    },
+    regionId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Region',
+      required: [true, 'Region is required'],
+      index: true,
+    },
+    serviceAreaIds: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'ServiceArea',
+      },
+    ],
     price: {
       type: Number,
       required: [true, 'Price is required'],
@@ -150,6 +168,9 @@ JobSchema.index({ isDeleted: 1, status: 1, createdAt: -1 });
 JobSchema.index({ postedBy: 1, isDeleted: 1, createdAt: -1 });
 JobSchema.index({ jobRole: 1, jobType: 1, isDeleted: 1 });
 JobSchema.index({ location: 1, isDeleted: 1, status: 1 });
+JobSchema.index({ stateId: 1, isDeleted: 1, status: 1 });
+JobSchema.index({ regionId: 1, isDeleted: 1, status: 1 });
+JobSchema.index({ serviceAreaIds: 1, isDeleted: 1, status: 1 });
 
 // Text index for search
 JobSchema.index(

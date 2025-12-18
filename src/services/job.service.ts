@@ -46,10 +46,23 @@ export async function getJobById(
     query.isDeleted = false;
   }
 
-  const job = await Job.findOne(query).populate({
-    path: 'postedBy',
-    select: 'firstName lastName profileImage',
-  });
+  const job = await Job.findOne(query)
+    .populate({
+      path: 'postedBy',
+      select: 'firstName lastName profileImage',
+    })
+    .populate({
+      path: 'stateId',
+      select: 'name code',
+    })
+    .populate({
+      path: 'regionId',
+      select: 'name code',
+    })
+    .populate({
+      path: 'serviceAreaIds',
+      select: 'name code',
+    });
 
   return job;
 }
@@ -116,6 +129,18 @@ export async function getAllJobs(params: JobSearchParams): Promise<{
       .populate({
         path: 'postedBy',
         select: 'firstName lastName profileImage',
+      })
+      .populate({
+        path: 'stateId',
+        select: 'name code',
+      })
+      .populate({
+        path: 'regionId',
+        select: 'name code',
+      })
+      .populate({
+        path: 'serviceAreaIds',
+        select: 'name code',
       })
       .sort(sortOptions)
       .skip(offset)
@@ -199,6 +224,9 @@ export async function updateJob(
   if (input.jobType !== undefined) job.jobType = input.jobType;
   if (input.additionalNote !== undefined) job.additionalNote = input.additionalNote;
   if (input.status !== undefined) job.status = input.status;
+  if (input.stateId !== undefined) job.stateId = input.stateId;
+  if (input.regionId !== undefined) job.regionId = input.regionId;
+  if (input.serviceAreaIds !== undefined) job.serviceAreaIds = input.serviceAreaIds;
 
   // Handle requiredCompetencies partial update
   if (input.requiredCompetencies) {
