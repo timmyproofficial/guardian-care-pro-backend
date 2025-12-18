@@ -24,7 +24,11 @@ import locationRoute from './location.route';
 import rosterRoute from './roster.route';
 import jobRoute from './job.route';
 import eventRoute from './event.route';
+<<<<<<< HEAD
 import serviceCategoryRoute from './serviceCategory.route';
+=======
+import publicRoute from './public.route';
+>>>>>>> 8a26e6c (Create a new endpoint for enabling provider's workers to cancel shifts)
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -150,10 +154,18 @@ const routes: Route[] = [
     route: eventRoute,
     authRequired: false, // Public endpoints available, auth handled per-route
   },
+<<<<<<< HEAD
   {
     path: '/service-categories',
     route: serviceCategoryRoute,
     authRequired: true,
+=======
+  // Public routes (no auth required - for external workers)
+  {
+    path: '/public',
+    route: publicRoute,
+    authRequired: false,
+>>>>>>> 8a26e6c (Create a new endpoint for enabling provider's workers to cancel shifts)
   }
 ];
 

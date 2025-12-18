@@ -1048,3 +1048,24 @@ export const serviceTypeValidation = {
     return value;
   }),
 };
+
+/**
+ * Public API validation schemas (no auth required)
+ */
+export const publicValidation = {
+  // Cancel shift by phone
+  cancelShift: Joi.object({
+    workerPhone: Joi.string().required().trim().min(8).max(20),
+    shiftDate: Joi.string().trim(),
+    shiftStartTime: Joi.string().trim(),
+    cancellationReason: Joi.string()
+      .required()
+      .valid('sick', 'emergency', 'unavailable', 'transport', 'other'),
+    cancellationMessage: Joi.string().trim().max(500),
+  }),
+
+  // Get shifts by phone
+  getMyShifts: Joi.object({
+    phone: Joi.string().required().trim().min(8).max(20),
+  }),
+};
