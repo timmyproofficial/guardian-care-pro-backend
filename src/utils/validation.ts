@@ -14,8 +14,10 @@ import {
   TimesheetStatus,
 } from '../types/shift.types';
 import { SubscriptionTier } from '../types/payment.types';
-import { password } from './custom-validators';
 import { BatchFrequency } from '../models/batchInvoiceConfig.model';
+import { JobRole, JobType, JobStatus as JobValidationStatus, ApplicationStatus } from '../types/job.types';
+import { password } from './custom-validators';
+
 // import mongoose from 'mongoose';
 import ServiceTypeModel from '../models/serviceType.model';
 
@@ -824,6 +826,105 @@ export const chatValidation = {
 };
 
 /**
+ * Job validation schemas
+ */
+export const jobValidation = {
+  createJob: Joi.object({
+    jobRole: Joi.string().valid(...Object.values(JobRole)).required(),
+    jobDescription: Joi.string().required().trim(),
+    keyResponsibilities: Joi.string().required().trim(),
+    requiredCompetencies: Joi.object({
+      rightToWorkInAustralia: Joi.boolean().default(false),
+      ndisWorkerScreeningCheck: Joi.boolean().default(false),
+      wwcc: Joi.boolean().default(false),
+      policeCheck: Joi.boolean().default(false),
+      firstAid: Joi.boolean().default(false),
+      cpr: Joi.boolean().default(false),
+      ahpraRegistration: Joi.boolean().default(false),
+      professionalIndemnityInsurance: Joi.boolean().default(false),
+      covidVaccinationStatus: Joi.boolean().default(false),
+    }).required(),
+    location: Joi.string().required().trim(),
+    stateId: objectId.required(),
+    regionId: objectId.required(),
+    serviceAreaIds: Joi.array().items(objectId).optional(),
+    price: Joi.number().required().min(0),
+    jobType: Joi.string().valid(...Object.values(JobType)).required(),
+    additionalNote: Joi.string().allow('').trim().optional(),
+    status: Joi.string().valid(...Object.values(JobValidationStatus)).optional(),
+  }),
+
+  updateJob: Joi.object({
+    jobRole: Joi.string().valid(...Object.values(JobRole)).optional(),
+    jobDescription: Joi.string().trim().optional(),
+    keyResponsibilities: Joi.string().trim().optional(),
+    requiredCompetencies: Joi.object({
+      rightToWorkInAustralia: Joi.boolean().optional(),
+      ndisWorkerScreeningCheck: Joi.boolean().optional(),
+      wwcc: Joi.boolean().optional(),
+      policeCheck: Joi.boolean().optional(),
+      firstAid: Joi.boolean().optional(),
+      cpr: Joi.boolean().optional(),
+      ahpraRegistration: Joi.boolean().optional(),
+      professionalIndemnityInsurance: Joi.boolean().optional(),
+      covidVaccinationStatus: Joi.boolean().optional(),
+    }).optional(),
+    location: Joi.string().trim().optional(),
+    stateId: objectId.optional(),
+    regionId: objectId.optional(),
+    serviceAreaIds: Joi.array().items(objectId).optional(),
+    price: Joi.number().min(0).optional(),
+    jobType: Joi.string().valid(...Object.values(JobType)).optional(),
+    additionalNote: Joi.string().allow('').trim().optional(),
+    status: Joi.string().valid(...Object.values(JobValidationStatus)).optional(),
+  }),
+
+  queryJobs: Joi.object({
+    jobRole: Joi.string().valid(...Object.values(JobRole)).optional(),
+    jobType: Joi.string().valid(...Object.values(JobType)).optional(),
+    location: Joi.string().trim().optional(),
+    minPrice: Joi.number().min(0).optional(),
+    maxPrice: Joi.number().min(0).optional(),
+    status: Joi.string().valid(...Object.values(JobValidationStatus)).optional(),
+    postedBy: objectId.optional(),
+    postedByType: Joi.string().valid('participant', 'provider').optional(),
+    search: Joi.string().trim().optional(),
+    limit: Joi.number().integer().min(1).max(100).default(20),
+    offset: Joi.number().integer().min(0).default(0),
+    sortBy: Joi.string().valid('createdAt', 'price', 'applicationCount').default('createdAt'),
+    sortOrder: Joi.string().valid('asc', 'desc').default('desc'),
+  }),
+
+  applyForJob: Joi.object({
+    fullName: Joi.string().required().trim(),
+    email: Joi.string().required().email().trim().lowercase(),
+    phone: Joi.string().required().trim().min(8).max(20),
+    location: Joi.string().required().trim(),
+    // attachments are handled by multer middleware, not Joi
+  }),
+
+  updateApplicationStatus: Joi.object({
+    status: Joi.string().valid(...Object.values(ApplicationStatus)).required(),
+  }),
+
+  getApplicationsForJob: Joi.object({
+    limit: Joi.number().integer().min(1).max(100).default(20),
+    offset: Joi.number().integer().min(0).default(0),
+  }),
+
+  getApplicationsByUser: Joi.object({
+    limit: Joi.number().integer().min(1).max(100).default(20),
+    offset: Joi.number().integer().min(0).default(0),
+    includeDeleted: Joi.boolean().optional(),
+  }),
+
+  getSavedJobs: Joi.object({
+    limit: Joi.number().integer().min(1).max(100).default(20),
+    offset: Joi.number().integer().min(0).default(0),
+  }),
+};
+
+/**
  * Invoice validation schemas
  */
 export const invoiceValidation = {
@@ -1046,5 +1147,26 @@ export const serviceTypeValidation = {
       return helpers.error('At least one field must be updated');
     }
     return value;
+  }),
+};
+
+/**
+ * Public API validation schemas (no auth required)
+ */
+export const publicValidation = {
+  // Cancel shift by phone
+  cancelShift: Joi.object({
+    workerPhone: Joi.string().required().trim().min(8).max(20),
+    shiftDate: Joi.string().trim(),
+    shiftStartTime: Joi.string().trim(),
+    cancellationReason: Joi.string()
+      .required()
+      .valid('sick', 'emergency', 'unavailable', 'transport', 'other'),
+    cancellationMessage: Joi.string().trim().max(500),
+  }),
+
+  // Get shifts by phone
+  getMyShifts: Joi.object({
+    phone: Joi.string().required().trim().min(8).max(20),
   }),
 };

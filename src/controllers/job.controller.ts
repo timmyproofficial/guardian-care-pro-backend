@@ -52,6 +52,9 @@ export const createJob = catchAsync(async (req: Request, res: Response) => {
     keyResponsibilities: req.body.keyResponsibilities,
     requiredCompetencies: req.body.requiredCompetencies,
     location: req.body.location,
+    stateId: req.body.stateId,
+    regionId: req.body.regionId,
+    serviceAreaIds: req.body.serviceAreaIds,
     price: req.body.price,
     jobType: req.body.jobType,
     additionalNote: req.body.additionalNote,
@@ -61,10 +64,12 @@ export const createJob = catchAsync(async (req: Request, res: Response) => {
   const job = await jobService.createJob(userId, postedByType, input);
 
   // Populate poster info before responding
-  await job.populate({
-    path: 'postedBy',
-    select: 'firstName lastName profileImage',
-  });
+  await job.populate([
+    { path: 'postedBy', select: 'firstName lastName profileImage' },
+    { path: 'stateId', select: 'name code' },
+    { path: 'regionId', select: 'name code' },
+    { path: 'serviceAreaIds', select: 'name code' },
+  ]);
 
   res.status(httpStatus.CREATED).json({
     success: true,
@@ -177,6 +182,9 @@ export const updateJob = catchAsync(async (req: Request, res: Response) => {
     keyResponsibilities: req.body.keyResponsibilities,
     requiredCompetencies: req.body.requiredCompetencies,
     location: req.body.location,
+    stateId: req.body.stateId,
+    regionId: req.body.regionId,
+    serviceAreaIds: req.body.serviceAreaIds,
     price: req.body.price,
     jobType: req.body.jobType,
     additionalNote: req.body.additionalNote,
@@ -192,10 +200,12 @@ export const updateJob = catchAsync(async (req: Request, res: Response) => {
 
   const job = await jobService.updateJob(jobId, userId, input, isAdmin);
 
-  await job.populate({
-    path: 'postedBy',
-    select: 'firstName lastName profileImage',
-  });
+  await job.populate([
+    { path: 'postedBy', select: 'firstName lastName profileImage' },
+    { path: 'stateId', select: 'name code' },
+    { path: 'regionId', select: 'name code' },
+    { path: 'serviceAreaIds', select: 'name code' },
+  ]);
 
   res.status(httpStatus.OK).json({
     success: true,

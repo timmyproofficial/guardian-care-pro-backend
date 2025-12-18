@@ -100,6 +100,7 @@ export enum EventTriggerSource {
   WORKER_SMS = 'worker_sms',
   WORKER_WHATSAPP = 'worker_whatsapp',
   WORKER_CALL = 'worker_call',
+  WORKER_PORTAL = 'worker_portal',
   PROVIDER_PORTAL = 'provider_portal',
   SYSTEM_AUTOMATION = 'system_automation'
 }
