@@ -4,6 +4,7 @@
  */
 
 import { Request, Response } from 'express';
+import { Types } from 'mongoose';
 import httpStatus from 'http-status';
 import * as jobService from '../services/job.service';
 import * as jobApplicationService from '../services/jobApplication.service';
@@ -97,6 +98,22 @@ export const getAllJobs = catchAsync(async (req: Request, res: Response) => {
     sortBy: (req.query.sortBy as 'createdAt' | 'price' | 'applicationCount') || 'createdAt',
     sortOrder: (req.query.sortOrder as 'asc' | 'desc') || 'desc',
   };
+
+  const stateIdQuery = req.query.stateId as string;
+  const regionIdQuery = req.query.regionId as string;
+  const serviceAreaIdsQuery = req.query.serviceAreaIds as string | string[];
+
+  if (stateIdQuery) {
+    params.stateId = new Types.ObjectId(stateIdQuery);
+  }
+  if (regionIdQuery) {
+    params.regionId = new Types.ObjectId(regionIdQuery);
+  }
+  if (serviceAreaIdsQuery) {
+    params.serviceAreaIds = Array.isArray(serviceAreaIdsQuery)
+      ? serviceAreaIdsQuery.map((id) => new Types.ObjectId(id))
+      : [new Types.ObjectId(serviceAreaIdsQuery)];
+  }
 
   const result = await jobService.getAllJobs(params);
 

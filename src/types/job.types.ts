@@ -196,6 +196,9 @@ export interface JobSearchParams {
   offset?: number;
   sortBy?: 'createdAt' | 'price' | 'applicationCount';
   sortOrder?: 'asc' | 'desc';
+  stateId?: Types.ObjectId;
+  regionId?: Types.ObjectId;
+  serviceAreaIds?: Types.ObjectId[];
 }
 
 /**
