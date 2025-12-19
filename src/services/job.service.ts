@@ -93,12 +93,21 @@ export async function getAllJobs(params: JobSearchParams): Promise<{
     offset = 0,
     sortBy = 'createdAt',
     sortOrder = 'desc',
+    stateId,
+    regionId,
+    serviceAreaIds,
   } = params;
 
   // Build query
   const query: FilterQuery<IJobDocument> = {
     isDeleted: false,
   };
+
+  if (stateId) query.stateId = stateId;
+  if (regionId) query.regionId = regionId;
+  if (serviceAreaIds && serviceAreaIds.length > 0) {
+    query.serviceAreaIds = { $in: serviceAreaIds };
+  }
 
   if (jobRole) query.jobRole = jobRole;
   if (jobType) query.jobType = jobType;
