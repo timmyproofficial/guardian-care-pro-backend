@@ -268,8 +268,8 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
   };
 
   // Process uploaded files from Cloudinary
-  // multer-storage-cloudinary adds 'path' as the Cloudinary URL
-  // Some versions may use 'secure_url' or 'url' instead
+  // The upload middleware has already uploaded files to Cloudinary
+  // and attached the URL to file.path
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
   const attachments: IJobAttachment[] = [];
 
@@ -281,17 +281,12 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
     coverLetterCount: files?.coverLetter?.length || 0,
   });
 
-  // Helper to extract Cloudinary URL from file object
-  const getCloudinaryUrl = (file: any): string | undefined => {
-    return file.path || file.secure_url || file.url || file.location;
-  };
-
   if (files?.resume?.[0]) {
     const resumeFile = files.resume[0] as any;
-    const fileUrl = getCloudinaryUrl(resumeFile);
+    const fileUrl = resumeFile.path; // Cloudinary URL is attached by middleware
     
     if (!fileUrl) {
-      logger.error('Resume file upload failed - no URL returned from Cloudinary', { 
+      logger.error('Resume file upload failed - no URL from middleware', { 
         fileKeys: Object.keys(resumeFile),
         filename: resumeFile.filename,
         originalname: resumeFile.originalname 
@@ -307,14 +302,16 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
       fileSize: resumeFile.size || 0,
       uploadedAt: new Date(),
     });
+
+    logger.info('Resume uploaded successfully', { fileUrl, fileName: resumeFile.originalname });
   }
 
   if (files?.coverLetter?.[0]) {
     const coverLetterFile = files.coverLetter[0] as any;
-    const fileUrl = getCloudinaryUrl(coverLetterFile);
+    const fileUrl = coverLetterFile.path; // Cloudinary URL is attached by middleware
     
     if (!fileUrl) {
-      logger.error('Cover letter file upload failed - no URL returned from Cloudinary', { 
+      logger.error('Cover letter file upload failed - no URL from middleware', { 
         fileKeys: Object.keys(coverLetterFile),
         filename: coverLetterFile.filename,
         originalname: coverLetterFile.originalname 
@@ -330,6 +327,8 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
       fileSize: coverLetterFile.size || 0,
       uploadedAt: new Date(),
     });
+
+    logger.info('Cover letter uploaded successfully', { fileUrl, fileName: coverLetterFile.originalname });
   }
 
   if (attachments.length === 0 || !attachments.some((a) => a.fieldName === 'resume')) {
