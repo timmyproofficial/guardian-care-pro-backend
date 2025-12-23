@@ -192,13 +192,20 @@ export const uploadJobAttachments = () => {
     // First, parse the multipart form data
     multerMiddleware(req, res, async (err: any) => {
       if (err) {
-        return next(err);
+        // Handle multer errors (file size, file type, etc.)
+        if (err instanceof multer.MulterError) {
+          if (err.code === 'LIMIT_FILE_SIZE') {
+            return next(new ApiError(httpStatus.BAD_REQUEST, 'File size too large. Maximum size is 10MB.'));
+          }
+          return next(new ApiError(httpStatus.BAD_REQUEST, `File upload error: ${err.message}`));
+        }
+        return next(new ApiError(httpStatus.BAD_REQUEST, err.message || 'File upload failed'));
       }
 
       try {
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
         
-        if (!files) {
+        if (!files || Object.keys(files).length === 0) {
           return next();
         }
 
@@ -207,15 +214,20 @@ export const uploadJobAttachments = () => {
           const resumeFile = files.resume[0];
           const attachmentId = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
           
-          const cloudinaryResult = await uploadJobAttachment(
-            resumeFile.buffer,
-            attachmentId,
-            'resume'
-          );
-          
-          // Attach Cloudinary URL to the file object
-          (resumeFile as any).path = cloudinaryResult.secure_url;
-          (resumeFile as any).cloudinary = cloudinaryResult;
+          try {
+            const cloudinaryResult = await uploadJobAttachment(
+              resumeFile.buffer,
+              attachmentId,
+              'resume'
+            );
+            
+            // Attach Cloudinary URL to the file object
+            (resumeFile as any).path = cloudinaryResult.secure_url;
+            (resumeFile as any).cloudinary = cloudinaryResult;
+          } catch (uploadError) {
+            const errorMessage = uploadError instanceof Error ? uploadError.message : 'Resume upload failed';
+            return next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, errorMessage));
+          }
         }
 
         // Upload cover letter to Cloudinary if present
@@ -223,20 +235,26 @@ export const uploadJobAttachments = () => {
           const coverLetterFile = files.coverLetter[0];
           const attachmentId = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
           
-          const cloudinaryResult = await uploadJobAttachment(
-            coverLetterFile.buffer,
-            attachmentId,
-            'coverLetter'
-          );
-          
-          // Attach Cloudinary URL to the file object
-          (coverLetterFile as any).path = cloudinaryResult.secure_url;
-          (coverLetterFile as any).cloudinary = cloudinaryResult;
+          try {
+            const cloudinaryResult = await uploadJobAttachment(
+              coverLetterFile.buffer,
+              attachmentId,
+              'coverLetter'
+            );
+            
+            // Attach Cloudinary URL to the file object
+            (coverLetterFile as any).path = cloudinaryResult.secure_url;
+            (coverLetterFile as any).cloudinary = cloudinaryResult;
+          } catch (uploadError) {
+            const errorMessage = uploadError instanceof Error ? uploadError.message : 'Cover letter upload failed';
+            return next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, errorMessage));
+          }
         }
 
         next();
       } catch (error) {
-        next(error);
+        const errorMessage = error instanceof Error ? error.message : 'File processing failed';
+        next(new ApiError(httpStatus.INTERNAL_SERVER_ERROR, errorMessage));
       }
     });
   };
