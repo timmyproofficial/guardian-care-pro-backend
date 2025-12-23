@@ -172,7 +172,8 @@ export const upload = multer({
  * Job attachment upload configuration using Cloudinary
  * Resume and cover letter files are stored in Cloudinary
  */
-import { jobAttachmentUpload } from '../utils/cloudinary';
+import { jobAttachmentUpload, uploadJobAttachment } from '../utils/cloudinary';
+import { Response, NextFunction } from 'express';
 
 /**
  * Job application upload middleware for resume and cover letter
@@ -180,8 +181,63 @@ import { jobAttachmentUpload } from '../utils/cloudinary';
  * Files are uploaded to Cloudinary in the 'job-attachments' folder
  */
 export const uploadJobAttachments = () => {
-  return jobAttachmentUpload.fields([
+  // First, use multer to parse the multipart/form-data and store files in memory
+  const multerMiddleware = jobAttachmentUpload.fields([
     { name: 'resume', maxCount: 1 },
     { name: 'coverLetter', maxCount: 1 },
   ]);
+
+  // Return a middleware chain that uploads to Cloudinary
+  return async (req: Request, res: Response, next: NextFunction) => {
+    // First, parse the multipart form data
+    multerMiddleware(req, res, async (err: any) => {
+      if (err) {
+        return next(err);
+      }
+
+      try {
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+        
+        if (!files) {
+          return next();
+        }
+
+        // Upload resume to Cloudinary if present
+        if (files.resume && files.resume[0]) {
+          const resumeFile = files.resume[0];
+          const attachmentId = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+          
+          const cloudinaryResult = await uploadJobAttachment(
+            resumeFile.buffer,
+            attachmentId,
+            'resume'
+          );
+          
+          // Attach Cloudinary URL to the file object
+          (resumeFile as any).path = cloudinaryResult.secure_url;
+          (resumeFile as any).cloudinary = cloudinaryResult;
+        }
+
+        // Upload cover letter to Cloudinary if present
+        if (files.coverLetter && files.coverLetter[0]) {
+          const coverLetterFile = files.coverLetter[0];
+          const attachmentId = `${Date.now()}-${crypto.randomBytes(8).toString('hex')}`;
+          
+          const cloudinaryResult = await uploadJobAttachment(
+            coverLetterFile.buffer,
+            attachmentId,
+            'coverLetter'
+          );
+          
+          // Attach Cloudinary URL to the file object
+          (coverLetterFile as any).path = cloudinaryResult.secure_url;
+          (coverLetterFile as any).cloudinary = cloudinaryResult;
+        }
+
+        next();
+      } catch (error) {
+        next(error);
+      }
+    });
+  };
 };

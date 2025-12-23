@@ -7,6 +7,8 @@ import { Router } from 'express';
 import * as jobController from '../controllers/job.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { uploadJobAttachments } from '../middlewares/upload.middleware';
+import validate from '../middlewares/validate.middleware';
+import { jobValidation } from '../utils/validation';
 import { UserRole } from '../types/user.types';
 
 const router = Router();
@@ -20,7 +22,7 @@ const router = Router();
  * @desc    Get all jobs with filters
  * @access  Public
  */
-router.get('/', jobController.getAllJobs);
+router.get('/', validate(jobValidation.queryJobs, 'query'), jobController.getAllJobs);
 
 /**
  * @route   GET /api/jobs/:jobId
@@ -76,6 +78,7 @@ router.post(
   '/',
   authenticate,
   authorize([UserRole.PARTICIPANT, UserRole.PROVIDER]),
+  validate(jobValidation.createJob),
   jobController.createJob
 );
 
@@ -88,6 +91,7 @@ router.put(
   '/:jobId',
   authenticate,
   authorize([UserRole.PARTICIPANT, UserRole.PROVIDER, UserRole.ADMIN]),
+  validate(jobValidation.updateJob),
   jobController.updateJob
 );
 
@@ -115,6 +119,7 @@ router.delete(
 router.post(
   '/:jobId/apply',
   uploadJobAttachments(),
+  validate(jobValidation.applyForJob),
   jobController.applyForJob
 );
 
