@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /api/YOUR_ENDPOINT_PATH:
+ * /api/v1/YOUR_ENDPOINT_PATH:
  *   METHOD:
  *     summary: Brief one-line description
  *     description: Detailed description of what this endpoint does
@@ -15,7 +15,7 @@
  *     security:
  *       - bearerAuth: []  # Remove this entire security block if no auth required
  *     
- *     # For endpoints with path parameters (e.g., /api/users/:userId)
+ *     # For endpoints with path parameters (e.g., /api/v1/users/:userId)
  *     parameters:
  *       - in: path
  *         name: paramName
@@ -24,7 +24,7 @@
  *           type: string
  *         description: Parameter description
  *     
- *     # For endpoints with query parameters (e.g., /api/users?page=1&limit=10)
+ *     # For endpoints with query parameters (e.g., /api/v1/users?page=1&limit=10)
  *     parameters:
  *       - in: query
  *         name: queryParamName
@@ -103,7 +103,7 @@
 // 1. PUBLIC GET ENDPOINT (No Auth)
 /**
  * @swagger
- * /api/public/data:
+ * /api/v1/public/data:
  *   get:
  *     summary: Get public data
  *     tags: [Public]
@@ -117,7 +117,7 @@
 // 2. PROTECTED POST ENDPOINT
 /**
  * @swagger
- * /api/protected/create:
+ * /api/v1/protected/create:
  *   post:
  *     summary: Create new resource
  *     tags: [Resources]
@@ -145,7 +145,7 @@
 // 3. GET BY ID
 /**
  * @swagger
- * /api/items/{id}:
+ * /api/v1/items/{id}:
  *   get:
  *     summary: Get item by ID
  *     tags: [Items]
@@ -166,7 +166,7 @@
 // 4. UPDATE ENDPOINT
 /**
  * @swagger
- * /api/items/{id}:
+ * /api/v1/items/{id}:
  *   put:
  *     summary: Update item
  *     tags: [Items]
@@ -193,7 +193,7 @@
 // 5. DELETE ENDPOINT
 /**
  * @swagger
- * /api/items/{id}:
+ * /api/v1/items/{id}:
  *   delete:
  *     summary: Delete item
  *     tags: [Items]

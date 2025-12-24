@@ -88,15 +88,15 @@ timesheetSchema.index({ organizationId: 1, status: 1, actualStartTime: -1 });
 
 ### 4. API Documentation ✅
 
-**Created:** `docs/api/service-types.md`
+**Created:** `docs/api/v1/service-types.md`
 
 **Documented Endpoints:**
-- `GET /api/service-types` - Get all service types (with filtering)
-- `GET /api/service-types/:id` - Get service type by ID
-- `GET /api/service-types/code/:code` - Get service type by code
-- `POST /api/service-types` - Create service type (Admin only)
-- `PUT /api/service-types/:id` - Update service type (Admin only)
-- `DELETE /api/service-types/:id` - Soft delete service type (Admin only)
+- `GET /api/v1/service-types` - Get all service types (with filtering)
+- `GET /api/v1/service-types/:id` - Get service type by ID
+- `GET /api/v1/service-types/code/:code` - Get service type by code
+- `POST /api/v1/service-types` - Create service type (Admin only)
+- `PUT /api/v1/service-types/:id` - Update service type (Admin only)
+- `DELETE /api/v1/service-types/:id` - Soft delete service type (Admin only)
 
 **Documentation Includes:**
 - ✅ Complete request/response examples
@@ -210,7 +210,7 @@ timesheetSchema.index({ organizationId: 1, status: 1, actualStartTime: -1 });
 - `src/controllers/serviceType.controller.ts`
 - `src/routes/serviceType.route.ts`
 - `src/services/serviceType.seed.ts`
-- `docs/api/service-types.md`
+- `docs/api/v1/service-types.md`
 - `docs/database-optimization.md`
 - `scripts/migrate-indexes.js`
 

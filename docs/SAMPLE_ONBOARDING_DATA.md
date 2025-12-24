@@ -2,7 +2,7 @@
 
 ## 1️⃣ **Participant Onboarding**
 
-### **Endpoint:** `POST /api/users/participant/:participantId/onboarding`
+### **Endpoint:** `POST /api/v1/users/participant/:participantId/onboarding`
 
 ### **Request Headers:**
 ```json
@@ -129,7 +129,7 @@
 
 ## 2️⃣ **Support Worker Onboarding**
 
-### **Endpoint:** `POST /api/users/worker/:workerId/onboarding`
+### **Endpoint:** `POST /api/v1/users/worker/:workerId/onboarding`
 
 ### **Request Headers:**
 ```json
@@ -515,7 +515,7 @@
 
 ## 3️⃣ **Support Worker Search**
 
-### **Endpoint:** `GET /api/workers/search`
+### **Endpoint:** `GET /api/v1/workers/search`
 
 ### **Request Headers:**
 ```json
@@ -528,22 +528,22 @@
 
 #### **1. Basic Search with Skills**
 ```bash
-GET /api/workers/search?skills[]=68649df68e1a442c4e36c8bf&skills[]=68649e238e1a442c4e36c8c4&page=1&limit=10
+GET /api/v1/workers/search?skills[]=68649df68e1a442c4e36c8bf&skills[]=68649e238e1a442c4e36c8c4&page=1&limit=10
 ```
 
 #### **2. Location-Based Search (By Region)**
 ```bash
-GET /api/workers/search?regionId=690b0a067ee1cac861cb2315&minRating=4&page=1&limit=10
+GET /api/v1/workers/search?regionId=690b0a067ee1cac861cb2315&minRating=4&page=1&limit=10
 ```
 
 #### **3. Auto-Match Participant Location**
 ```bash
-GET /api/workers/search?matchParticipantLocation=true&skills[]=68649df68e1a442c4e36c8bf&onlyVerified=true&page=1&limit=10
+GET /api/v1/workers/search?matchParticipantLocation=true&skills[]=68649df68e1a442c4e36c8bf&onlyVerified=true&page=1&limit=10
 ```
 
 #### **4. Combined Filters**
 ```bash
-GET /api/workers/search?stateId=690b0a037ee1cac861cb22df&skills[]=68649df68e1a442c4e36c8bf&languages[]=English&minRating=4.5&maxHourlyRate=55&availabilityDays[]=monday&availabilityDays[]=wednesday&keyword=experienced&onlyVerified=true&page=1&limit=10
+GET /api/v1/workers/search?stateId=690b0a037ee1cac861cb22df&skills[]=68649df68e1a442c4e36c8bf&languages[]=English&minRating=4.5&maxHourlyRate=55&availabilityDays[]=monday&availabilityDays[]=wednesday&keyword=experienced&onlyVerified=true&page=1&limit=10
 ```
 
 ### **Expected Response (200 OK):**

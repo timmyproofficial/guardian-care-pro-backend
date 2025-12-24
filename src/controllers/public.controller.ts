@@ -18,7 +18,7 @@ import logger from '../utils/logger';
 
 /**
  * Cancel a shift via phone number verification
- * POST /api/public/shift-cancellation
+ * POST /api/v1/public/shift-cancellation
  * 
  * No authentication required - worker identifies via phone number
  */
@@ -86,7 +86,7 @@ export const cancelShiftByPhone = async (req: Request, res: Response) => {
 
 /**
  * Get upcoming shifts for a worker by phone
- * GET /api/public/my-shifts
+ * GET /api/v1/public/my-shifts
  * 
  * Query params:
  * - phone: Worker's phone number (required)
@@ -134,7 +134,7 @@ export const getMyShifts = async (req: Request, res: Response) => {
 
 /**
  * Get cancellation reasons (for UI dropdown)
- * GET /api/public/cancellation-reasons
+ * GET /api/v1/public/cancellation-reasons
  */
 export const getCancellationReasons = async (_req: Request, res: Response) => {
   const reasons = [

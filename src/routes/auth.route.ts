@@ -10,9 +10,65 @@ import { authValidation } from '../utils/validation';
 const router = express.Router();
 
 /**
- * @route POST /api/auth/register
- * @desc Register a new user
- * @access Public
+ * @swagger
+ * /api/v1/auth/register:
+ *   post:
+ *     summary: Register a new user
+ *     description: Create a new user account with email and password
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - role
+ *               - firstName
+ *               - lastName
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 8
+ *                 example: SecurePass123!
+ *               role:
+ *                 type: string
+ *                 enum: [PARTICIPANT, SUPPORT_WORKER, PROVIDER]
+ *                 example: PARTICIPANT
+ *               firstName:
+ *                 type: string
+ *                 example: John
+ *               lastName:
+ *                 type: string
+ *                 example: Doe
+ *               phone:
+ *                 type: string
+ *                 example: +61412345678
+ *     responses:
+ *       201:
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                 user:
+ *                   type: object
+ *       400:
+ *         description: Validation error or email already exists
  */
 router.post(
   '/register',
@@ -21,9 +77,54 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/login
- * @desc Login with email and password
- * @access Public
+ * @swagger
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: Login with email and password
+ *     description: Authenticate a user and receive JWT tokens
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: SecurePass123!
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 token:
+ *                   type: string
+ *                   description: JWT access token
+ *                 refreshToken:
+ *                   type: string
+ *                   description: JWT refresh token
+ *                 user:
+ *                   type: object
+ *       401:
+ *         description: Invalid credentials
+ *       400:
+ *         description: Validation error
  */
 router.post(
   '/login',
@@ -32,9 +133,22 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/refresh-token
- * @desc Refresh authentication tokens
- * @access Public
+ * @swagger
+ * /api/v1/auth/refresh-token:
+ *   post:
+ *     summary: Refresh authentication tokens
+ *     description: Refresh authentication tokens
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
  */
 router.post(
   '/refresh-token',
@@ -43,9 +157,27 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/logout
- * @desc Logout and invalidate refresh token
- * @access Public
+ * @swagger
+ * /api/v1/auth/logout:
+ *   post:
+ *     summary: Logout and invalidate refresh token
+ *     description: Logout the current user and invalidate their refresh token
+ *     tags: [Authentication]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Logout successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: Logged out successfully
  */
 router.post(
   '/logout',
@@ -54,9 +186,22 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/forgot-password
- * @desc Send password reset email
- * @access Public
+ * @swagger
+ * /api/v1/auth/forgot-password:
+ *   post:
+ *     summary: Send password reset email
+ *     description: Send password reset email
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
  */
 router.post(
   '/forgot-password',
@@ -65,9 +210,22 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/reset-password
- * @desc Reset password using token
- * @access Public
+ * @swagger
+ * /api/v1/auth/reset-password:
+ *   post:
+ *     summary: Reset password using token
+ *     description: Reset password using token
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
  */
 router.post(
   '/reset-password',
@@ -76,9 +234,22 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/verify-email
- * @desc Verify email address
- * @access Public
+ * @swagger
+ * /api/v1/auth/verify-email:
+ *   post:
+ *     summary: Verify email address
+ *     description: Verify email address
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
  */
 router.post(
   '/verify-email',
@@ -87,9 +258,22 @@ router.post(
 );
 
 /**
- * @route POST /api/auth/resend-verification
- * @desc Resend verification code to email
- * @access Public
+ * @swagger
+ * /api/v1/auth/resend-verification:
+ *   post:
+ *     summary: Resend verification code to email
+ *     description: Resend verification code to email
+ *     tags: [Authentication]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
  */
 router.post(
   '/resend-verification',

@@ -76,7 +76,7 @@ heroku logs --tail --app backend-guardian-care-pro
 
 Then try downloading an invoice again:
 ```
-GET https://your-app-name.herokuapp.com/api/v1/invoices/{invoice-id}/download
+GET https://your-app-name.herokuapp.com/api/v1/v1/invoices/{invoice-id}/download
 ```
 
 ## Alternative Solution (If Above Doesn't Work)

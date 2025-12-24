@@ -64,7 +64,7 @@ This applies to:
 
 ### 1. Update Incident Status
 
-**Endpoint:** `PATCH /api/incidents/:incidentId/status`
+**Endpoint:** `PATCH /api/v1/incidents/:incidentId/status`
 
 **Permission Changes:**
 - ✅ Admins can update any incident status
@@ -73,7 +73,7 @@ This applies to:
 **Request Example:**
 
 ```http
-PATCH /api/incidents/60f7b3b3b3b3b3b3b3b3b3b3/status
+PATCH /api/v1/incidents/60f7b3b3b3b3b3b3b3b3b3b3/status
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
@@ -133,7 +133,7 @@ Content-Type: application/json
 
 ### 2. Resolve Incident
 
-**Endpoint:** `PATCH /api/incidents/:incidentId/resolve`
+**Endpoint:** `PATCH /api/v1/incidents/:incidentId/resolve`
 
 **Permission Changes:**
 - ✅ Admins can resolve any incident
@@ -142,7 +142,7 @@ Content-Type: application/json
 **Request Example:**
 
 ```http
-PATCH /api/incidents/60f7b3b3b3b3b3b3b3b3b3b3/resolve
+PATCH /api/v1/incidents/60f7b3b3b3b3b3b3b3b3b3b3/resolve
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
@@ -203,7 +203,7 @@ Content-Type: application/json
 
 ### 3. Get All Incidents
 
-**Endpoint:** `GET /api/incidents`
+**Endpoint:** `GET /api/v1/incidents`
 
 **Population Changes:**
 - All user fields are now fully populated
@@ -249,7 +249,7 @@ Content-Type: application/json
 
 ### 4. Get Incidents by Shift
 
-**Endpoint:** `GET /api/incidents/shift/:shiftId`
+**Endpoint:** `GET /api/v1/incidents/shift/:shiftId`
 
 **Population Changes:**
 - Fully populated user documents in responses
@@ -258,7 +258,7 @@ Content-Type: application/json
 
 ### 5. Get Incidents by Reporter
 
-**Endpoint:** `GET /api/incidents/reporter/:userId`
+**Endpoint:** `GET /api/v1/incidents/reporter/:userId`
 
 **Population Changes:**
 - Fully populated user documents
@@ -268,7 +268,7 @@ Content-Type: application/json
 
 ### 6. Get Incidents Against User
 
-**Endpoint:** `GET /api/incidents/against/:userId`
+**Endpoint:** `GET /api/v1/incidents/against/:userId`
 
 **Population Changes:**
 - Fully populated user documents
@@ -278,7 +278,7 @@ Content-Type: application/json
 
 ### 7. Get Incident by ID
 
-**Endpoint:** `GET /api/incidents/:incidentId`
+**Endpoint:** `GET /api/v1/incidents/:incidentId`
 
 **Population Changes:**
 - Fully populated user documents in response
@@ -287,7 +287,7 @@ Content-Type: application/json
 
 ### 8. Create Incident
 
-**Endpoint:** `POST /api/incidents`
+**Endpoint:** `POST /api/v1/incidents`
 
 **Population Changes:**
 - Response includes fully populated user documents
@@ -316,12 +316,12 @@ Content-Type: application/json
 **Steps:**
 1. Worker logs in and views incidents reported against them:
    ```http
-   GET /api/incidents/against/60f7b3b3b3b3b3b3b3b3b3d1
+   GET /api/v1/incidents/against/60f7b3b3b3b3b3b3b3b3b3d1
    ```
 
 2. Worker resolves the incident with an explanation:
    ```http
-   PATCH /api/incidents/60f7b3b3b3b3b3b3b3b3b3b3/resolve
+   PATCH /api/v1/incidents/60f7b3b3b3b3b3b3b3b3b3b3/resolve
    {
      "resolutionNote": "Traffic accident caused delay. Will notify in future.",
      "resolvedBy": "60f7b3b3b3b3b3b3b3b3b3d1"
@@ -339,12 +339,12 @@ Content-Type: application/json
 **Steps:**
 1. Participant views incidents against them:
    ```http
-   GET /api/incidents/against/60f7b3b3b3b3b3b3b3b3b3e1
+   GET /api/v1/incidents/against/60f7b3b3b3b3b3b3b3b3b3e1
    ```
 
 2. Participant updates incident status:
    ```http
-   PATCH /api/incidents/60f7b3b3b3b3b3b3b3b3b3b3/status
+   PATCH /api/v1/incidents/60f7b3b3b3b3b3b3b3b3b3b3/status
    {
      "status": "IN_REVIEW",
      "updatedBy": "60f7b3b3b3b3b3b3b3b3b3e1"
@@ -441,9 +441,9 @@ const reporterImage = incident.reportedBy.profileImage;
 
 ## Related Documentation
 
-- [Incident API](/docs/api/incidents.md) - Main incident API documentation
-- [User API](/docs/api/users.md) - User management
-- [Shift API](/docs/api/shifts.md) - Shift management
+- [Incident API](/docs/api/v1/incidents.md) - Main incident API documentation
+- [User API](/docs/api/v1/users.md) - User management
+- [Shift API](/docs/api/v1/shifts.md) - Shift management
 
 ---
 

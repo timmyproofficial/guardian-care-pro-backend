@@ -75,7 +75,7 @@ Every time you create a new endpoint, add Swagger annotations above the route de
 ```typescript
 /**
  * @swagger
- * /api/your-endpoint:
+ * /api/v1/your-endpoint:
  *   get:
  *     summary: Brief description
  *     description: Detailed description of what this endpoint does
@@ -106,7 +106,7 @@ router.get('/your-endpoint', yourController.yourMethod);
 ```typescript
 /**
  * @swagger
- * /api/jobs:
+ * /api/v1/jobs:
  *   get:
  *     summary: Get all jobs with filters
  *     description: Retrieve a paginated list of job postings with optional filters
@@ -171,7 +171,7 @@ router.get('/', validate(jobValidation.queryJobs, 'query'), jobController.getAll
 ```typescript
 /**
  * @swagger
- * /api/jobs:
+ * /api/v1/jobs:
  *   post:
  *     summary: Create a new job posting
  *     description: Create a new job posting (Participant or Provider only)
@@ -239,7 +239,7 @@ router.post('/', authenticate, authorize([UserRole.PARTICIPANT, UserRole.PROVIDE
 ```typescript
 /**
  * @swagger
- * /api/jobs/{jobId}:
+ * /api/v1/jobs/{jobId}:
  *   get:
  *     summary: Get a single job by ID
  *     description: Retrieve detailed information about a specific job posting
@@ -276,7 +276,7 @@ router.get('/:jobId', jobController.getJobById);
 ```typescript
 /**
  * @swagger
- * /api/jobs/{jobId}:
+ * /api/v1/jobs/{jobId}:
  *   put:
  *     summary: Update a job
  *     description: Update an existing job posting (Owner or Admin only)
@@ -322,7 +322,7 @@ router.put('/:jobId', authenticate, authorize([UserRole.PARTICIPANT, UserRole.PR
 ```typescript
 /**
  * @swagger
- * /api/jobs/{jobId}:
+ * /api/v1/jobs/{jobId}:
  *   delete:
  *     summary: Delete a job
  *     description: Soft delete a job posting (Owner or Admin only)
@@ -354,7 +354,7 @@ router.delete('/:jobId', authenticate, authorize([UserRole.PARTICIPANT, UserRole
 ```typescript
 /**
  * @swagger
- * /api/jobs/{jobId}/apply:
+ * /api/v1/jobs/{jobId}/apply:
  *   post:
  *     summary: Apply for a job
  *     description: Submit a job application with resume and cover letter
@@ -440,7 +440,7 @@ Then reference in your routes:
 ```typescript
 /**
  * @swagger
- * /api/example:
+ * /api/v1/example:
  *   get:
  *     # ... other properties
  *     responses:

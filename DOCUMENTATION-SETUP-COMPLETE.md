@@ -39,7 +39,7 @@ You'll see:
 - Authentication option
 
 ### Step 3: Test an Endpoint
-1. Click on any endpoint (e.g., `GET /api/jobs`)
+1. Click on any endpoint (e.g., `GET /api/v1/jobs`)
 2. Click **"Try it out"**
 3. Fill in parameters (if needed)
 4. Click **"Execute"**
@@ -54,7 +54,7 @@ When you create a new endpoint, add this **above** the route:
 ```typescript
 /**
  * @swagger
- * /api/your-endpoint:
+ * /api/v1/your-endpoint:
  *   post:
  *     summary: Create something
  *     tags: [YourTag]
@@ -125,7 +125,7 @@ router.post('/your-endpoint', authenticate, controller.create);
 
 To test protected endpoints:
 
-1. Get a JWT token (login via `/api/auth/login`)
+1. Get a JWT token (login via `/api/v1/auth/login`)
 2. In Swagger UI, click **"Authorize"** button (top right)
 3. Enter: `Bearer <your-token-here>`
 4. Click **"Authorize"** then **"Close"**

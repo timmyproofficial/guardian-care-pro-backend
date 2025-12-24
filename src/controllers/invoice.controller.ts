@@ -15,7 +15,7 @@ import logger from '../utils/logger';
 export const invoiceController = {
   /**
    * Get invoice by ID
-   * @route GET /api/invoices/:invoiceId
+   * @route GET /api/v1/invoices/:invoiceId
    */
   getInvoiceById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -55,7 +55,7 @@ export const invoiceController = {
 
   /**
    * Get invoice by invoice number
-   * @route GET /api/invoices/number/:invoiceNumber
+   * @route GET /api/v1/invoices/number/:invoiceNumber
    */
   getInvoiceByNumber: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -95,7 +95,7 @@ export const invoiceController = {
 
   /**
    * Get invoice by timesheet ID
-   * @route GET /api/invoices/timesheet/:timesheetId
+   * @route GET /api/v1/invoices/timesheet/:timesheetId
    */
   getInvoiceByTimesheetId: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -135,7 +135,7 @@ export const invoiceController = {
 
   /**
    * Get invoices (based on user role)
-   * @route GET /api/invoices
+   * @route GET /api/v1/invoices
    */
   getInvoices: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -220,7 +220,7 @@ export const invoiceController = {
 
   /**
    * Generate invoice for a timesheet (usually called automatically on timesheet approval)
-   * @route POST /api/invoices/generate/:timesheetId
+   * @route POST /api/v1/invoices/generate/:timesheetId
    */
   generateInvoice: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -250,7 +250,7 @@ export const invoiceController = {
 
   /**
    * Send invoice to participant
-   * @route POST /api/invoices/:invoiceId/send
+   * @route POST /api/v1/invoices/:invoiceId/send
    */
   sendInvoice: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -298,7 +298,7 @@ export const invoiceController = {
 
   /**
    * Send batch invoices to participant
-   * @route POST /api/invoices/send-batch
+   * @route POST /api/v1/invoices/send-batch
    */
   sendBatchInvoices: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -367,7 +367,7 @@ export const invoiceController = {
 
   /**
    * Download invoice as PDF
-   * @route GET /api/invoices/:invoiceId/download
+   * @route GET /api/v1/invoices/:invoiceId/download
    */
   downloadInvoice: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

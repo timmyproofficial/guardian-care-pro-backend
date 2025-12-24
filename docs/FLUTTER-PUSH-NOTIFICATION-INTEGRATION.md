@@ -255,7 +255,7 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   static const _storage = FlutterSecureStorage();
   
-  static const String _baseUrl = 'https://your-api-url.com/api/v1';
+  static const String _baseUrl = 'https://your-api-url.com/api/v1/v1';
   
   // Notification channel for Android
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
@@ -642,7 +642,7 @@ Push notifications don't work on emulators/simulators reliably. Use physical dev
 ### 3. Manual Test via Backend:
 
 ```bash
-curl -X POST https://your-api-url.com/api/v1/notifications/test \
+curl -X POST https://your-api-url.com/api/v1/v1/notifications/test \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{

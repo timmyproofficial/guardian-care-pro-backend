@@ -18,7 +18,7 @@ import { successResponse, errorResponse } from '../utils/api-response';
 export const workerSearchController = {
   /**
    * Search for support workers with filtering and pagination
-   * @route GET /api/workers/search
+   * @route GET /api/v1/workers/search
    */
   searchWorkers: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -184,7 +184,7 @@ export const workerSearchController = {
 
   /**
    * Get worker profile details
-   * @route GET /api/workers/:workerId/profile
+   * @route GET /api/v1/workers/:workerId/profile
    */
   getWorkerProfile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -222,7 +222,7 @@ export const workerSearchController = {
 
   /**
    * Get filter options for worker search
-   * @route GET /api/workers/filter-options
+   * @route GET /api/v1/workers/filter-options
    */
   getFilterOptions: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

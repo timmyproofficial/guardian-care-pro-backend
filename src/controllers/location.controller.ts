@@ -211,7 +211,7 @@ export const getLocationHierarchy = async (req: Request, res: Response): Promise
 
 /**
  * Search for workers nearby participant's location (geospatial)
- * GET /api/workers/nearby
+ * GET /api/v1/workers/nearby
  */
 export const searchNearbyWorkers = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -280,7 +280,7 @@ export const searchNearbyWorkers = async (req: Request, res: Response): Promise<
 
 /**
  * Search for workers by region/state/service area
- * GET /api/workers/by-region
+ * GET /api/v1/workers/by-region
  */
 export const searchWorkersByRegion = async (req: Request, res: Response): Promise<void> => {
   try {

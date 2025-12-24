@@ -19,7 +19,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/jobs:
+ * /api/v1/jobs:
  *   get:
  *     summary: Get all jobs with filters
  *     description: Retrieve a paginated list of job postings with optional filters
@@ -94,7 +94,7 @@ router.get('/', validate(jobValidation.queryJobs, 'query'), jobController.getAll
 
 /**
  * @swagger
- * /api/jobs/{jobId}:
+ * /api/v1/jobs/{jobId}:
  *   get:
  *     summary: Get a single job by ID
  *     description: Retrieve detailed information about a specific job posting
@@ -135,7 +135,7 @@ router.get('/:jobId', jobController.getJobById);
 
 /**
  * @swagger
- * /api/jobs/user/my-posts:
+ * /api/v1/jobs/user/my-posts:
  *   get:
  *     summary: Get jobs posted by the current user
  *     description: Retrieve all job postings created by the authenticated user
@@ -173,7 +173,7 @@ router.get(
 
 /**
  * @swagger
- * /api/jobs/user/my-applications:
+ * /api/v1/jobs/user/my-applications:
  *   get:
  *     summary: Get user's job applications
  *     description: Retrieve all jobs the authenticated user has applied to
@@ -194,7 +194,7 @@ router.get(
 
 /**
  * @swagger
- * /api/jobs/user/saved:
+ * /api/v1/jobs/user/saved:
  *   get:
  *     summary: Get user's saved jobs
  *     description: Retrieve all jobs saved by the authenticated user
@@ -215,7 +215,7 @@ router.get(
 
 /**
  * @swagger
- * /api/jobs:
+ * /api/v1/jobs:
  *   post:
  *     summary: Create a new job posting
  *     description: Create a new job posting (Participant or Provider only)
@@ -284,9 +284,34 @@ router.post(
 );
 
 /**
- * @route   PUT /api/jobs/:jobId
- * @desc    Update a job
- * @access  Private (Owner or Admin)
+ * @swagger
+ * /api/v1/jobs/:jobId:
+ *   put:
+ *     summary: Update a job
+ *     description: Update a job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.put(
   '/:jobId',
@@ -297,9 +322,28 @@ router.put(
 );
 
 /**
- * @route   DELETE /api/jobs/:jobId
- * @desc    Soft delete a job
- * @access  Private (Owner or Admin)
+ * @swagger
+ * /api/v1/jobs/:jobId:
+ *   delete:
+ *     summary: Soft delete a job
+ *     description: Soft delete a job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/:jobId',
@@ -313,9 +357,31 @@ router.delete(
 // =============================================================================
 
 /**
- * @route   POST /api/jobs/:jobId/apply
- * @desc    Apply for a job (multipart/form-data with resume and coverLetter)
- * @access  Public (but tracks applicantId if authenticated)
+ * @swagger
+ * /api/v1/jobs/:jobId/apply:
+ *   post:
+ *     summary: Apply for a job (multipart/form-data with resume and coverLetter)
+ *     description: Apply for a job (multipart/form-data with resume and coverLetter)
+ *     tags: [Jobs]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       404:
+ *         description: Resource not found
  */
 router.post(
   '/:jobId/apply',
@@ -325,9 +391,28 @@ router.post(
 );
 
 /**
- * @route   GET /api/jobs/:jobId/applications
- * @desc    Get applications for a job (job owner only)
- * @access  Private (Job owner or Admin)
+ * @swagger
+ * /api/v1/jobs/:jobId/applications:
+ *   get:
+ *     summary: Get applications for a job (job owner only)
+ *     description: Get applications for a job (job owner only)
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:jobId/applications',
@@ -337,9 +422,28 @@ router.get(
 );
 
 /**
- * @route   GET /api/jobs/applications/:applicationId
- * @desc    Get a single application
- * @access  Private
+ * @swagger
+ * /api/v1/jobs/applications/:applicationId:
+ *   get:
+ *     summary: Get a single application
+ *     description: Get a single application
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The applicationId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/applications/:applicationId',
@@ -348,9 +452,34 @@ router.get(
 );
 
 /**
- * @route   PATCH /api/jobs/applications/:applicationId/status
- * @desc    Update application status
- * @access  Private (Job owner or Admin)
+ * @swagger
+ * /api/v1/jobs/applications/:applicationId/status:
+ *   patch:
+ *     summary: Update application status
+ *     description: Update application status
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The applicationId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.patch(
   '/applications/:applicationId/status',
@@ -360,9 +489,28 @@ router.patch(
 );
 
 /**
- * @route   DELETE /api/jobs/applications/:applicationId
- * @desc    Delete an application (soft delete)
- * @access  Private (Applicant, Job owner, or Admin)
+ * @swagger
+ * /api/v1/jobs/applications/:applicationId:
+ *   delete:
+ *     summary: Delete an application (soft delete)
+ *     description: Delete an application (soft delete)
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: applicationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The applicationId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/applications/:applicationId',
@@ -375,9 +523,34 @@ router.delete(
 // =============================================================================
 
 /**
- * @route   POST /api/jobs/:jobId/save
- * @desc    Save a job
- * @access  Private
+ * @swagger
+ * /api/v1/jobs/:jobId/save:
+ *   post:
+ *     summary: Save a job
+ *     description: Save a job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.post(
   '/:jobId/save',
@@ -386,9 +559,28 @@ router.post(
 );
 
 /**
- * @route   DELETE /api/jobs/:jobId/save
- * @desc    Unsave a job
- * @access  Private
+ * @swagger
+ * /api/v1/jobs/:jobId/save:
+ *   delete:
+ *     summary: Unsave a job
+ *     description: Unsave a job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/:jobId/save',
@@ -397,9 +589,34 @@ router.delete(
 );
 
 /**
- * @route   POST /api/jobs/:jobId/toggle-save
- * @desc    Toggle save status for a job
- * @access  Private
+ * @swagger
+ * /api/v1/jobs/:jobId/toggle-save:
+ *   post:
+ *     summary: Toggle save status for a job
+ *     description: Toggle save status for a job
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.post(
   '/:jobId/toggle-save',
@@ -408,9 +625,28 @@ router.post(
 );
 
 /**
- * @route   GET /api/jobs/:jobId/is-saved
- * @desc    Check if a job is saved
- * @access  Private
+ * @swagger
+ * /api/v1/jobs/:jobId/is-saved:
+ *   get:
+ *     summary: Check if a job is saved
+ *     description: Check if a job is saved
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The jobId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:jobId/is-saved',

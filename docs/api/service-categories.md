@@ -15,7 +15,7 @@ Authorization: Bearer <your_access_token>
 ## Base URL
 
 ```
-/api/service-categories
+/api/v1/service-categories
 ```
 
 ## Endpoints
@@ -24,7 +24,7 @@ Authorization: Bearer <your_access_token>
 
 Retrieve all service categories with optional filtering and pagination.
 
-**Endpoint:** `GET /api/service-categories`
+**Endpoint:** `GET /api/v1/service-categories`
 
 **Authentication:** Required (All authenticated users)
 
@@ -42,7 +42,7 @@ Retrieve all service categories with optional filtering and pagination.
 **Request Example:**
 
 ```http
-GET /api/service-categories?status=active&page=1&limit=20&sortBy=name&sortOrder=asc
+GET /api/v1/service-categories?status=active&page=1&limit=20&sortBy=name&sortOrder=asc
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -96,7 +96,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Retrieve a specific service category by its ID.
 
-**Endpoint:** `GET /api/service-categories/:id`
+**Endpoint:** `GET /api/v1/service-categories/:id`
 
 **Authentication:** Required (All authenticated users)
 
@@ -109,7 +109,7 @@ Retrieve a specific service category by its ID.
 **Request Example:**
 
 ```http
-GET /api/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
+GET /api/v1/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -147,7 +147,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Retrieve service categories filtered by status.
 
-**Endpoint:** `GET /api/service-categories/status/:status`
+**Endpoint:** `GET /api/v1/service-categories/status/:status`
 
 **Authentication:** Required (All authenticated users)
 
@@ -160,7 +160,7 @@ Retrieve service categories filtered by status.
 **Request Example:**
 
 ```http
-GET /api/service-categories/status/active
+GET /api/v1/service-categories/status/active
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -190,7 +190,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Create a new service category (Admin only).
 
-**Endpoint:** `POST /api/service-categories`
+**Endpoint:** `POST /api/v1/service-categories`
 
 **Authentication:** Required (Admin only)
 
@@ -206,7 +206,7 @@ Create a new service category (Admin only).
 **Request Example:**
 
 ```http
-POST /api/service-categories
+POST /api/v1/service-categories
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
@@ -254,7 +254,7 @@ Content-Type: application/json
 
 Update an existing service category (Admin only).
 
-**Endpoint:** `PUT /api/service-categories/:id`
+**Endpoint:** `PUT /api/v1/service-categories/:id`
 
 **Authentication:** Required (Admin only)
 
@@ -276,7 +276,7 @@ Update an existing service category (Admin only).
 **Request Example:**
 
 ```http
-PUT /api/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
+PUT /api/v1/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: application/json
 
@@ -314,7 +314,7 @@ Content-Type: application/json
 
 Delete a service category (Admin only).
 
-**Endpoint:** `DELETE /api/service-categories/:id`
+**Endpoint:** `DELETE /api/v1/service-categories/:id`
 
 **Authentication:** Required (Admin only)
 
@@ -327,7 +327,7 @@ Delete a service category (Admin only).
 **Request Example:**
 
 ```http
-DELETE /api/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
+DELETE /api/v1/service-categories/60f7b3b3b3b3b3b3b3b3b3b3
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -347,14 +347,14 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 Get statistical data about service categories (Admin only).
 
-**Endpoint:** `GET /api/service-categories/statistics`
+**Endpoint:** `GET /api/v1/service-categories/statistics`
 
 **Authentication:** Required (Admin only)
 
 **Request Example:**
 
 ```http
-GET /api/service-categories/statistics
+GET /api/v1/service-categories/statistics
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -473,6 +473,6 @@ The system comes pre-seeded with 7 main service categories:
 
 ## Related Endpoints
 
-- [Service Types API](/docs/api/service-types.md) - Manage individual service types
-- [Worker Onboarding API](/docs/api/users.md#worker-onboarding) - Workers select service categories
-- [Participant Onboarding API](/docs/api/users.md#participant-onboarding) - Participants select service categories
+- [Service Types API](/docs/api/v1/service-types.md) - Manage individual service types
+- [Worker Onboarding API](/docs/api/v1/users.md#worker-onboarding) - Workers select service categories
+- [Participant Onboarding API](/docs/api/v1/users.md#participant-onboarding) - Participants select service categories

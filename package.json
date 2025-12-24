@@ -18,6 +18,8 @@
     "cleanup:geojson": "ts-node scripts/cleanup-partial-geojson.ts",
     "generate:docs": "node scripts/generate-postman.js",
     "docs": "npm run generate:docs",
+    "migrate:swagger": "ts-node scripts/migrate-to-swagger.ts",
+    "migrate:swagger:write": "ts-node scripts/migrate-to-swagger.ts --write",
     "heroku-postbuild": "npm run build"
   },
   "keywords": [

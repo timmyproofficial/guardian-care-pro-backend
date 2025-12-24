@@ -172,7 +172,7 @@ Added location fields for workers:
 
 #### Get All States
 ```http
-GET /api/location/states
+GET /api/v1/location/states
 Authorization: Bearer {token}
 ```
 
@@ -189,25 +189,25 @@ Authorization: Bearer {token}
 
 #### Get Regions by State
 ```http
-GET /api/location/regions/:stateId
+GET /api/v1/location/regions/:stateId
 Authorization: Bearer {token}
 ```
 
 #### Get Suburbs by Region
 ```http
-GET /api/location/suburbs/region/:regionId
+GET /api/v1/location/suburbs/region/:regionId
 Authorization: Bearer {token}
 ```
 
 #### Get Suburbs by State
 ```http
-GET /api/location/suburbs/state/:stateId
+GET /api/v1/location/suburbs/state/:stateId
 Authorization: Bearer {token}
 ```
 
 #### Search Suburbs
 ```http
-GET /api/location/suburbs/search?query=Sydney&stateId={stateId}&limit=20
+GET /api/v1/location/suburbs/search?query=Sydney&stateId={stateId}&limit=20
 Authorization: Bearer {token}
 ```
 
@@ -218,25 +218,25 @@ Authorization: Bearer {token}
 
 #### Get Service Areas by Region
 ```http
-GET /api/location/service-areas/region/:regionId
+GET /api/v1/location/service-areas/region/:regionId
 Authorization: Bearer {token}
 ```
 
 #### Get Service Areas by State
 ```http
-GET /api/location/service-areas/state/:stateId
+GET /api/v1/location/service-areas/state/:stateId
 Authorization: Bearer {token}
 ```
 
 #### Get All Service Areas
 ```http
-GET /api/location/service-areas
+GET /api/v1/location/service-areas
 Authorization: Bearer {token}
 ```
 
 #### Get Location Hierarchy
 ```http
-GET /api/location/hierarchy/:suburbId
+GET /api/v1/location/hierarchy/:suburbId
 Authorization: Bearer {token}
 ```
 
@@ -244,7 +244,7 @@ Returns complete hierarchy (suburb, region, state, service areas).
 
 #### Geocode Address
 ```http
-POST /api/location/geocode
+POST /api/v1/location/geocode
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -273,7 +273,7 @@ Content-Type: application/json
 
 #### Search Workers Nearby (Geospatial)
 ```http
-GET /api/location/workers/nearby
+GET /api/v1/location/workers/nearby
 Authorization: Bearer {token}
 ```
 
@@ -291,7 +291,7 @@ Authorization: Bearer {token}
 
 **Example**:
 ```http
-GET /api/location/workers/nearby?participantId=123&maxDistanceKm=30&skills[]=skill1&skills[]=skill2&minRating=4&page=1&limit=10
+GET /api/v1/location/workers/nearby?participantId=123&maxDistanceKm=30&skills[]=skill1&skills[]=skill2&minRating=4&page=1&limit=10
 ```
 
 **Response**:
@@ -335,7 +335,7 @@ GET /api/location/workers/nearby?participantId=123&maxDistanceKm=30&skills[]=ski
 
 #### Search Workers by Region
 ```http
-GET /api/location/workers/by-region
+GET /api/v1/location/workers/by-region
 Authorization: Bearer {token}
 ```
 
@@ -351,12 +351,12 @@ Authorization: Bearer {token}
 
 **Example 1 - By Region**:
 ```http
-GET /api/location/workers/by-region?participantId=123&regionId=456&skills[]=skill1&page=1&limit=10
+GET /api/v1/location/workers/by-region?participantId=123&regionId=456&skills[]=skill1&page=1&limit=10
 ```
 
 **Example 2 - Auto-match Participant's Location**:
 ```http
-GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=true&minRating=4&page=1
+GET /api/v1/location/workers/by-region?participantId=123&matchParticipantLocation=true&minRating=4&page=1
 ```
 
 **How it works**:
@@ -372,7 +372,7 @@ GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=t
 ### 1. Participant Onboarding with Location
 
 ```typescript
-POST /api/users/participant/:participantId/onboarding
+POST /api/v1/users/participant/:participantId/onboarding
 Content-Type: application/json
 
 {
@@ -398,7 +398,7 @@ Content-Type: application/json
 ### 2. Worker Onboarding with Location
 
 ```typescript
-POST /api/users/worker/:workerId/onboarding
+POST /api/v1/users/worker/:workerId/onboarding
 Content-Type: application/json
 
 {
@@ -430,7 +430,7 @@ Content-Type: application/json
 // Frontend example
 const findNearbyWorkers = async (participantId) => {
   const response = await fetch(
-    `/api/location/workers/nearby?participantId=${participantId}&maxDistanceKm=30&page=1&limit=10`,
+    `/api/v1/location/workers/nearby?participantId=${participantId}&maxDistanceKm=30&page=1&limit=10`,
     {
       headers: {
         'Authorization': `Bearer ${token}`
@@ -452,7 +452,7 @@ const findNearbyWorkers = async (participantId) => {
 ```javascript
 const findRegionalWorkers = async (participantId) => {
   const response = await fetch(
-    `/api/location/workers/by-region?participantId=${participantId}&matchParticipantLocation=true&onlyVerified=true`,
+    `/api/v1/location/workers/by-region?participantId=${participantId}&matchParticipantLocation=true&onlyVerified=true`,
     {
       headers: {
         'Authorization': `Bearer ${token}`

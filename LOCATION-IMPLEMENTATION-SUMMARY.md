@@ -93,18 +93,18 @@ Created four new models for hierarchical location data:
 - Error handling and response formatting
 
 **Location Routes** (`src/routes/location.route.ts`):
-- `GET /api/location/states` - Get all states
-- `GET /api/location/regions/:stateId` - Get regions by state
-- `GET /api/location/suburbs/region/:regionId` - Get suburbs by region
-- `GET /api/location/suburbs/state/:stateId` - Get suburbs by state
-- `GET /api/location/suburbs/search` - Search suburbs
-- `GET /api/location/service-areas/region/:regionId` - Get service areas by region
-- `GET /api/location/service-areas/state/:stateId` - Get service areas by state
-- `GET /api/location/service-areas` - Get all service areas
-- `GET /api/location/hierarchy/:suburbId` - Get location hierarchy
-- `POST /api/location/geocode` - Geocode address
-- `GET /api/location/workers/nearby` - **Geospatial worker search**
-- `GET /api/location/workers/by-region` - **Regional worker search**
+- `GET /api/v1/location/states` - Get all states
+- `GET /api/v1/location/regions/:stateId` - Get regions by state
+- `GET /api/v1/location/suburbs/region/:regionId` - Get suburbs by region
+- `GET /api/v1/location/suburbs/state/:stateId` - Get suburbs by state
+- `GET /api/v1/location/suburbs/search` - Search suburbs
+- `GET /api/v1/location/service-areas/region/:regionId` - Get service areas by region
+- `GET /api/v1/location/service-areas/state/:stateId` - Get service areas by state
+- `GET /api/v1/location/service-areas` - Get all service areas
+- `GET /api/v1/location/hierarchy/:suburbId` - Get location hierarchy
+- `POST /api/v1/location/geocode` - Geocode address
+- `GET /api/v1/location/workers/nearby` - **Geospatial worker search**
+- `GET /api/v1/location/workers/by-region` - **Regional worker search**
 
 All routes integrated into main router (`src/routes/index.ts`)
 
@@ -265,21 +265,21 @@ src/
 
 ### Find Workers Within 25km
 ```javascript
-GET /api/location/workers/nearby?participantId=123&maxDistanceKm=25&skills[]=skill1&minRating=4
+GET /api/v1/location/workers/nearby?participantId=123&maxDistanceKm=25&skills[]=skill1&minRating=4
 ```
 
 Returns workers sorted by distance with `distanceKm` field.
 
 ### Find Workers in Same Region
 ```javascript
-GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=true&onlyVerified=true
+GET /api/v1/location/workers/by-region?participantId=123&matchParticipantLocation=true&onlyVerified=true
 ```
 
 Automatically matches participant's state/region/service area.
 
 ### Manual Region Filter
 ```javascript
-GET /api/location/workers/by-region?participantId=123&regionId=456&stateId=789
+GET /api/v1/location/workers/by-region?participantId=123&regionId=456&stateId=789
 ```
 
 Finds workers serving specific regions or states.

@@ -33,7 +33,7 @@ Add this **above** your route definition:
 ```typescript
 /**
  * @swagger
- * /api/your-path:
+ * /api/v1/your-path:
  *   post:
  *     summary: Brief description
  *     tags: [YourTag]

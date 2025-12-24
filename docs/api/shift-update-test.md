@@ -11,7 +11,7 @@ Previously, when updating a shift with only the `status` field (e.g., to "comple
 
 **Request:**
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
@@ -39,7 +39,7 @@ Content-Type: application/json
 
 **Request:**
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
@@ -69,7 +69,7 @@ Content-Type: application/json
 
 **Request:**
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
@@ -102,7 +102,7 @@ Content-Type: application/json
 
 **Request:**
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
@@ -124,7 +124,7 @@ Content-Type: application/json
 
 **Request:**
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{access_token}}
 Content-Type: application/json
 
@@ -146,7 +146,7 @@ Content-Type: application/json
 
 ### Worker Accepting a Shift
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{worker_access_token}}
 Content-Type: application/json
 
@@ -157,7 +157,7 @@ Content-Type: application/json
 
 ### Worker Starting a Shift
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{worker_access_token}}
 Content-Type: application/json
 
@@ -168,7 +168,7 @@ Content-Type: application/json
 
 ### Worker Completing a Shift
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{worker_access_token}}
 Content-Type: application/json
 
@@ -179,7 +179,7 @@ Content-Type: application/json
 
 ### Worker Cancelling a Shift
 ```http
-PATCH /api/v1/shifts/{{shift_id}}
+PATCH /api/v1/v1/shifts/{{shift_id}}
 Authorization: Bearer {{worker_access_token}}
 Content-Type: application/json
 

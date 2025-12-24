@@ -110,7 +110,7 @@ import Shift from '../models/shift.model';
 ### Test Shift Booking Email:
 ```bash
 # Create a shift and assign a worker
-POST /api/shifts
+POST /api/v1/shifts
 {
   "organizationId": "...",
   "participantId": "...",
@@ -127,7 +127,7 @@ POST /api/shifts
 ### Test Timesheet Approval Email:
 ```bash
 # Submit timesheet (as worker)
-POST /api/timesheets
+POST /api/v1/timesheets
 {
   "shiftId": "...",
   "actualStartTime": "...",
@@ -136,7 +136,7 @@ POST /api/timesheets
 }
 
 # Approve timesheet (as participant)
-PATCH /api/timesheets/:id/status
+PATCH /api/v1/timesheets/:id/status
 {
   "status": "approved"
 }
@@ -147,7 +147,7 @@ PATCH /api/timesheets/:id/status
 ### Test Timesheet Rejection Email:
 ```bash
 # Reject timesheet (as participant)
-PATCH /api/timesheets/:id/status
+PATCH /api/v1/timesheets/:id/status
 {
   "status": "rejected",
   "rejectionReason": "Hours don't match schedule"

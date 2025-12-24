@@ -26,7 +26,7 @@ import catchAsync from '../utils/catchAsync';
 
 /**
  * Create a new event
- * POST /api/events
+ * POST /api/v1/events
  * Supports multipart/form-data with eventImage file upload
  */
 export const createEvent = catchAsync(async (req: Request, res: Response) => {
@@ -74,7 +74,7 @@ export const createEvent = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get all events with filters
- * GET /api/events
+ * GET /api/v1/events
  */
 export const getAllEvents = catchAsync(async (req: Request, res: Response) => {
   const params: EventSearchParams = {
@@ -99,7 +99,7 @@ export const getAllEvents = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get a single event by ID
- * GET /api/events/:eventId
+ * GET /api/v1/events/:eventId
  */
 export const getEventById = catchAsync(async (req: Request, res: Response) => {
   const { eventId } = req.params;
@@ -127,7 +127,7 @@ export const getEventById = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get events created by the current user
- * GET /api/events/my-events
+ * GET /api/v1/events/my-events
  */
 export const getMyEvents = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -153,7 +153,7 @@ export const getMyEvents = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Update an event
- * PUT /api/events/:eventId
+ * PUT /api/v1/events/:eventId
  * Supports multipart/form-data with eventImage file upload
  */
 export const updateEvent = catchAsync(async (req: Request, res: Response) => {
@@ -203,7 +203,7 @@ export const updateEvent = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Soft delete an event
- * DELETE /api/events/:eventId
+ * DELETE /api/v1/events/:eventId
  */
 export const deleteEvent = catchAsync(async (req: Request, res: Response) => {
   const { eventId } = req.params;
@@ -224,7 +224,7 @@ export const deleteEvent = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Register for an event
- * POST /api/events/:eventId/register
+ * POST /api/v1/events/:eventId/register
  */
 export const registerForEvent = catchAsync(async (req: Request, res: Response) => {
   const { eventId } = req.params;
@@ -249,7 +249,7 @@ export const registerForEvent = catchAsync(async (req: Request, res: Response) =
 
 /**
  * Get registrations for an event (event owner only)
- * GET /api/events/:eventId/registrations
+ * GET /api/v1/events/:eventId/registrations
  */
 export const getEventRegistrations = catchAsync(async (req: Request, res: Response) => {
   const { eventId } = req.params;
@@ -286,7 +286,7 @@ export const getEventRegistrations = catchAsync(async (req: Request, res: Respon
 
 /**
  * Get user's event registrations
- * GET /api/events/my-registrations
+ * GET /api/v1/events/my-registrations
  */
 export const getMyRegistrations = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -311,7 +311,7 @@ export const getMyRegistrations = catchAsync(async (req: Request, res: Response)
 
 /**
  * Get a single registration
- * GET /api/events/registrations/:registrationId
+ * GET /api/v1/events/registrations/:registrationId
  */
 export const getRegistrationById = catchAsync(async (req: Request, res: Response) => {
   const { registrationId } = req.params;
@@ -330,7 +330,7 @@ export const getRegistrationById = catchAsync(async (req: Request, res: Response
 
 /**
  * Accept a registration
- * PATCH /api/events/registrations/:registrationId/accept
+ * PATCH /api/v1/events/registrations/:registrationId/accept
  */
 export const acceptRegistration = catchAsync(async (req: Request, res: Response) => {
   const { registrationId } = req.params;
@@ -352,7 +352,7 @@ export const acceptRegistration = catchAsync(async (req: Request, res: Response)
 
 /**
  * Reject a registration
- * PATCH /api/events/registrations/:registrationId/reject
+ * PATCH /api/v1/events/registrations/:registrationId/reject
  */
 export const rejectRegistration = catchAsync(async (req: Request, res: Response) => {
   const { registrationId } = req.params;
@@ -376,7 +376,7 @@ export const rejectRegistration = catchAsync(async (req: Request, res: Response)
 
 /**
  * Delete a registration
- * DELETE /api/events/registrations/:registrationId
+ * DELETE /api/v1/events/registrations/:registrationId
  */
 export const deleteRegistration = catchAsync(async (req: Request, res: Response) => {
   const { registrationId } = req.params;

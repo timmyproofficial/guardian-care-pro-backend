@@ -33,7 +33,7 @@ async function seedRosterSnapshots() {
       console.log('\n========================================');
       console.log('ERROR: No provider found in the database');
       console.log('Please register a provider first using:');
-      console.log('POST /api/v1/auth/register with role: "provider"');
+      console.log('POST /api/v1/v1/auth/register with role: "provider"');
       console.log('========================================\n');
       process.exit(1);
     }
@@ -302,9 +302,9 @@ async function seedRosterSnapshots() {
     console.log(`Shift References Created: ${shiftReferences.length}`);
     console.log('========================================');
     console.log('\nYou can now test the following endpoints:');
-    console.log('- GET /api/v1/roster/snapshots');
-    console.log(`- GET /api/v1/roster/snapshots/${snapshot._id}`);
-    console.log('- GET /api/v1/roster/shift-references');
+    console.log('- GET /api/v1/v1/roster/snapshots');
+    console.log(`- GET /api/v1/v1/roster/snapshots/${snapshot._id}`);
+    console.log('- GET /api/v1/v1/roster/shift-references');
     console.log('========================================\n');
 
     await mongoose.disconnect();

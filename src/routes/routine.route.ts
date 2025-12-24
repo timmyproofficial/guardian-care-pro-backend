@@ -13,9 +13,25 @@ import { UserRole } from '../types/user.types';
 const router = express.Router();
 
 /**
- * @route POST /api/routines
- * @desc Create a new routine
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/routines:
+ *   post:
+ *     summary: Create a new routine
+ *     description: Create a new routine
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/',
@@ -26,13 +42,26 @@ router.post(
 );
 
 /**
- * @route GET /api/routines
- * @desc Get routines for the authenticated user
- * @access Private (Participants and Workers)
- * @query {string} [status] - Filter by routine status
- * @query {string} [serviceTypeId] - Filter by service type
- * @query {string} [search] - Search in routine name/description
- * @query {string} [participantId] - Required for workers to specify participant
+ * @swagger
+ * /api/v1/routines:
+ *   get:
+ *     summary: Get routines for the authenticated user
+ *     description: Get routines for the authenticated user
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [status] - Filter by routine status
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/',
@@ -43,9 +72,28 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/:routineId
- * @desc Get routine by ID
- * @access Private
+ * @swagger
+ * /api/v1/routines/:routineId:
+ *   get:
+ *     summary: Get routine by ID
+ *     description: Get routine by ID
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: routineId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The routineId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:routineId',
@@ -54,9 +102,34 @@ router.get(
 );
 
 /**
- * @route PUT /api/routines/:routineId
- * @desc Update routine
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/routines/:routineId:
+ *   put:
+ *     summary: Update routine
+ *     description: Update routine
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: routineId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The routineId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.put(
   '/:routineId',
@@ -67,9 +140,28 @@ router.put(
 );
 
 /**
- * @route DELETE /api/routines/:routineId
- * @desc Delete routine
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/routines/:routineId:
+ *   delete:
+ *     summary: Delete routine
+ *     description: Delete routine
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: routineId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The routineId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/:routineId',
@@ -79,9 +171,34 @@ router.delete(
 );
 
 /**
- * @route POST /api/routines/:routineId/duplicate
- * @desc Duplicate routine
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/routines/:routineId/duplicate:
+ *   post:
+ *     summary: Duplicate routine
+ *     description: Duplicate routine
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: routineId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The routineId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.post(
   '/:routineId/duplicate',
@@ -92,9 +209,28 @@ router.post(
 );
 
 /**
- * @route GET /api/routines/:routineId/stats
- * @desc Get routine usage statistics
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/routines/:routineId/stats:
+ *   get:
+ *     summary: Get routine usage statistics
+ *     description: Get routine usage statistics
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: routineId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The routineId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:routineId/stats',
@@ -104,9 +240,34 @@ router.get(
 );
 
 /**
- * @route PUT /api/shifts/:shiftId/routine
- * @desc Update shift routine attachment
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/shifts/:shiftId/routine:
+ *   put:
+ *     summary: Update shift routine attachment
+ *     description: Update shift routine attachment
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: shiftId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The shiftId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.put(
   '/shifts/:shiftId/routine',
@@ -119,9 +280,28 @@ router.put(
 
 
 /**
- * @route GET /api/shifts/:shiftId/routine-completion
- * @desc Get routine completion by shift
- * @access Private
+ * @swagger
+ * /api/v1/shifts/:shiftId/routine-completion:
+ *   get:
+ *     summary: Get routine completion by shift
+ *     description: Get routine completion by shift
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: shiftId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The shiftId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/shifts/:shiftId/routine-completion',
@@ -132,14 +312,34 @@ router.get(
 
 
 /**
- * @route GET /api/participants/:participantId/routine-completions
- * @desc Get routine completions for participant
- * @access Private
- * @query {string} [status] - Filter by completion status
- * @query {string} [routineId] - Filter by routine
- * @query {string} [workerId] - Filter by worker
- * @query {string} [startDate] - Filter by date range start
- * @query {string} [endDate] - Filter by date range end
+ * @swagger
+ * /api/v1/participants/:participantId/routine-completions:
+ *   get:
+ *     summary: Get routine completions for participant
+ *     description: Get routine completions for participant
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: participantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The participantId
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [status] - Filter by completion status
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/participants/:participantId/routine-completions',
@@ -149,14 +349,34 @@ router.get(
 );
 
 /**
- * @route GET /api/workers/:workerId/routine-completions
- * @desc Get routine completions for worker
- * @access Private
- * @query {string} [status] - Filter by completion status
- * @query {string} [routineId] - Filter by routine
- * @query {string} [participantId] - Filter by participant
- * @query {string} [startDate] - Filter by date range start
- * @query {string} [endDate] - Filter by date range end
+ * @swagger
+ * /api/v1/workers/:workerId/routine-completions:
+ *   get:
+ *     summary: Get routine completions for worker
+ *     description: Get routine completions for worker
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: workerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The workerId
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [status] - Filter by completion status
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/workers/:workerId/routine-completions',
@@ -166,10 +386,34 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/daily-stats/:participantId
- * @desc Get daily completion statistics for a participant
- * @access Private (Participants can only view their own, workers/admins can view any)
- * @query {string} [date] - Date in ISO format (defaults to today)
+ * @swagger
+ * /api/v1/routines/daily-stats/:participantId:
+ *   get:
+ *     summary: Get daily completion statistics for a participant
+ *     description: Get daily completion statistics for a participant
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: participantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The participantId
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [date] - Date in ISO format (defaults to today)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/daily-stats/:participantId',
@@ -179,10 +423,34 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/daily-details/:participantId
- * @desc Get detailed daily routine completions for a participant
- * @access Private (Participants can only view their own, workers/admins can view any)
- * @query {string} [date] - Date in ISO format (defaults to today)
+ * @swagger
+ * /api/v1/routines/daily-details/:participantId:
+ *   get:
+ *     summary: Get detailed daily routine completions for a participant
+ *     description: Get detailed daily routine completions for a participant
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: participantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The participantId
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [date] - Date in ISO format (defaults to today)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/daily-details/:participantId',
@@ -192,10 +460,34 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/weekly-trend/:participantId
- * @desc Get weekly completion trend for a participant
- * @access Private (Participants can only view their own, workers/admins can view any)
- * @query {string} [weekStartDate] - Week start date in ISO format (defaults to current week Monday)
+ * @swagger
+ * /api/v1/routines/weekly-trend/:participantId:
+ *   get:
+ *     summary: Get weekly completion trend for a participant
+ *     description: Get weekly completion trend for a participant
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: participantId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The participantId
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [weekStartDate] - Week start date in ISO format (defaults to current week Monday)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/weekly-trend/:participantId',
@@ -205,11 +497,26 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/organization-daily-stats
- * @desc Get organization daily statistics (admin only)
- * @access Private (Admin and Organization Admin only)
- * @query {string} [date] - Date in ISO format (defaults to today)
- * @query {string} [organizationId] - Organization ID (required for admin, auto for org admin)
+ * @swagger
+ * /api/v1/routines/organization-daily-stats:
+ *   get:
+ *     summary: Get organization daily statistics (admin only)
+ *     description: Get organization daily statistics (admin only)
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [date] - Date in ISO format (defaults to today)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/organization-daily-stats',
@@ -220,10 +527,32 @@ router.get(
 );
 
 /**
- * @route GET /api/routines/overdue
- * @desc Get overdue routines for organization (admin only)
- * @access Private (Admin and Organization Admin only)
- * @query {string} [organizationId] - Organization ID (required for admin, auto for org admin)
+ * @swagger
+ * /api/v1/routines/overdue:
+ *   get:
+ *     summary: Get overdue routines for organization (admin only)
+ *     description: Get overdue routines for organization (admin only)
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [organizationId] - Organization ID (required for admin
+ *       - in: query
+ *         name: auto
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: auto for org admin)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/overdue',
@@ -234,9 +563,34 @@ router.get(
 );
 
 /**
- * @route PATCH /api/shifts/:shiftId/routine/complete
- * @desc Complete routine for a shift (ultra-simplified)
- * @access Private (Workers only)
+ * @swagger
+ * /api/v1/shifts/:shiftId/routine/complete:
+ *   patch:
+ *     summary: Complete routine for a shift (ultra-simplified)
+ *     description: Complete routine for a shift (ultra-simplified)
+ *     tags: [Routines]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: shiftId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The shiftId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.patch(
   '/shifts/:shiftId/routine/complete',

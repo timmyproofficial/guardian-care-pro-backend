@@ -25,7 +25,7 @@
     }
   },
   "paths": {
-    "/api/jobs": {
+    "/api/v1/jobs": {
       "get": {
         "summary": "Get all jobs with filters",
         "description": "Retrieve a paginated list of job postings with optional filters",
@@ -231,7 +231,7 @@
         }
       }
     },
-    "/api/jobs/{jobId}": {
+    "/api/v1/jobs/{jobId}": {
       "get": {
         "summary": "Get a single job by ID",
         "description": "Retrieve detailed information about a specific job posting",
@@ -283,7 +283,7 @@
         }
       }
     },
-    "/api/jobs/user/my-posts": {
+    "/api/v1/jobs/user/my-posts": {
       "get": {
         "summary": "Get jobs posted by the current user",
         "description": "Retrieve all job postings created by the authenticated user",
@@ -331,7 +331,7 @@
         }
       }
     },
-    "/api/jobs/user/my-applications": {
+    "/api/v1/jobs/user/my-applications": {
       "get": {
         "summary": "Get user's job applications",
         "description": "Retrieve all jobs the authenticated user has applied to",
@@ -353,7 +353,7 @@
         }
       }
     },
-    "/api/jobs/user/saved": {
+    "/api/v1/jobs/user/saved": {
       "get": {
         "summary": "Get user's saved jobs",
         "description": "Retrieve all jobs saved by the authenticated user",

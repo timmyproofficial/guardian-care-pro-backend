@@ -13,7 +13,7 @@ import { ServiceTypeStatus } from '../models/serviceType.model';
 export const serviceTypeController = {
   /**
    * Create a new service type
-   * @route POST /api/service-types
+   * @route POST /api/v1/service-types
    * @body { name, code, status }
    */
   createServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -49,7 +49,7 @@ export const serviceTypeController = {
 
   /**
    * Get all service types with optional filtering
-   * @route GET /api/service-types
+   * @route GET /api/v1/service-types
    * @query status, activeOnly
    */
   getAllServiceTypes: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -75,7 +75,7 @@ export const serviceTypeController = {
 
   /**
    * Get active service types (for dropdowns/selection)
-   * @route GET /api/service-types/active
+   * @route GET /api/v1/service-types/active
    */
   getActiveServiceTypes: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -95,7 +95,7 @@ export const serviceTypeController = {
 
   /**
    * Get service type by ID
-   * @route GET /api/service-types/:serviceTypeId
+   * @route GET /api/v1/service-types/:serviceTypeId
    */
   getServiceTypeById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -116,7 +116,7 @@ export const serviceTypeController = {
 
   /**
    * Get service type by code
-   * @route GET /api/service-types/code/:code
+   * @route GET /api/v1/service-types/code/:code
    */
   getServiceTypeByCode: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -137,7 +137,7 @@ export const serviceTypeController = {
 
   /**
    * Update service type
-   * @route PATCH /api/service-types/:serviceTypeId
+   * @route PATCH /api/v1/service-types/:serviceTypeId
    * @body { name?, code?, status? }
    */
   updateServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
@@ -165,7 +165,7 @@ export const serviceTypeController = {
 
   /**
    * Delete service type (soft delete - set status to inactive)
-   * @route DELETE /api/service-types/:serviceTypeId
+   * @route DELETE /api/v1/service-types/:serviceTypeId
    */
   deleteServiceType: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

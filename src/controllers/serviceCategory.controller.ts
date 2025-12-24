@@ -13,7 +13,7 @@ import { ServiceCategoryStatus } from '../models/serviceCategory.model';
 const serviceCategoryController = {
   /**
    * Create a new service category
-   * @route POST /api/v1/service-categories
+   * @route POST /api/v1/v1/service-categories
    */
   createServiceCategory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -36,7 +36,7 @@ const serviceCategoryController = {
 
   /**
    * Get all service categories with filtering and pagination
-   * @route GET /api/v1/service-categories
+   * @route GET /api/v1/v1/service-categories
    */
   getAllServiceCategories: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -67,7 +67,7 @@ const serviceCategoryController = {
 
   /**
    * Get a single service category by ID
-   * @route GET /api/v1/service-categories/:id
+   * @route GET /api/v1/v1/service-categories/:id
    */
   getServiceCategoryById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -82,7 +82,7 @@ const serviceCategoryController = {
 
   /**
    * Get service categories by status
-   * @route GET /api/v1/service-categories/status/:status
+   * @route GET /api/v1/v1/service-categories/status/:status
    */
   getServiceCategoriesByStatus: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -97,7 +97,7 @@ const serviceCategoryController = {
 
   /**
    * Update a service category
-   * @route PUT /api/v1/service-categories/:id
+   * @route PUT /api/v1/v1/service-categories/:id
    */
   updateServiceCategory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -116,7 +116,7 @@ const serviceCategoryController = {
 
   /**
    * Delete a service category
-   * @route DELETE /api/v1/service-categories/:id
+   * @route DELETE /api/v1/v1/service-categories/:id
    */
   deleteServiceCategory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -131,7 +131,7 @@ const serviceCategoryController = {
 
   /**
    * Get service category statistics
-   * @route GET /api/v1/service-categories/statistics
+   * @route GET /api/v1/v1/service-categories/statistics
    */
   getServiceCategoryStatistics: async (_req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

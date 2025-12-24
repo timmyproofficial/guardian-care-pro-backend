@@ -74,7 +74,7 @@ heroku logs --tail --app backend-guardian-care-pro
 
 # Test the endpoint
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  https://your-api.example.com/api/v1/invoices/INVOICE_ID/download
+  https://your-api.example.com/api/v1/v1/invoices/INVOICE_ID/download
 ```
 
 ## Next Steps

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Successfully merged location-based and general worker search into a single unified endpoint at `GET /api/workers/search`.
+Successfully merged location-based and general worker search into a single unified endpoint at `GET /api/v1/workers/search`.
 
 ## What Changed
 
@@ -40,7 +40,7 @@ Successfully merged location-based and general worker search into a single unifi
 
 ### Endpoint
 ```
-GET /api/workers/search
+GET /api/v1/workers/search
 ```
 
 ### Authentication
@@ -77,36 +77,36 @@ GET /api/workers/search
 
 ### 1. General Search (Existing Functionality)
 ```bash
-GET /api/workers/search?skills[]=68649df68e1a442c4e36c8bf&languages[]=English&page=1&limit=10
+GET /api/v1/workers/search?skills[]=68649df68e1a442c4e36c8bf&languages[]=English&page=1&limit=10
 ```
 
 ### 2. Location-Only Search
 ```bash
 # By state
-GET /api/workers/search?stateId=690b0a037ee1cac861cb22df
+GET /api/v1/workers/search?stateId=690b0a037ee1cac861cb22df
 
 # By region
-GET /api/workers/search?regionId=690b0a067ee1cac861cb2315
+GET /api/v1/workers/search?regionId=690b0a067ee1cac861cb2315
 
 # Auto-match participant's location
-GET /api/workers/search?matchParticipantLocation=true&page=1&limit=10
+GET /api/v1/workers/search?matchParticipantLocation=true&page=1&limit=10
 ```
 
 ### 3. Combined Location + General Filters
 ```bash
 # Region + skills + rating
-GET /api/workers/search?regionId=690b0a067ee1cac861cb2315&skills[]=68649df68e1a442c4e36c8bf&minRating=4&onlyVerified=true
+GET /api/v1/workers/search?regionId=690b0a067ee1cac861cb2315&skills[]=68649df68e1a442c4e36c8bf&minRating=4&onlyVerified=true
 
 # State + languages + hourly rate
-GET /api/workers/search?stateId=690b0a037ee1cac861cb22df&languages[]=English&maxHourlyRate=50
+GET /api/v1/workers/search?stateId=690b0a037ee1cac861cb22df&languages[]=English&maxHourlyRate=50
 
 # Auto-match + skills + availability
-GET /api/workers/search?matchParticipantLocation=true&skills[]=68649df68e1a442c4e36c8bf&availabilityDays[]=monday&availabilityDays[]=tuesday
+GET /api/v1/workers/search?matchParticipantLocation=true&skills[]=68649df68e1a442c4e36c8bf&availabilityDays[]=monday&availabilityDays[]=tuesday
 ```
 
 ### 4. Location + Keyword Search
 ```bash
-GET /api/workers/search?regionId=690b0a067ee1cac861cb2315&keyword=experienced&page=1
+GET /api/v1/workers/search?regionId=690b0a067ee1cac861cb2315&keyword=experienced&page=1
 ```
 
 ## Response Format
@@ -221,8 +221,8 @@ When location filters are provided:
 
 After verifying the unified endpoint works correctly, consider deprecating:
 
-1. **`GET /api/location/workers/by-region`** - Now redundant
-2. **`GET /api/location/workers/nearby`** - Proximity search (keep for now, different use case)
+1. **`GET /api/v1/location/workers/by-region`** - Now redundant
+2. **`GET /api/v1/location/workers/nearby`** - Proximity search (keep for now, different use case)
 
 ### Recommended Migration Steps
 

@@ -8,7 +8,7 @@ Create a new Postman environment with these variables:
 
 ```json
 {
-  "base_url": "http://localhost:3000/api/v1",
+  "base_url": "http://localhost:3000/api/v1/v1",
   "access_token": "",
   "refresh_token": "",
   "participant_id": "",

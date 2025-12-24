@@ -85,7 +85,7 @@ Developer Workflow:
 ```typescript
 /**
  * @swagger
- * /api/endpoint:
+ * /api/v1/endpoint:
  *   get:
  *     summary: ...
  */
@@ -142,7 +142,7 @@ route.ts files  ──▶  swagger-jsdoc  ──▶  OpenAPI JSON
 User Authentication in Swagger UI:
 ══════════════════════════════════
 
-  1. User logs in via /api/auth/login
+  1. User logs in via /api/v1/auth/login
      │
      ├─▶ Receives JWT token
      │

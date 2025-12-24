@@ -13,7 +13,7 @@ npm run dev
 Then open: **http://localhost:5000/api-docs**
 
 ### 2. Test an Endpoint
-1. In Swagger UI, expand any endpoint (e.g., `GET /api/jobs`)
+1. In Swagger UI, expand any endpoint (e.g., `GET /api/v1/jobs`)
 2. Click **"Try it out"**
 3. Click **"Execute"**
 4. See the response!
@@ -34,7 +34,7 @@ Then open: **http://localhost:5000/api-docs**
 ```typescript
 /**
  * @swagger
- * /api/users:
+ * /api/v1/users:
  *   post:
  *     summary: Create new user
  *     tags: [Users]
