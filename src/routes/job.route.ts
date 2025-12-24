@@ -18,16 +18,114 @@ const router = Router();
 // =============================================================================
 
 /**
- * @route   GET /api/jobs
- * @desc    Get all jobs with filters
- * @access  Public
+ * @swagger
+ * /api/jobs:
+ *   get:
+ *     summary: Get all jobs with filters
+ *     description: Retrieve a paginated list of job postings with optional filters
+ *     tags: [Jobs]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *         description: Page number
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *         description: Number of items per page
+ *       - in: query
+ *         name: status
+ *         schema:
+ *           type: string
+ *           enum: [OPEN, CLOSED, FILLED, CANCELLED]
+ *         description: Filter by job status
+ *       - in: query
+ *         name: location
+ *         schema:
+ *           type: string
+ *         description: Filter by location
+ *       - in: query
+ *         name: serviceType
+ *         schema:
+ *           type: string
+ *         description: Filter by service type ID
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search in title and description
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved jobs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 pagination:
+ *                   type: object
+ *                   properties:
+ *                     page:
+ *                       type: integer
+ *                     limit:
+ *                       type: integer
+ *                     total:
+ *                       type: integer
+ *       400:
+ *         description: Validation error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ValidationError'
  */
 router.get('/', validate(jobValidation.queryJobs, 'query'), jobController.getAllJobs);
 
 /**
- * @route   GET /api/jobs/:jobId
- * @desc    Get a single job by ID
- * @access  Public (but extra info if authenticated)
+ * @swagger
+ * /api/jobs/{jobId}:
+ *   get:
+ *     summary: Get a single job by ID
+ *     description: Retrieve detailed information about a specific job posting
+ *     tags: [Jobs]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: jobId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The job ID
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved job
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *       404:
+ *         description: Job not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get('/:jobId', jobController.getJobById);
 
@@ -36,9 +134,35 @@ router.get('/:jobId', jobController.getJobById);
 // =============================================================================
 
 /**
- * @route   GET /api/jobs/user/my-posts
- * @desc    Get jobs posted by the current user
- * @access  Private (Participant, Provider)
+ * @swagger
+ * /api/jobs/user/my-posts:
+ *   get:
+ *     summary: Get jobs posted by the current user
+ *     description: Retrieve all job postings created by the authenticated user
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user's job posts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *       401:
+ *         description: Unauthorized - Invalid or missing token
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
  */
 router.get(
   '/user/my-posts',
@@ -48,9 +172,19 @@ router.get(
 );
 
 /**
- * @route   GET /api/jobs/user/my-applications
- * @desc    Get user's applied jobs
- * @access  Private
+ * @swagger
+ * /api/jobs/user/my-applications:
+ *   get:
+ *     summary: Get user's job applications
+ *     description: Retrieve all jobs the authenticated user has applied to
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved user's applications
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/user/my-applications',
@@ -59,9 +193,19 @@ router.get(
 );
 
 /**
- * @route   GET /api/jobs/user/saved
- * @desc    Get user's saved jobs
- * @access  Private
+ * @swagger
+ * /api/jobs/user/saved:
+ *   get:
+ *     summary: Get user's saved jobs
+ *     description: Retrieve all jobs saved by the authenticated user
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved saved jobs
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/user/saved',
@@ -70,9 +214,66 @@ router.get(
 );
 
 /**
- * @route   POST /api/jobs
- * @desc    Create a new job
- * @access  Private (Participant, Provider only)
+ * @swagger
+ * /api/jobs:
+ *   post:
+ *     summary: Create a new job posting
+ *     description: Create a new job posting (Participant or Provider only)
+ *     tags: [Jobs]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - title
+ *               - description
+ *               - serviceType
+ *               - location
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: "Personal Care Assistant Needed"
+ *               description:
+ *                 type: string
+ *                 example: "Looking for a caring support worker to assist with daily activities"
+ *               serviceType:
+ *                 type: string
+ *                 description: Service type ID
+ *               location:
+ *                 type: object
+ *                 properties:
+ *                   address:
+ *                     type: string
+ *                   suburb:
+ *                     type: string
+ *                   state:
+ *                     type: string
+ *                   postcode:
+ *                     type: string
+ *               requirements:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               budget:
+ *                 type: object
+ *                 properties:
+ *                   min:
+ *                     type: number
+ *                   max:
+ *                     type: number
+ *     responses:
+ *       201:
+ *         description: Job created successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Insufficient permissions
  */
 router.post(
   '/',
