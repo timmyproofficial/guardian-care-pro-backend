@@ -12,7 +12,8 @@ export enum JobRole {
   SUPPORT_WORKER = 'Support Worker',
   YOUTH_WORKER = 'Youth Worker',
   NURSING_ASSISTANT = 'Nursing Assistant',
-  CLEANSER = 'Cleanser',
+  CLEANER = 'Cleaner',
+  HANDY_PERSON = 'Handy Person',
 }
 
 /**
