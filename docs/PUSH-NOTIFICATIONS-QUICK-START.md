@@ -61,7 +61,7 @@ Check logs for:
 
 ```bash
 # Register a test token (replace with actual values)
-curl -X POST http://localhost:5000/api/v1/notifications/register-device \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/register-device \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
@@ -71,7 +71,7 @@ curl -X POST http://localhost:5000/api/v1/notifications/register-device \
   }'
 
 # Send a test notification
-curl -X POST http://localhost:5000/api/v1/notifications/test \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/test \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
@@ -150,10 +150,10 @@ Save as: `lib/services/notification_service.dart`
 
 **Update the API URL:**
 ```dart
-static const String _baseUrl = 'https://your-api-url.com/api/v1';
+static const String _baseUrl = 'https://your-api-url.com/api/v1/v1';
 // or for local testing:
-// static const String _baseUrl = 'http://10.0.2.2:5000/api/v1'; // Android emulator
-// static const String _baseUrl = 'http://localhost:5000/api/v1'; // iOS simulator
+// static const String _baseUrl = 'http://10.0.2.2:5000/api/v1/v1'; // Android emulator
+// static const String _baseUrl = 'http://localhost:5000/api/v1/v1'; // iOS simulator
 ```
 
 ### Step 6: Initialize in main.dart

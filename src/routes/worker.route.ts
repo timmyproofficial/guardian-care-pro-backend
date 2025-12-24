@@ -10,15 +10,98 @@ import { UserRole } from '../types/user.types';
 const router = express.Router();
 
 /**
- * @route GET /api/workers/search
- * @desc Search for support workers with filtering and pagination
- * @query General filters: skills[], serviceAreas[], languages[], availabilityDays[], availabilityStartTime, availabilityEndTime, availabilityDate, minRating, maxHourlyRate, onlyVerified, keyword, page, limit
- * @query Location filters: stateId, regionId, serviceAreaId, matchParticipantLocation
- * @access Private (Participants only - uses authenticated user's ID)
- * @example GET /api/workers/search?skills[]=skill1&skills[]=skill2&page=1&limit=10
- * @example GET /api/workers/search?regionId=456&minRating=4&page=1
- * @example GET /api/workers/search?matchParticipantLocation=true&skills[]=skill1
- * @example GET /api/workers/search?stateId=123&languages[]=English&onlyVerified=true
+ * @swagger
+ * /api/v1/workers/search:
+ *   get:
+ *     summary: Search for support workers with filtering and pagination
+ *     description: Search for support workers with filtering and pagination
+ *     tags: [Workers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: General
+ *         required: true
+ *         schema:
+ *           type: array
+ *         description: General filters: skills[]
+ *       - in: query
+ *         name: serviceAreas
+ *         required: true
+ *         schema:
+ *           type: array
+ *         description: serviceAreas[]
+ *       - in: query
+ *         name: languages
+ *         required: true
+ *         schema:
+ *           type: array
+ *         description: languages[]
+ *       - in: query
+ *         name: availabilityDays
+ *         required: true
+ *         schema:
+ *           type: array
+ *         description: availabilityDays[]
+ *       - in: query
+ *         name: availabilityStartTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: availabilityStartTime
+ *       - in: query
+ *         name: availabilityEndTime
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: availabilityEndTime
+ *       - in: query
+ *         name: availabilityDate
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: availabilityDate
+ *       - in: query
+ *         name: minRating
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: minRating
+ *       - in: query
+ *         name: maxHourlyRate
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: maxHourlyRate
+ *       - in: query
+ *         name: onlyVerified
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: onlyVerified
+ *       - in: query
+ *         name: keyword
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: keyword
+ *       - in: query
+ *         name: page
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: page
+ *       - in: query
+ *         name: limit
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: limit
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/search',
@@ -28,9 +111,19 @@ router.get(
 );
 
 /**
- * @route GET /api/workers/filter-options
- * @desc Get filter options for worker search
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/workers/filter-options:
+ *   get:
+ *     summary: Get filter options for worker search
+ *     description: Get filter options for worker search
+ *     tags: [Workers]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/filter-options',
@@ -40,9 +133,28 @@ router.get(
 );
 
 /**
- * @route GET /api/workers/:workerId/profile
- * @desc Get worker profile details
- * @access Private (Participants only)
+ * @swagger
+ * /api/v1/workers/:workerId/profile:
+ *   get:
+ *     summary: Get worker profile details
+ *     description: Get worker profile details
+ *     tags: [Workers]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: workerId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The workerId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:workerId/profile',

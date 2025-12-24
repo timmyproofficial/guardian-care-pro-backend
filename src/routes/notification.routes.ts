@@ -10,30 +10,88 @@ import { authenticate } from '../middlewares/auth.middleware';
 const router = express.Router();
 
 /**
- * @route   POST /api/notifications/register-device
- * @desc    Register a device for push notifications
- * @access  Private (requires authentication)
+ * @swagger
+ * /api/v1/notifications/register-device:
+ *   post:
+ *     summary: Register a device for push notifications
+ *     description: Register a device for push notifications
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/register-device', authenticate, notificationController.registerDevice);
 
 /**
- * @route   POST /api/notifications/unregister-device
- * @desc    Unregister a device from push notifications
- * @access  Private (requires authentication)
+ * @swagger
+ * /api/v1/notifications/unregister-device:
+ *   post:
+ *     summary: Unregister a device from push notifications
+ *     description: Unregister a device from push notifications
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/unregister-device', authenticate, notificationController.unregisterDevice);
 
 /**
- * @route   GET /api/notifications/devices
- * @desc    Get user's registered devices
- * @access  Private (requires authentication)
+ * @swagger
+ * /api/v1/notifications/devices:
+ *   get:
+ *     summary: Get user's registered devices
+ *     description: Get user's registered devices
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/devices', authenticate, notificationController.getRegisteredDevices);
 
 /**
- * @route   POST /api/notifications/test
- * @desc    Send a test push notification (for development)
- * @access  Private (requires authentication)
+ * @swagger
+ * /api/v1/notifications/test:
+ *   post:
+ *     summary: Send a test push notification (for development)
+ *     description: Send a test push notification (for development)
+ *     tags: [Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/test', authenticate, notificationController.testPushNotification);
 

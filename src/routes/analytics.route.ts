@@ -14,13 +14,56 @@ import { Request } from 'express';
 const router = express.Router();
 
 /**
- * @route GET /api/analytics/overview
- * @desc Get role-specific dashboard overview analytics
- * @access Private (All authenticated users)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string, required if dateRange=custom)
- * @query {string} [endDate] - Custom range end date (ISO string, required if dateRange=custom)
- * @query {boolean} [comparison] - Include comparison with previous period (default: true)
+ * @swagger
+ * /api/v1/analytics/overview:
+ *   get:
+ *     summary: Get role-specific dashboard overview analytics
+ *     description: Get role-specific dashboard overview analytics
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/overview',
@@ -30,12 +73,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/admin/users
- * @desc Get user analytics for admin dashboard
- * @access Private (Admin only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/admin/users:
+ *   get:
+ *     summary: Get user analytics for admin dashboard
+ *     description: Get user analytics for admin dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/admin/users',
@@ -46,12 +133,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/admin/financial
- * @desc Get financial analytics for admin dashboard
- * @access Private (Admin only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/admin/financial:
+ *   get:
+ *     summary: Get financial analytics for admin dashboard
+ *     description: Get financial analytics for admin dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/admin/financial',
@@ -62,12 +193,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/participant/services
- * @desc Get service analytics for participant dashboard
- * @access Private (Participant only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/participant/services:
+ *   get:
+ *     summary: Get service analytics for participant dashboard
+ *     description: Get service analytics for participant dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/participant/services',
@@ -78,12 +253,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/worker/financial
- * @desc Get financial analytics for worker dashboard
- * @access Private (Support Worker only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/worker/financial:
+ *   get:
+ *     summary: Get financial analytics for worker dashboard
+ *     description: Get financial analytics for worker dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/worker/financial',
@@ -94,12 +313,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/worker/schedule
- * @desc Get schedule analytics for worker dashboard
- * @access Private (Support Worker only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/worker/schedule:
+ *   get:
+ *     summary: Get schedule analytics for worker dashboard
+ *     description: Get schedule analytics for worker dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/worker/schedule',
@@ -110,12 +373,56 @@ router.get(
 );
 
 /**
- * @route GET /api/analytics/worker/performance
- * @desc Get performance analytics for worker dashboard
- * @access Private (Support Worker only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/worker/performance:
+ *   get:
+ *     summary: Get performance analytics for worker dashboard
+ *     description: Get performance analytics for worker dashboard
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/worker/performance',
@@ -126,10 +433,26 @@ router.get(
 );
 
 /**
- * @route POST /api/analytics/filtered
- * @desc Get filtered analytics (admin only)
- * @access Private (Admin only)
- * @body {AnalyticsFilters} filters - Analytics filter criteria
+ * @swagger
+ * /api/v1/analytics/filtered:
+ *   post:
+ *     summary: Get filtered analytics (admin only)
+ *     description: Get filtered analytics (admin only)
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: {AnalyticsFilters} filters - Analytics filter criteria
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/filtered',
@@ -140,12 +463,56 @@ router.post(
 );
 
 /**
- * @route GET /api/analytics/platform/summary
- * @desc Get platform metrics summary (admin only)
- * @access Private (Admin only)
- * @query {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @query {string} [startDate] - Custom range start date (ISO string)
- * @query {string} [endDate] - Custom range end date (ISO string)
+ * @swagger
+ * /api/v1/analytics/platform/summary:
+ *   get:
+ *     summary: Get platform metrics summary (admin only)
+ *     description: Get platform metrics summary (admin only)
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: string
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: {string} [dateRange] - Date range type (today
+ *       - in: query
+ *         name: week
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: week
+ *       - in: query
+ *         name: month
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: month
+ *       - in: query
+ *         name: quarter
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: quarter
+ *       - in: query
+ *         name: year
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: year
+ *       - in: query
+ *         name: custom
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: custom)
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/platform/summary',
@@ -156,13 +523,26 @@ router.get(
 );
 
 /**
- * @route POST /api/analytics/export
- * @desc Export analytics data (all roles)
- * @access Private (All authenticated users)
- * @body {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
- * @body {string} [startDate] - Custom range start date (ISO string)
- * @body {string} [endDate] - Custom range end date (ISO string)
- * @body {string} [format] - Export format (json, csv, pdf) - default: json
+ * @swagger
+ * /api/v1/analytics/export:
+ *   post:
+ *     summary: Export analytics data (all roles)
+ *     description: Export analytics data (all roles)
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             description: {string} [dateRange] - Date range type (today, week, month, quarter, year, custom)
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/export',
@@ -172,9 +552,19 @@ router.post(
 );
 
 /**
- * @route GET /api/analytics/realtime
- * @desc Get real-time metrics (admin only)
- * @access Private (Admin only)
+ * @swagger
+ * /api/v1/analytics/realtime:
+ *   get:
+ *     summary: Get real-time metrics (admin only)
+ *     description: Get real-time metrics (admin only)
+ *     tags: [Analytics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/realtime',

@@ -12,7 +12,7 @@ import { AuthenticatedRequest } from '../middlewares/auth.middleware';
 const incidentController = {
   /**
    * Create a new incident
-   * @route POST /api/v1/incidents
+   * @route POST /api/v1/v1/incidents
    */
   createIncident: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -37,7 +37,7 @@ const incidentController = {
 
   /**
    * Get all incidents with filtering and pagination
-   * @route GET /api/v1/incidents
+   * @route GET /api/v1/v1/incidents
    */
   getAllIncidents: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -79,7 +79,7 @@ const incidentController = {
 
   /**
    * Get incidents for a specific shift
-   * @route GET /api/v1/incidents/shift/:shiftId
+   * @route GET /api/v1/v1/incidents/shift/:shiftId
    */
   getIncidentsByShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -94,7 +94,7 @@ const incidentController = {
 
   /**
    * Get incidents reported by current user
-   * @route GET /api/v1/incidents/my-reports/:id
+   * @route GET /api/v1/v1/incidents/my-reports/:id
    */
   getMyReports: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -109,7 +109,7 @@ const incidentController = {
 
   /**
    * Get incidents reported against current user
-   * @route GET /api/v1/incidents/against-me/:id
+   * @route GET /api/v1/v1/incidents/against-me/:id
    */
   getIncidentsAgainstMe: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -124,7 +124,7 @@ const incidentController = {
 
   /**
    * Get a single incident by ID
-   * @route GET /api/v1/incidents/:id
+   * @route GET /api/v1/v1/incidents/:id
    */
   getIncidentById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -139,7 +139,7 @@ const incidentController = {
 
   /**
    * Update incident status (admin action)
-   * @route PATCH /api/v1/incidents/:id/status
+   * @route PATCH /api/v1/v1/incidents/:id/status
    */
   updateIncidentStatus: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -160,7 +160,7 @@ const incidentController = {
 
   /**
    * Resolve an incident (admin action)
-   * @route PATCH /api/v1/incidents/:id/resolve
+   * @route PATCH /api/v1/v1/incidents/:id/resolve
    */
   resolveIncident: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -184,7 +184,7 @@ const incidentController = {
 
   /**
    * Delete an incident (admin action)
-   * @route DELETE /api/v1/incidents/:id
+   * @route DELETE /api/v1/v1/incidents/:id
    */
   deleteIncident: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -219,7 +219,7 @@ const incidentController = {
   },
   /**
    * Get incident statistics (admin action)
-   * @route GET /api/v1/incidents/statistics
+   * @route GET /api/v1/v1/incidents/statistics
    */
   getIncidentStatistics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

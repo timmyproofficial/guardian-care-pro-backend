@@ -20,7 +20,7 @@ import { UserRole } from '../types/user.types';
 export const adminUserController = {
   /**
    * Get participants with advanced filtering
-   * @route GET /api/admin/participants
+   * @route GET /api/v1/admin/participants
    */
   getParticipants: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -87,7 +87,7 @@ export const adminUserController = {
 
   /**
    * Get support workers with advanced filtering
-   * @route GET /api/admin/support-workers
+   * @route GET /api/v1/admin/support-workers
    */
   getWorkers: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -196,7 +196,7 @@ export const adminUserController = {
 
   /**
    * Get admins with advanced filtering
-   * @route GET /api/admin/admins
+   * @route GET /api/v1/admin/admins
    */
   getAdmins: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -294,7 +294,7 @@ export const adminUserController = {
 
   /**
    * Get filter options for frontend dropdowns
-   * @route GET /api/admin/users/filter-options
+   * @route GET /api/v1/admin/users/filter-options
    */
   getFilterOptions: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -321,7 +321,7 @@ export const adminUserController = {
 
   /**
    * Get user statistics for admin dashboard
-   * @route GET /api/admin/users/statistics
+   * @route GET /api/v1/admin/users/statistics
    */
   getStatistics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

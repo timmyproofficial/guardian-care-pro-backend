@@ -77,7 +77,7 @@ FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_PRIVATE_KEY_HERE\n-----E
 # =============================================================================
 NODE_ENV=development
 PORT=5000
-API_PREFIX=/api/v1
+API_PREFIX=/api/v1/v1
 CLIENT_URL=http://localhost:3000
 CORS_ORIGIN=*
 
@@ -160,7 +160,7 @@ LOG_LEVEL=info
 
 ### 1. Register Device Token
 
-**Endpoint:** `POST /api/v1/notifications/register-device`
+**Endpoint:** `POST /api/v1/v1/notifications/register-device`
 
 **Authentication:** Required (Bearer token)
 
@@ -188,7 +188,7 @@ LOG_LEVEL=info
 
 ### 2. Unregister Device Token
 
-**Endpoint:** `POST /api/v1/notifications/unregister-device`
+**Endpoint:** `POST /api/v1/v1/notifications/unregister-device`
 
 **Authentication:** Required (Bearer token)
 
@@ -209,7 +209,7 @@ LOG_LEVEL=info
 
 ### 3. Get Registered Devices
 
-**Endpoint:** `GET /api/v1/notifications/devices`
+**Endpoint:** `GET /api/v1/v1/notifications/devices`
 
 **Authentication:** Required (Bearer token)
 
@@ -235,7 +235,7 @@ LOG_LEVEL=info
 
 ### 4. Send Test Notification
 
-**Endpoint:** `POST /api/v1/notifications/test`
+**Endpoint:** `POST /api/v1/v1/notifications/test`
 
 **Authentication:** Required (Bearer token)
 
@@ -331,7 +331,7 @@ await PushNotificationService.sendToUser(userId, {
 
 **Test Registration:**
 ```bash
-curl -X POST http://localhost:5000/api/v1/notifications/register-device \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/register-device \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
@@ -343,7 +343,7 @@ curl -X POST http://localhost:5000/api/v1/notifications/register-device \
 
 **Test Send:**
 ```bash
-curl -X POST http://localhost:5000/api/v1/notifications/test \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/test \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{

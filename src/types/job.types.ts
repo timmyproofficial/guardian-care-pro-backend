@@ -24,6 +24,8 @@ export enum JobType {
   HYBRID = 'hybrid',
   CONTRACT = 'contract',
   REMOTE = 'remote',
+  PART_TIME = 'partTime',
+  CASUAL = 'casual',
 }
 
 /**

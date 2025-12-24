@@ -54,7 +54,7 @@ function getProviderId(req: AuthenticatedRequest): mongoose.Types.ObjectId | nul
 export const rosterController = {
   /**
    * Upload roster file
-   * POST /api/roster-snapshots/upload
+   * POST /api/v1/roster-snapshots/upload
    */
   uploadRoster: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -124,7 +124,7 @@ export const rosterController = {
   
   /**
    * List roster snapshots
-   * GET /api/roster-snapshots
+   * GET /api/v1/roster-snapshots
    */
   listSnapshots: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -190,7 +190,7 @@ export const rosterController = {
   
   /**
    * Get snapshot details
-   * GET /api/roster-snapshots/:snapshotId
+   * GET /api/v1/roster-snapshots/:snapshotId
    */
   getSnapshot: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -251,7 +251,7 @@ export const rosterController = {
   
   /**
    * Search shift references
-   * GET /api/shift-references/search
+   * GET /api/v1/shift-references/search
    */
   searchShifts: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -383,7 +383,7 @@ export const rosterController = {
   
   /**
    * Report shift cancellation
-   * POST /api/shift-events/cancellation
+   * POST /api/v1/shift-events/cancellation
    */
   reportCancellation: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -474,7 +474,7 @@ export const rosterController = {
   
   /**
    * Find replacement workers
-   * POST /api/workers/find-replacements
+   * POST /api/v1/workers/find-replacements
    */
   findReplacements: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -520,7 +520,7 @@ export const rosterController = {
   
   /**
    * Get parsing errors for a snapshot
-   * GET /api/roster-snapshots/:snapshotId/errors
+   * GET /api/v1/roster-snapshots/:snapshotId/errors
    */
   getSnapshotErrors: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

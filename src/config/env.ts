@@ -17,7 +17,7 @@ const envVarsSchema = Joi.object()
   .keys({
     NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
     PORT: Joi.number().default(3000),
-    API_PREFIX: Joi.string().default('/api/v1'),
+    API_PREFIX: Joi.string().default('/api/v1/v1'),
     CLIENT_URL: Joi.string().required().description('Client application URL'),
     CORS_ORIGIN: Joi.string().default('*'),
     

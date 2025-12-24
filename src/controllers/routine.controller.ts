@@ -25,7 +25,7 @@ import logger from '../utils/logger';
 export const routineController = {
   /**
    * Create a new routine
-   * @route POST /api/routines
+   * @route POST /api/v1/routines
    */
   createRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -64,7 +64,7 @@ export const routineController = {
 
   /**
    * Get participant's routines
-   * @route GET /api/routines
+   * @route GET /api/v1/routines
    */
   getRoutines: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -122,7 +122,7 @@ export const routineController = {
 
   /**
    * Get routine by ID
-   * @route GET /api/routines/:routineId
+   * @route GET /api/v1/routines/:routineId
    */
   getRoutineById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -154,7 +154,7 @@ export const routineController = {
 
   /**
    * Update routine
-   * @route PUT /api/routines/:routineId
+   * @route PUT /api/v1/routines/:routineId
    */
   updateRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -191,7 +191,7 @@ export const routineController = {
 
   /**
    * Delete routine
-   * @route DELETE /api/routines/:routineId
+   * @route DELETE /api/v1/routines/:routineId
    */
   deleteRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -224,7 +224,7 @@ export const routineController = {
 
   /**
    * Duplicate routine
-   * @route POST /api/routines/:routineId/duplicate
+   * @route POST /api/v1/routines/:routineId/duplicate
    */
   duplicateRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -262,7 +262,7 @@ export const routineController = {
 
   /**
    * Get routine usage statistics
-   * @route GET /api/routines/:routineId/stats
+   * @route GET /api/v1/routines/:routineId/stats
    */
   getRoutineStats: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -295,7 +295,7 @@ export const routineController = {
 
   /**
    * Update shift routine attachment
-   * @route PUT /api/shifts/:shiftId/routine
+   * @route PUT /api/v1/shifts/:shiftId/routine
    */
   updateShiftRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -338,7 +338,7 @@ export const routineController = {
 
   /**
    * Get routine completion by shift
-   * @route GET /api/shifts/:shiftId/routine-completion
+   * @route GET /api/v1/shifts/:shiftId/routine-completion
    */
   getRoutineCompletionByShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -369,7 +369,7 @@ export const routineController = {
 
   /**
    * Get routine completions for participant
-   * @route GET /api/participants/:participantId/routine-completions
+   * @route GET /api/v1/participants/:participantId/routine-completions
    */
   getParticipantCompletions: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -428,7 +428,7 @@ export const routineController = {
 
   /**
    * Get routine completions for worker
-   * @route GET /api/workers/:workerId/routine-completions
+   * @route GET /api/v1/workers/:workerId/routine-completions
    */
   getWorkerCompletions: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -487,7 +487,7 @@ export const routineController = {
 
   /**
    * Get daily completion statistics for a participant
-   * @route GET /api/routines/daily-stats/:participantId
+   * @route GET /api/v1/routines/daily-stats/:participantId
    */
   getDailyStats: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -526,7 +526,7 @@ export const routineController = {
 
   /**
    * Get detailed daily routine completions for a participant
-   * @route GET /api/routines/daily-details/:participantId
+   * @route GET /api/v1/routines/daily-details/:participantId
    */
   getDailyDetails: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -565,7 +565,7 @@ export const routineController = {
 
   /**
    * Get weekly completion trend for a participant
-   * @route GET /api/routines/weekly-trend/:participantId
+   * @route GET /api/v1/routines/weekly-trend/:participantId
    */
   getWeeklyTrend: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -614,7 +614,7 @@ export const routineController = {
 
   /**
    * Get organization daily statistics (admin only)
-   * @route GET /api/routines/organization-daily-stats
+   * @route GET /api/v1/routines/organization-daily-stats
    */
   getOrganizationDailyStats: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -661,7 +661,7 @@ export const routineController = {
 
   /**
    * Get overdue routines for organization (admin only)
-   * @route GET /api/routines/overdue
+   * @route GET /api/v1/routines/overdue
    */
   getOverdueRoutines: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -700,7 +700,7 @@ export const routineController = {
 
   /**
    * Complete routine for a shift (ultra-simplified)
-   * @route PATCH /api/shifts/:shiftId/routine/complete
+   * @route PATCH /api/v1/shifts/:shiftId/routine/complete
    */
   completeShiftRoutine: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

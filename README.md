@@ -112,9 +112,30 @@ npm run test:watch
 
 ## API Documentation
 
+### 📚 Interactive Documentation
+
+This API includes **automatic documentation** with Swagger/OpenAPI:
+
+- **Swagger UI (Interactive)**: http://localhost:5000/api-docs
+- **OpenAPI JSON**: http://localhost:5000/api-docs.json
+- **Postman Collection**: Run `npm run docs` to generate
+
+**Quick Start:**
+1. Start the server: `npm run dev`
+2. Open http://localhost:5000/api-docs in your browser
+3. Click "Authorize" to add your JWT token
+4. Try out endpoints directly in the browser
+
+**For Developers:**
+- See [docs/DOCUMENTATION-README.md](./docs/DOCUMENTATION-README.md) for quick reference
+- See [docs/API-DOCUMENTATION-GUIDE.md](./docs/API-DOCUMENTATION-GUIDE.md) for complete guide
+- Always add Swagger annotations when creating new endpoints
+
+### API Endpoints Overview
+
 The API is organized around REST. All requests and responses are in JSON format.
 
-Base URL: `/api/v1`
+Base URL: `/api`
 
 ### Authentication
 

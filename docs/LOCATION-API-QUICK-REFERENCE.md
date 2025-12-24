@@ -16,7 +16,7 @@ await seedLocationData();
 ### 2. Participant Onboarding with Location
 
 ```http
-POST /api/users/participant/:participantId/onboarding
+POST /api/v1/users/participant/:participantId/onboarding
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -51,7 +51,7 @@ Content-Type: application/json
 ### 3. Worker Onboarding with Location
 
 ```http
-POST /api/users/worker/:workerId/onboarding
+POST /api/v1/users/worker/:workerId/onboarding
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -102,7 +102,7 @@ Content-Type: application/json
 
 ### Get States
 ```http
-GET /api/location/states
+GET /api/v1/location/states
 Authorization: Bearer {token}
 ```
 
@@ -119,31 +119,31 @@ Authorization: Bearer {token}
 
 ### Get Regions by State
 ```http
-GET /api/location/regions/{stateId}
+GET /api/v1/location/regions/{stateId}
 Authorization: Bearer {token}
 ```
 
 ### Get Suburbs by Region
 ```http
-GET /api/location/suburbs/region/{regionId}
+GET /api/v1/location/suburbs/region/{regionId}
 Authorization: Bearer {token}
 ```
 
 ### Search Suburbs
 ```http
-GET /api/location/suburbs/search?query=Sydney&stateId={stateId}
+GET /api/v1/location/suburbs/search?query=Sydney&stateId={stateId}
 Authorization: Bearer {token}
 ```
 
 ### Get Service Areas
 ```http
-GET /api/location/service-areas
+GET /api/v1/location/service-areas
 Authorization: Bearer {token}
 ```
 
 ### Geocode Address
 ```http
-POST /api/location/geocode
+POST /api/v1/location/geocode
 Authorization: Bearer {token}
 Content-Type: application/json
 
@@ -163,7 +163,7 @@ Content-Type: application/json
 **Best for:** Finding workers within physical proximity
 
 ```http
-GET /api/location/workers/nearby?participantId={id}&maxDistanceKm=30&skills[]={skillId}&page=1&limit=10
+GET /api/v1/location/workers/nearby?participantId={id}&maxDistanceKm=30&skills[]={skillId}&page=1&limit=10
 Authorization: Bearer {token}
 ```
 
@@ -181,7 +181,7 @@ Authorization: Bearer {token}
 
 **Example:**
 ```http
-GET /api/location/workers/nearby?participantId=123abc&maxDistanceKm=20&skills[]=skill1&minRating=4&onlyVerified=true
+GET /api/v1/location/workers/nearby?participantId=123abc&maxDistanceKm=20&skills[]=skill1&minRating=4&onlyVerified=true
 ```
 
 **Response:**
@@ -224,7 +224,7 @@ GET /api/location/workers/nearby?participantId=123abc&maxDistanceKm=20&skills[]=
 **Best for:** Finding workers in same state/region/service area
 
 ```http
-GET /api/location/workers/by-region?participantId={id}&regionId={regionId}&page=1
+GET /api/v1/location/workers/by-region?participantId={id}&regionId={regionId}&page=1
 Authorization: Bearer {token}
 ```
 
@@ -240,12 +240,12 @@ Authorization: Bearer {token}
 
 **Example 1 - By Region:**
 ```http
-GET /api/location/workers/by-region?participantId=123&regionId=456&skills[]=skill1
+GET /api/v1/location/workers/by-region?participantId=123&regionId=456&skills[]=skill1
 ```
 
 **Example 2 - Auto-match:**
 ```http
-GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=true&onlyVerified=true
+GET /api/v1/location/workers/by-region?participantId=123&matchParticipantLocation=true&onlyVerified=true
 ```
 
 **Response:** Same structure as nearby search (without `distanceKm` field)
@@ -258,21 +258,21 @@ GET /api/location/workers/by-region?participantId=123&matchParticipantLocation=t
 
 **Get States for Dropdown:**
 ```javascript
-const states = await fetch('/api/location/states', {
+const states = await fetch('/api/v1/location/states', {
   headers: { 'Authorization': `Bearer ${token}` }
 }).then(r => r.json());
 ```
 
 **Get Regions when State Selected:**
 ```javascript
-const regions = await fetch(`/api/location/regions/${selectedStateId}`, {
+const regions = await fetch(`/api/v1/location/regions/${selectedStateId}`, {
   headers: { 'Authorization': `Bearer ${token}` }
 }).then(r => r.json());
 ```
 
 **Get Suburbs when Region Selected:**
 ```javascript
-const suburbs = await fetch(`/api/location/suburbs/region/${selectedRegionId}`, {
+const suburbs = await fetch(`/api/v1/location/suburbs/region/${selectedRegionId}`, {
   headers: { 'Authorization': `Bearer ${token}` }
 }).then(r => r.json());
 ```
@@ -290,7 +290,7 @@ const findNearbyWorkers = async (participantId, filters = {}) => {
     ...(filters.minRating && { minRating: filters.minRating })
   });
 
-  const response = await fetch(`/api/location/workers/nearby?${params}`, {
+  const response = await fetch(`/api/v1/location/workers/nearby?${params}`, {
     headers: { 'Authorization': `Bearer ${token}` }
   });
 
@@ -314,7 +314,7 @@ result.data.workers.forEach(worker => {
 ```javascript
 const findRegionalWorkers = async (participantId) => {
   const response = await fetch(
-    `/api/location/workers/by-region?participantId=${participantId}&matchParticipantLocation=true&onlyVerified=true`,
+    `/api/v1/location/workers/by-region?participantId=${participantId}&matchParticipantLocation=true&onlyVerified=true`,
     {
       headers: { 'Authorization': `Bearer ${token}` }
     }
@@ -352,7 +352,7 @@ const findRegionalWorkers = async (participantId) => {
 
 ```javascript
 try {
-  const response = await fetch('/api/location/workers/nearby?participantId=123', {
+  const response = await fetch('/api/v1/location/workers/nearby?participantId=123', {
     headers: { 'Authorization': `Bearer ${token}` }
   });
   
@@ -379,23 +379,23 @@ try {
 
 ```javascript
 // 1. Load states on form mount
-const states = await fetch('/api/location/states').then(r => r.json());
+const states = await fetch('/api/v1/location/states').then(r => r.json());
 
 // 2. When user selects state, load regions
 const handleStateChange = async (stateId) => {
-  const regions = await fetch(`/api/location/regions/${stateId}`).then(r => r.json());
+  const regions = await fetch(`/api/v1/location/regions/${stateId}`).then(r => r.json());
   setRegions(regions.data);
 };
 
 // 3. When user selects region, load suburbs
 const handleRegionChange = async (regionId) => {
-  const suburbs = await fetch(`/api/location/suburbs/region/${regionId}`).then(r => r.json());
+  const suburbs = await fetch(`/api/v1/location/suburbs/region/${regionId}`).then(r => r.json());
   setSuburbs(suburbs.data);
 };
 
 // 4. When user enters address, geocode it
 const handleAddressComplete = async (address) => {
-  const coords = await fetch('/api/location/geocode', {
+  const coords = await fetch('/api/v1/location/geocode', {
     method: 'POST',
     body: JSON.stringify(address),
     headers: { 'Content-Type': 'application/json' }
@@ -406,7 +406,7 @@ const handleAddressComplete = async (address) => {
 
 // 5. Submit onboarding with all data
 const submitOnboarding = async (formData) => {
-  await fetch(`/api/users/participant/${participantId}/onboarding`, {
+  await fetch(`/api/v1/users/participant/${participantId}/onboarding`, {
     method: 'POST',
     body: JSON.stringify({
       ...formData,
