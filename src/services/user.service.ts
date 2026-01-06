@@ -567,6 +567,32 @@ export const userService = {
   },
 
   /**
+   * Get all provider users
+   */
+  getAllProviderUsers: async (): Promise<IUser[]> => {
+    try {
+      const providers = await User.find({ role: UserRole.PROVIDER });
+      return providers;
+    } catch (error) {
+      logger.error('Error getting all provider users:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get provider by phone number
+   */
+  getProviderByPhoneNumber: async (phoneNumber: string): Promise<IUser | null> => {
+    try {
+      const provider = await User.findOne({ phone: phoneNumber, role: UserRole.PROVIDER });
+      return provider;
+    } catch (error) {
+      logger.error(`Error getting provider by phone number ${phoneNumber}:`, error);
+      throw error;
+    }
+  },
+
+  /**
    * Get all users with optional filtering
    */
   getUsers: async (
