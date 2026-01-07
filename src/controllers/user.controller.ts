@@ -390,37 +390,75 @@ export const userController = {
   },
 
   /**
+   * Get all provider users
+   * @route GET /api/admin/providers
+   */
+  getAllProviderUsers: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const providers = await userService.getAllProviderUsers();
+      return res.json(successResponse({ providers }, 'Provider users retrieved successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
+   * Get provider by phone number
+   * @route GET /api/admin/providers/phone/:phoneNumber
+   */
+  getProviderByPhoneNumber: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { phoneNumber } = req.params;
+      const provider = await userService.getProviderByPhoneNumber(phoneNumber);
+
+      if (!provider) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Provider not found', httpStatus.NOT_FOUND));
+      }
+      return res.json(successResponse({ provider }, 'Provider retrieved successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
    * Get all users with filtering
    * @route GET /api/v1/users
    */
   getUsers: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { role, status, search, sortBy, limit, page } = req.query;
+      const role = req.query.role as string;
+      const status = req.query.status as string;
+      const search = req.query.search as string;
+      const sortBy = req.query.sortBy as string;
+      const limit = req.query.limit as string;
+      const page = req.query.page as string;
 
       // Build filter
       const filter: Record<string, any> = {};
 
-      if (role) {
-        filter.role = role;
+      if (req.query.role) {
+        filter.role = req.query.role;
       }
 
-      if (status) {
-        filter.status = status;
+      if (req.query.status) {
+        filter.status = req.query.status;
       }
 
-      if (search) {
+      if (req.query.search) {
         filter.$or = [
-          { firstName: { $regex: search, $options: 'i' } },
-          { lastName: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } },
+          { firstName: { $regex: req.query.search, $options: 'i' } },
+          { lastName: { $regex: req.query.search, $options: 'i' } },
+          { email: { $regex: req.query.search, $options: 'i' } },
         ];
       }
 
       // Set options
       const options = {
-        sortBy: sortBy as string,
-        limit: limit ? parseInt(limit as string, 10) : 10,
-        page: page ? parseInt(page as string, 10) : 1,
+        sortBy: req.query.sortBy as string,
+        limit: req.query.limit ? parseInt(req.query.limit as string, 10) : 10,
+        page: req.query.page ? parseInt(req.query.page as string, 10) : 1,
       };
 
       const result = await userService.getUsers(filter, options);

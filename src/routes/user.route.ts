@@ -92,6 +92,21 @@ router.delete('/:userId', authenticate, authorize([UserRole.ADMIN]), userControl
 
 router.patch('/:userId/status', authenticate, authorize([UserRole.ADMIN]), userController.updateUserStatus);
 
+// ADMIN-specific provider routes
+router.get(
+  '/admin/providers',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.getAllProviderUsers,
+);
+
+router.get(
+  '/admin/providers/phone/:phoneNumber',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.getProviderByPhoneNumber,
+);
+
 // Role-specific user routes
 router.get('/participants/:participantId', authenticate, userController.getParticipantById);
 
