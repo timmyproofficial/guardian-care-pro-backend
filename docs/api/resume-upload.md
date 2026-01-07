@@ -15,7 +15,7 @@ Authorization: Bearer <your_access_token>
 ## Base URL
 
 ```
-/api/users
+/api/v1/users
 ```
 
 ## Endpoint
@@ -24,7 +24,7 @@ Authorization: Bearer <your_access_token>
 
 Upload a resume document for the authenticated support worker.
 
-**Endpoint:** `POST /api/users/upload-resume`
+**Endpoint:** `POST /api/v1/users/upload-resume`
 
 **Authentication:** Required (Support Worker only)
 
@@ -45,7 +45,7 @@ Upload a resume document for the authenticated support worker.
 **Request Example:**
 
 ```http
-POST /api/users/upload-resume
+POST /api/v1/users/upload-resume
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 Content-Type: multipart/form-data
 
@@ -61,7 +61,7 @@ Content-Type: application/pdf
 
 ```bash
 curl -X POST \
-  https://api.guardiancarepro.com/api/users/upload-resume \
+  https://api.guardiancarepro.com/api/v1/users/upload-resume \
   -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -F 'file=@/path/to/resume.pdf'
 ```
@@ -73,7 +73,7 @@ const formData = new FormData();
 formData.append('file', resumeFile); // resumeFile is a File object
 
 const response = await axios.post(
-  '/api/users/upload-resume',
+  '/api/v1/users/upload-resume',
   formData,
   {
     headers: {
@@ -227,7 +227,7 @@ The `resume` field must be a valid URL matching this pattern:
 The resume field is now **required** during worker onboarding:
 
 ```http
-POST /api/users/workers/onboarding
+POST /api/v1/users/workers/onboarding
 ```
 
 **Request Body:**
@@ -312,7 +312,7 @@ function ResumeUpload() {
       formData.append('file', file);
 
       const response = await axios.post(
-        '/api/users/upload-resume',
+        '/api/v1/users/upload-resume',
         formData,
         {
           headers: {
@@ -405,7 +405,7 @@ export default {
         formData.append('file', this.file);
 
         const response = await this.$axios.post(
-          '/api/users/upload-resume',
+          '/api/v1/users/upload-resume',
           formData,
           {
             headers: {
@@ -441,9 +441,9 @@ export default {
 
 ## Related Endpoints
 
-- [User Profile API](/docs/api/users.md#update-profile) - Update user profile
-- [Worker Onboarding API](/docs/api/users.md#worker-onboarding) - Complete worker onboarding
-- [Profile Image Upload](/docs/api/users.md#upload-profile-image) - Upload profile picture
+- [User Profile API](/docs/api/v1/users.md#update-profile) - Update user profile
+- [Worker Onboarding API](/docs/api/v1/users.md#worker-onboarding) - Complete worker onboarding
+- [Profile Image Upload](/docs/api/v1/users.md#upload-profile-image) - Upload profile picture
 
 ---
 

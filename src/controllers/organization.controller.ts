@@ -18,7 +18,7 @@ interface AuthRequest extends Request {
 export const organizationController = {
   /**
    * Create a new organization
-   * @route POST /api/organizations
+   * @route POST /api/v1/organizations
    */
   createOrganization: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -47,7 +47,7 @@ export const organizationController = {
 
   /**
    * Get participant's organizations
-   * @route GET /api/organizations
+   * @route GET /api/v1/organizations
    */
   getOrganizations: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -80,7 +80,7 @@ export const organizationController = {
 
   /**
  * Get organization ID for the authenticated participant
- * @route GET /api/organizations/my-organization-id
+ * @route GET /api/v1/organizations/my-organization-id
  */
   getMyOrganizationId: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -110,7 +110,7 @@ export const organizationController = {
 
   /**
    * Get organization ID for a specified participant (admin only)
-   * @route GET /api/organizations/participant/:participantId/organization-id
+   * @route GET /api/v1/organizations/participant/:participantId/organization-id
    */
   getOrganizationIdForParticipant: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -140,7 +140,7 @@ export const organizationController = {
 
   /**
    * Get support workers for the authenticated participant's organization
-   * @route GET /api/organizations/my-support-workers
+   * @route GET /api/v1/organizations/my-support-workers
    */
   getMySupportWorkers: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -170,7 +170,7 @@ export const organizationController = {
 
   /**
    * Invite a worker to an organization
-   * @route POST /api/organizations/:organizationId/invite
+   * @route POST /api/v1/organizations/:organizationId/invite
    */
   inviteWorker: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -203,7 +203,7 @@ export const organizationController = {
 
   /**
    * Process a worker invite (admin function)
-   * @route POST /api/organizations/:organizationId/invites/:inviteId/process
+   * @route POST /api/v1/organizations/:organizationId/invites/:inviteId/process
    */
   processInvite: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -252,7 +252,7 @@ export const organizationController = {
 
   /**
    * Get all pending invites (admin function)
-   * @route GET /api/organizations/invites/pending
+   * @route GET /api/v1/organizations/invites/pending
    */
   getPendingInvites: async (_req: Request, res: Response, next: NextFunction) => {
     try {
@@ -271,7 +271,7 @@ export const organizationController = {
 
   /**
    * Get worker's invites
-   * @route GET /api/organizations/invites/worker
+   * @route GET /api/v1/organizations/invites/worker
    */
   getWorkerInvites: async (req: AuthRequest, res: Response, next: NextFunction) => {
     try {
@@ -297,7 +297,7 @@ export const organizationController = {
 
   /**
    * Remove a worker from an organization
-   * @route DELETE /api/organizations/:organizationId/workers/:workerId
+   * @route DELETE /api/v1/organizations/:organizationId/workers/:workerId
    */
   removeWorker: async (req: Request, res: Response, next: NextFunction) => {
     try {

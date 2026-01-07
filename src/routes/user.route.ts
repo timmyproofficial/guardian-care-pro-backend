@@ -31,16 +31,42 @@ router.patch('/profile/address', authenticate, validate(userValidation.updateAdd
 
 // User-specific account management routes
 /**
- * @route DELETE /api/users/profile
- * @desc Delete current user's account
- * @access Private (Authenticated User)
+ * @swagger
+ * /api/v1/users/profile:
+ *   delete:
+ *     summary: Delete current user's account
+ *     description: Delete current user's account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
  */
 router.delete('/profile', authenticate, userController.deleteMyAccount);
 
 /**
- * @route PATCH /api/users/profile/deactivate
- * @desc Deactivate current user's account
- * @access Private (Authenticated User)
+ * @swagger
+ * /api/v1/users/profile/deactivate:
+ *   patch:
+ *     summary: Deactivate current user's account
+ *     description: Deactivate current user's account
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
  */
 router.patch('/profile/deactivate', authenticate, userController.deactivateMyAccount);
 

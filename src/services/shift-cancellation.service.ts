@@ -433,7 +433,7 @@ function generateNextSteps(
     steps.push('Use the Find Replacement endpoint to search for available workers.');
   } else {
     steps.push('No automatic replacement workflow started.');
-    steps.push('To find a replacement, use POST /api/workers/find-replacements');
+    steps.push('To find a replacement, use POST /api/v1/workers/find-replacements');
   }
   
   if (noticeHours < 4) {

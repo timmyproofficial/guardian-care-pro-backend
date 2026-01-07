@@ -28,13 +28,13 @@ Complete CRUD API for managing service categories - hierarchical groupings of se
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| GET | `/api/service-categories` | Get all categories with filtering/pagination | All users |
-| GET | `/api/service-categories/:id` | Get category by ID | All users |
-| GET | `/api/service-categories/status/:status` | Get categories by status | All users |
-| GET | `/api/service-categories/statistics` | Get category statistics | Admin only |
-| POST | `/api/service-categories` | Create new category | Admin only |
-| PUT | `/api/service-categories/:id` | Update category | Admin only |
-| DELETE | `/api/service-categories/:id` | Delete category | Admin only |
+| GET | `/api/v1/service-categories` | Get all categories with filtering/pagination | All users |
+| GET | `/api/v1/service-categories/:id` | Get category by ID | All users |
+| GET | `/api/v1/service-categories/status/:status` | Get categories by status | All users |
+| GET | `/api/v1/service-categories/statistics` | Get category statistics | Admin only |
+| POST | `/api/v1/service-categories` | Create new category | Admin only |
+| PUT | `/api/v1/service-categories/:id` | Update category | Admin only |
+| DELETE | `/api/v1/service-categories/:id` | Delete category | Admin only |
 
 ### Key Features
 
@@ -54,7 +54,7 @@ Complete CRUD API for managing service categories - hierarchical groupings of se
 
 ### Documentation
 
-📄 [Full API Documentation](/docs/api/service-categories.md)
+📄 [Full API Documentation](/docs/api/v1/service-categories.md)
 
 ---
 
@@ -70,7 +70,7 @@ Support workers can now upload their resume/CV documents via a dedicated endpoin
 
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/users/upload-resume` | Upload resume document | Support Worker only |
+| POST | `/api/v1/users/upload-resume` | Upload resume document | Support Worker only |
 
 ### Key Features
 
@@ -86,7 +86,7 @@ Support workers can now upload their resume/CV documents via a dedicated endpoin
 const formData = new FormData();
 formData.append('file', resumeFile);
 
-await axios.post('/api/users/upload-resume', formData, {
+await axios.post('/api/v1/users/upload-resume', formData, {
   headers: { 'Content-Type': 'multipart/form-data' }
 });
 ```
@@ -100,7 +100,7 @@ await axios.post('/api/users/upload-resume', formData, {
 
 ### Documentation
 
-📄 [Full API Documentation](/docs/api/resume-upload.md)
+📄 [Full API Documentation](/docs/api/v1/resume-upload.md)
 
 ---
 
@@ -173,7 +173,7 @@ await axios.post('/api/users/upload-resume', formData, {
 
 ### Documentation
 
-📄 [Full API Documentation](/docs/api/onboarding-updates.md)
+📄 [Full API Documentation](/docs/api/v1/onboarding-updates.md)
 
 ---
 
@@ -225,14 +225,14 @@ await axios.post('/api/users/upload-resume', formData, {
 
 ### Affected Endpoints
 
-- `PATCH /api/incidents/:id/status` - Permission updated
-- `PATCH /api/incidents/:id/resolve` - Permission updated
-- `GET /api/incidents` - Full population
-- `GET /api/incidents/:id` - Full population
-- `GET /api/incidents/shift/:shiftId` - Full population
-- `GET /api/incidents/reporter/:userId` - Full population
-- `GET /api/incidents/against/:userId` - Full population
-- `POST /api/incidents` - Response with full population
+- `PATCH /api/v1/incidents/:id/status` - Permission updated
+- `PATCH /api/v1/incidents/:id/resolve` - Permission updated
+- `GET /api/v1/incidents` - Full population
+- `GET /api/v1/incidents/:id` - Full population
+- `GET /api/v1/incidents/shift/:shiftId` - Full population
+- `GET /api/v1/incidents/reporter/:userId` - Full population
+- `GET /api/v1/incidents/against/:userId` - Full population
+- `POST /api/v1/incidents` - Response with full population
 
 ### Related Files
 
@@ -241,7 +241,7 @@ await axios.post('/api/users/upload-resume', formData, {
 
 ### Documentation
 
-📄 [Full API Documentation](/docs/api/incident-updates.md)
+📄 [Full API Documentation](/docs/api/v1/incident-updates.md)
 
 ---
 
@@ -260,12 +260,12 @@ await axios.post('/api/users/upload-resume', formData, {
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/api/service-types/by-category` | Get service types grouped by category |
+| GET | `/api/v1/service-types/by-category` | Get service types grouped by category |
 
 ### Updated Service Type Creation
 
 ```json
-POST /api/service-types
+POST /api/v1/service-types
 {
   "name": "Personal Care",
   "code": "PERSONAL_CARE",
@@ -289,7 +289,7 @@ POST /api/service-types
 
 ### Documentation
 
-📄 [Service Types API](/docs/api/service-types.md)
+📄 [Service Types API](/docs/api/v1/service-types.md)
 
 ---
 
@@ -525,13 +525,13 @@ No new environment variables required for these changes.
 
 ## Documentation Files
 
-All new API documentation files are located in `/docs/api/`:
+All new API documentation files are located in `/docs/api/v1/`:
 
-1. 📄 [service-categories.md](/docs/api/service-categories.md) - Service Categories API
-2. 📄 [resume-upload.md](/docs/api/resume-upload.md) - Resume Upload API
-3. 📄 [onboarding-updates.md](/docs/api/onboarding-updates.md) - Worker/Participant Updates
-4. 📄 [incident-updates.md](/docs/api/incident-updates.md) - Incident Management Updates
-5. 📄 [service-types.md](/docs/api/service-types.md) - Service Types API (updated)
+1. 📄 [service-categories.md](/docs/api/v1/service-categories.md) - Service Categories API
+2. 📄 [resume-upload.md](/docs/api/v1/resume-upload.md) - Resume Upload API
+3. 📄 [onboarding-updates.md](/docs/api/v1/onboarding-updates.md) - Worker/Participant Updates
+4. 📄 [incident-updates.md](/docs/api/v1/incident-updates.md) - Incident Management Updates
+5. 📄 [service-types.md](/docs/api/v1/service-types.md) - Service Types API (updated)
 
 ---
 

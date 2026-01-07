@@ -109,7 +109,7 @@ export const timesheetController = {
 
   /**
    * Create a new timesheet
-   * @route POST /api/timesheets
+   * @route POST /api/v1/timesheets
    */
   createTimesheet: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -197,7 +197,7 @@ export const timesheetController = {
 
   /**
    * Get timesheet by ID
-   * @route GET /api/timesheets/:timesheetId
+   * @route GET /api/v1/timesheets/:timesheetId
    */
   getTimesheetById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -237,7 +237,7 @@ export const timesheetController = {
 
   /**
    * Get timesheet by shift ID
-   * @route GET /api/timesheets/shift/:shiftId
+   * @route GET /api/v1/timesheets/shift/:shiftId
    */
   getTimesheetByShiftId: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -277,7 +277,7 @@ export const timesheetController = {
 
   /**
    * Get timesheets for current user (based on role)
-   * @route GET /api/timesheets
+   * @route GET /api/v1/timesheets
    */
   getTimesheets: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -346,7 +346,7 @@ export const timesheetController = {
 
   /**
    * Approve timesheet (participant only)
-   * @route POST /api/timesheets/:timesheetId/approve
+   * @route POST /api/v1/timesheets/:timesheetId/approve
    */
   approveTimesheet: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -380,7 +380,7 @@ export const timesheetController = {
 
   /**
    * Reject timesheet (participant only)
-   * @route POST /api/timesheets/:timesheetId/reject
+   * @route POST /api/v1/timesheets/:timesheetId/reject
    */
   rejectTimesheet: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -423,7 +423,7 @@ export const timesheetController = {
 
   /**
    * Revise timesheet (worker only)
-   * @route PATCH /api/timesheets/:timesheetId/revise
+   * @route PATCH /api/v1/timesheets/:timesheetId/revise
    */
   reviseTimesheet: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -511,7 +511,7 @@ export const timesheetController = {
   
   /**
    * Admin update timesheet status
-   * @route PATCH /api/timesheets/:timesheetId/status
+   * @route PATCH /api/v1/timesheets/:timesheetId/status
    */
   adminUpdateTimesheetStatus: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

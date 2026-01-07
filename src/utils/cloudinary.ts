@@ -196,11 +196,32 @@ export const documentUpload = multer({
 
 // File filter for job attachments
 const jobAttachmentFileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
-  const allowedMimes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
-  if (allowedMimes.includes(file.mimetype)) {
+  const allowedMimes = [
+    'application/pdf',
+    'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-word',
+    'text/plain',
+    // Some systems send DOC files with these MIME types
+    'application/octet-stream',
+    // RTF files
+    'application/rtf',
+    'text/rtf',
+  ];
+  
+  // Also check file extension as a fallback
+  const allowedExtensions = ['.pdf', '.doc', '.docx', '.txt', '.rtf'];
+  const fileExtension = file.originalname.toLowerCase().match(/\.[^.]*$/);
+  const hasValidExtension = fileExtension && allowedExtensions.includes(fileExtension[0]);
+  
+  if (allowedMimes.includes(file.mimetype) || hasValidExtension) {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type. Only PDF, DOC, DOCX and TXT are allowed.'));
+    logger.warn('Job attachment file type rejected', { 
+      mimetype: file.mimetype, 
+      filename: file.originalname 
+    });
+    cb(new Error('Invalid file type. Only PDF, DOC, DOCX, TXT and RTF are allowed.'));
   }
 };
 
@@ -226,13 +247,28 @@ export const uploadJobAttachment = async (
   attachmentType: 'resume' | 'coverLetter'
 ): Promise<UploadApiResponse> => {
   try {
+    logger.info('Uploading job attachment to Cloudinary', { 
+      attachmentType, 
+      attachmentId,
+      isBuffer: Buffer.isBuffer(filePath),
+      bufferSize: Buffer.isBuffer(filePath) ? filePath.length : 'N/A'
+    });
+
     // If it's a buffer (from multer memory storage)
     if (Buffer.isBuffer(filePath)) {
-      return await uploadBufferToCloudinary(filePath, {
+      const result = await uploadBufferToCloudinary(filePath, {
         folder: 'job-attachments',
         public_id: `${attachmentType}-${attachmentId}`,
         resource_type: 'auto',
+        timeout: 60000, // 60 second timeout
       });
+      
+      logger.info('Job attachment uploaded successfully', { 
+        attachmentType, 
+        url: result.secure_url 
+      });
+      
+      return result;
     }
 
     // If it's a file path (existing functionality)
@@ -240,11 +276,22 @@ export const uploadJobAttachment = async (
       folder: 'job-attachments',
       public_id: `${attachmentType}-${attachmentId}`,
       resource_type: 'auto',
+      timeout: 60000, // 60 second timeout
     });
+    
+    logger.info('Job attachment uploaded successfully', { 
+      attachmentType, 
+      url: result.secure_url 
+    });
+    
     return result;
   } catch (error) {
-    logger.error('Error uploading job attachment to Cloudinary:', error);
-    throw error;
+    logger.error('Error uploading job attachment to Cloudinary:', { 
+      error: error instanceof Error ? error.message : error,
+      attachmentType,
+      attachmentId
+    });
+    throw new Error(`Failed to upload ${attachmentType}: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 };
 

@@ -16,16 +16,39 @@ const router = Router();
 // =============================================================================
 
 /**
- * @route   GET /api/events
- * @desc    Get all events with filters
- * @access  Public
+ * @swagger
+ * /api/v1/events:
+ *   get:
+ *     summary: Get all events with filters
+ *     description: Get all events with filters
+ *     tags: [Events]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
  */
 router.get('/', eventController.getAllEvents);
 
 /**
- * @route   GET /api/events/:eventId
- * @desc    Get a single event by ID
- * @access  Public (but extra info if authenticated)
+ * @swagger
+ * /api/v1/events/:eventId:
+ *   get:
+ *     summary: Get a single event by ID
+ *     description: Get a single event by ID
+ *     tags: [Events]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The eventId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       404:
+ *         description: Resource not found
  */
 router.get('/:eventId', eventController.getEventById);
 
@@ -34,9 +57,19 @@ router.get('/:eventId', eventController.getEventById);
 // =============================================================================
 
 /**
- * @route   GET /api/events/user/my-events
- * @desc    Get events created by the current user
- * @access  Private (Provider, Admin)
+ * @swagger
+ * /api/v1/events/user/my-events:
+ *   get:
+ *     summary: Get events created by the current user
+ *     description: Get events created by the current user
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/user/my-events',
@@ -46,9 +79,19 @@ router.get(
 );
 
 /**
- * @route   GET /api/events/user/my-registrations
- * @desc    Get user's event registrations
- * @access  Private
+ * @swagger
+ * /api/v1/events/user/my-registrations:
+ *   get:
+ *     summary: Get user's event registrations
+ *     description: Get user's event registrations
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
  */
 router.get(
   '/user/my-registrations',
@@ -57,9 +100,25 @@ router.get(
 );
 
 /**
- * @route   POST /api/events
- * @desc    Create a new event (multipart/form-data with eventImage)
- * @access  Private (Provider only)
+ * @swagger
+ * /api/v1/events:
+ *   post:
+ *     summary: Create a new event (multipart/form-data with eventImage)
+ *     description: Create a new event (multipart/form-data with eventImage)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       401:
+ *         description: Unauthorized
  */
 router.post(
   '/',
@@ -70,9 +129,34 @@ router.post(
 );
 
 /**
- * @route   PUT /api/events/:eventId
- * @desc    Update an event (multipart/form-data with eventImage)
- * @access  Private (Owner or Admin)
+ * @swagger
+ * /api/v1/events/:eventId:
+ *   put:
+ *     summary: Update an event (multipart/form-data with eventImage)
+ *     description: Update an event (multipart/form-data with eventImage)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The eventId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.put(
   '/:eventId',
@@ -83,9 +167,28 @@ router.put(
 );
 
 /**
- * @route   DELETE /api/events/:eventId
- * @desc    Soft delete an event
- * @access  Private (Owner or Admin)
+ * @swagger
+ * /api/v1/events/:eventId:
+ *   delete:
+ *     summary: Soft delete an event
+ *     description: Soft delete an event
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The eventId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/:eventId',
@@ -99,9 +202,31 @@ router.delete(
 // =============================================================================
 
 /**
- * @route   POST /api/events/:eventId/register
- * @desc    Register for an event
- * @access  Public (tracks userId if authenticated)
+ * @swagger
+ * /api/v1/events/:eventId/register:
+ *   post:
+ *     summary: Register for an event
+ *     description: Register for an event
+ *     tags: [Events]
+ *     security: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The eventId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       201:
+ *         description: Successfully created
+ *       404:
+ *         description: Resource not found
  */
 router.post(
   '/:eventId/register',
@@ -109,9 +234,28 @@ router.post(
 );
 
 /**
- * @route   GET /api/events/:eventId/registrations
- * @desc    Get registrations for an event (event owner only)
- * @access  Private (Event owner or Admin)
+ * @swagger
+ * /api/v1/events/:eventId/registrations:
+ *   get:
+ *     summary: Get registrations for an event (event owner only)
+ *     description: Get registrations for an event (event owner only)
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: eventId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The eventId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/:eventId/registrations',
@@ -121,9 +265,28 @@ router.get(
 );
 
 /**
- * @route   GET /api/events/registrations/:registrationId
- * @desc    Get a single registration
- * @access  Private
+ * @swagger
+ * /api/v1/events/registrations/:registrationId:
+ *   get:
+ *     summary: Get a single registration
+ *     description: Get a single registration
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: registrationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The registrationId
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved data
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.get(
   '/registrations/:registrationId',
@@ -132,9 +295,34 @@ router.get(
 );
 
 /**
- * @route   PATCH /api/events/registrations/:registrationId/accept
- * @desc    Accept a registration
- * @access  Private (Event owner or Admin)
+ * @swagger
+ * /api/v1/events/registrations/:registrationId/accept:
+ *   patch:
+ *     summary: Accept a registration
+ *     description: Accept a registration
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: registrationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The registrationId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.patch(
   '/registrations/:registrationId/accept',
@@ -144,9 +332,34 @@ router.patch(
 );
 
 /**
- * @route   PATCH /api/events/registrations/:registrationId/reject
- * @desc    Reject a registration
- * @access  Private (Event owner or Admin)
+ * @swagger
+ * /api/v1/events/registrations/:registrationId/reject:
+ *   patch:
+ *     summary: Reject a registration
+ *     description: Reject a registration
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: registrationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The registrationId
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Successfully updated
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.patch(
   '/registrations/:registrationId/reject',
@@ -156,9 +369,28 @@ router.patch(
 );
 
 /**
- * @route   DELETE /api/events/registrations/:registrationId
- * @desc    Delete a registration
- * @access  Private (Registrant, Event owner, or Admin)
+ * @swagger
+ * /api/v1/events/registrations/:registrationId:
+ *   delete:
+ *     summary: Delete a registration
+ *     description: Delete a registration
+ *     tags: [Events]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: registrationId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The registrationId
+ *     responses:
+ *       200:
+ *         description: Successfully deleted
+ *       401:
+ *         description: Unauthorized
+ *       404:
+ *         description: Resource not found
  */
 router.delete(
   '/registrations/:registrationId',

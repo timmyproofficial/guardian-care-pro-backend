@@ -17,7 +17,7 @@ import fs from 'fs';
 export const chatController = {
   /**
    * Create a new conversation
-   * @route POST /api/chat/conversations
+   * @route POST /api/v1/chat/conversations
    */
   createConversation: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -77,7 +77,7 @@ export const chatController = {
 
   /**
    * Get user's conversations
-   * @route GET /api/chat/conversations
+   * @route GET /api/v1/chat/conversations
    */
   getConversations: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -114,7 +114,7 @@ export const chatController = {
 
   /**
    * Get conversation messages
-   * @route GET /api/chat/conversations/:conversationId/messages
+   * @route GET /api/v1/chat/conversations/:conversationId/messages
    */
   getMessages: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -152,7 +152,7 @@ export const chatController = {
 
   /**
    * Send a message
-   * @route POST /api/chat/conversations/:conversationId/messages
+   * @route POST /api/v1/chat/conversations/:conversationId/messages
    */
   sendMessage: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -263,7 +263,7 @@ export const chatController = {
 
   /**
    * Mark messages as read
-   * @route POST /api/chat/conversations/:conversationId/read
+   * @route POST /api/v1/chat/conversations/:conversationId/read
    */
   markAsRead: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -299,7 +299,7 @@ export const chatController = {
 
   /**
    * Add reaction to message
-   * @route POST /api/chat/messages/:messageId/reactions
+   * @route POST /api/v1/chat/messages/:messageId/reactions
    */
   addReaction: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -325,7 +325,7 @@ export const chatController = {
 
   /**
    * Remove reaction from message
-   * @route DELETE /api/chat/messages/:messageId/reactions/:emoji
+   * @route DELETE /api/v1/chat/messages/:messageId/reactions/:emoji
    */
   removeReaction: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -350,7 +350,7 @@ export const chatController = {
 
   /**
    * Add members to conversation
-   * @route POST /api/chat/conversations/:conversationId/members
+   * @route POST /api/v1/chat/conversations/:conversationId/members
    */
   addMembers: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -386,7 +386,7 @@ export const chatController = {
 
   /**
    * Remove member from conversation
-   * @route DELETE /api/chat/conversations/:conversationId/members/:memberId
+   * @route DELETE /api/v1/chat/conversations/:conversationId/members/:memberId
    */
   removeMember: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -421,7 +421,7 @@ export const chatController = {
 
   /**
    * Search conversations and messages
-   * @route GET /api/chat/search
+   * @route GET /api/v1/chat/search
    */
   search: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -456,7 +456,7 @@ export const chatController = {
 
   /**
    * Get online users
-   * @route GET /api/chat/users/online
+   * @route GET /api/v1/chat/users/online
    */
   getOnlineUsers: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -479,7 +479,7 @@ export const chatController = {
 
   /**
    * Upload chat file
-   * @route POST /api/chat/upload
+   * @route POST /api/v1/chat/upload
    */
   uploadFile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

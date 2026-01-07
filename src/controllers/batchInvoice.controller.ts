@@ -18,7 +18,7 @@ import fs from 'fs';
 export const batchInvoiceController = {
   /**
    * Get batch configuration
-   * @route GET /api/batch-invoices/config
+   * @route GET /api/v1/batch-invoices/config
    */
   getBatchConfig: async (_req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -31,7 +31,7 @@ export const batchInvoiceController = {
 
   /**
    * Update batch configuration
-   * @route PUT /api/batch-invoices/config
+   * @route PUT /api/v1/batch-invoices/config
    */
   updateBatchConfig: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -57,7 +57,7 @@ export const batchInvoiceController = {
 
   /**
    * Get batch processing history
-   * @route GET /api/batch-invoices/history
+   * @route GET /api/v1/batch-invoices/history
    */
   getBatchHistory: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -106,7 +106,7 @@ export const batchInvoiceController = {
 
   /**
    * Get batch invoices
-   * @route GET /api/batch-invoices
+   * @route GET /api/v1/batch-invoices
    */
   getBatchInvoices: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -188,7 +188,7 @@ export const batchInvoiceController = {
 
   /**
    * Get batch invoice by ID
-   * @route GET /api/batch-invoices/:batchInvoiceId
+   * @route GET /api/v1/batch-invoices/:batchInvoiceId
    */
   getBatchInvoiceById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -228,7 +228,7 @@ export const batchInvoiceController = {
 
   /**
    * Trigger batch invoice generation
-   * @route POST /api/batch-invoices/trigger
+   * @route POST /api/v1/batch-invoices/trigger
    */
   triggerBatchGeneration: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -282,7 +282,7 @@ export const batchInvoiceController = {
 
   /**
    * Download batch invoice PDF
-   * @route GET /api/batch-invoices/:batchInvoiceId/download
+   * @route GET /api/v1/batch-invoices/:batchInvoiceId/download
    */
   downloadBatchInvoice: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -354,7 +354,7 @@ export const batchInvoiceController = {
 
   /**
    * Send batch invoice email
-   * @route POST /api/batch-invoices/:batchInvoiceId/send
+   * @route POST /api/v1/batch-invoices/:batchInvoiceId/send
    */
   sendBatchInvoice: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -415,7 +415,7 @@ export const batchInvoiceController = {
 
   /**
    * Run scheduled batch generation manually
-   * @route POST /api/batch-invoices/run-scheduled
+   * @route POST /api/v1/batch-invoices/run-scheduled
    */
   runScheduledBatch: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

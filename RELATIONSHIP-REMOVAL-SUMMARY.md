@@ -104,14 +104,14 @@ All data is now operational and verified.
 ## API Impact
 
 ### Endpoints Removed
-- `GET /api/service-types/by-category` - No longer applicable without relationships
+- `GET /api/v1/service-types/by-category` - No longer applicable without relationships
 
 ### Endpoints Modified (behavior change)
-- `POST /api/service-categories` - No longer accepts `subCategories` array
-- `PUT /api/service-categories/:id` - No longer accepts `subCategories` updates
-- `POST /api/service-types` - No longer requires `categoryId`
-- `PATCH /api/service-types/:serviceTypeId` - No longer accepts `categoryId` updates
-- `GET /api/service-types` - No longer supports `categoryId` filter
+- `POST /api/v1/service-categories` - No longer accepts `subCategories` array
+- `PUT /api/v1/service-categories/:id` - No longer accepts `subCategories` updates
+- `POST /api/v1/service-types` - No longer requires `categoryId`
+- `PATCH /api/v1/service-types/:serviceTypeId` - No longer accepts `categoryId` updates
+- `GET /api/v1/service-types` - No longer supports `categoryId` filter
 
 ### Endpoints Unchanged (still functional)
 - All category CRUD operations (except relationship fields)

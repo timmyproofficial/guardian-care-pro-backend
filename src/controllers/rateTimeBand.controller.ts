@@ -11,7 +11,7 @@ import { successResponse, errorResponse } from '../utils/api-response';
 export const rateTimeBandController = {
   /**
    * Get all rate time bands
-   * @route GET /api/rate-time-bands
+   * @route GET /api/v1/rate-time-bands
    */
   getAllRateTimeBands: async (_req: Request, res: Response, next: NextFunction) => {
     try {
@@ -25,7 +25,7 @@ export const rateTimeBandController = {
 
   /**
    * Get rate time band by ID
-   * @route GET /api/rate-time-bands/:rateTimeBandId
+   * @route GET /api/v1/rate-time-bands/:rateTimeBandId
    */
   getRateTimeBandById: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -47,7 +47,7 @@ export const rateTimeBandController = {
 
   /**
    * Create rate time band (admin only)
-   * @route POST /api/rate-time-bands
+   * @route POST /api/v1/rate-time-bands
    */
   createRateTimeBand: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -95,7 +95,7 @@ export const rateTimeBandController = {
 
   /**
    * Update rate time band (admin only)
-   * @route PATCH /api/rate-time-bands/:rateTimeBandId
+   * @route PATCH /api/v1/rate-time-bands/:rateTimeBandId
    */
   updateRateTimeBand: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -137,7 +137,7 @@ export const rateTimeBandController = {
 
   /**
    * Delete rate time band (admin only)
-   * @route DELETE /api/rate-time-bands/:rateTimeBandId
+   * @route DELETE /api/v1/rate-time-bands/:rateTimeBandId
    */
   deleteRateTimeBand: async (req: Request, res: Response, next: NextFunction) => {
     try {

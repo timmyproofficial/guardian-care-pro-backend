@@ -31,7 +31,7 @@ import catchAsync from '../utils/catchAsync';
 
 /**
  * Create a new job
- * POST /api/jobs
+ * POST /api/v1/jobs
  */
 export const createJob = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -81,7 +81,7 @@ export const createJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get all jobs with filters
- * GET /api/jobs
+ * GET /api/v1/jobs
  */
 export const getAllJobs = catchAsync(async (req: Request, res: Response) => {
   const params: JobSearchParams = {
@@ -125,7 +125,7 @@ export const getAllJobs = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get a single job by ID
- * GET /api/jobs/:jobId
+ * GET /api/v1/jobs/:jobId
  */
 export const getJobById = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -160,7 +160,7 @@ export const getJobById = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get jobs posted by the current user
- * GET /api/jobs/my-posts
+ * GET /api/v1/jobs/my-posts
  */
 export const getMyJobs = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -186,7 +186,7 @@ export const getMyJobs = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Update a job
- * PUT /api/jobs/:jobId
+ * PUT /api/v1/jobs/:jobId
  */
 export const updateJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -233,7 +233,7 @@ export const updateJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Soft delete a job
- * DELETE /api/jobs/:jobId
+ * DELETE /api/v1/jobs/:jobId
  */
 export const deleteJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -254,7 +254,7 @@ export const deleteJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Apply for a job
- * POST /api/jobs/:jobId/apply
+ * POST /api/v1/jobs/:jobId/apply
  */
 export const applyForJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -268,8 +268,8 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
   };
 
   // Process uploaded files from Cloudinary
-  // multer-storage-cloudinary adds 'path' as the Cloudinary URL
-  // Some versions may use 'secure_url' or 'url' instead
+  // The upload middleware has already uploaded files to Cloudinary
+  // and attached the URL to file.path
   const files = req.files as { [fieldname: string]: Express.Multer.File[] };
   const attachments: IJobAttachment[] = [];
 
@@ -281,17 +281,12 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
     coverLetterCount: files?.coverLetter?.length || 0,
   });
 
-  // Helper to extract Cloudinary URL from file object
-  const getCloudinaryUrl = (file: any): string | undefined => {
-    return file.path || file.secure_url || file.url || file.location;
-  };
-
   if (files?.resume?.[0]) {
     const resumeFile = files.resume[0] as any;
-    const fileUrl = getCloudinaryUrl(resumeFile);
+    const fileUrl = resumeFile.path; // Cloudinary URL is attached by middleware
     
     if (!fileUrl) {
-      logger.error('Resume file upload failed - no URL returned from Cloudinary', { 
+      logger.error('Resume file upload failed - no URL from middleware', { 
         fileKeys: Object.keys(resumeFile),
         filename: resumeFile.filename,
         originalname: resumeFile.originalname 
@@ -307,14 +302,16 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
       fileSize: resumeFile.size || 0,
       uploadedAt: new Date(),
     });
+
+    logger.info('Resume uploaded successfully', { fileUrl, fileName: resumeFile.originalname });
   }
 
   if (files?.coverLetter?.[0]) {
     const coverLetterFile = files.coverLetter[0] as any;
-    const fileUrl = getCloudinaryUrl(coverLetterFile);
+    const fileUrl = coverLetterFile.path; // Cloudinary URL is attached by middleware
     
     if (!fileUrl) {
-      logger.error('Cover letter file upload failed - no URL returned from Cloudinary', { 
+      logger.error('Cover letter file upload failed - no URL from middleware', { 
         fileKeys: Object.keys(coverLetterFile),
         filename: coverLetterFile.filename,
         originalname: coverLetterFile.originalname 
@@ -330,6 +327,8 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
       fileSize: coverLetterFile.size || 0,
       uploadedAt: new Date(),
     });
+
+    logger.info('Cover letter uploaded successfully', { fileUrl, fileName: coverLetterFile.originalname });
   }
 
   if (attachments.length === 0 || !attachments.some((a) => a.fieldName === 'resume')) {
@@ -352,7 +351,7 @@ export const applyForJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get applications for a job (job owner only)
- * GET /api/jobs/:jobId/applications
+ * GET /api/v1/jobs/:jobId/applications
  */
 export const getJobApplications = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -385,7 +384,7 @@ export const getJobApplications = catchAsync(async (req: Request, res: Response)
 
 /**
  * Get user's applied jobs
- * GET /api/jobs/my-applications
+ * GET /api/v1/jobs/my-applications
  */
 export const getMyApplications = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -410,7 +409,7 @@ export const getMyApplications = catchAsync(async (req: Request, res: Response) 
 
 /**
  * Get a single application
- * GET /api/jobs/applications/:applicationId
+ * GET /api/v1/jobs/applications/:applicationId
  */
 export const getApplicationById = catchAsync(async (req: Request, res: Response) => {
   const { applicationId } = req.params;
@@ -429,7 +428,7 @@ export const getApplicationById = catchAsync(async (req: Request, res: Response)
 
 /**
  * Update application status
- * PATCH /api/jobs/applications/:applicationId/status
+ * PATCH /api/v1/jobs/applications/:applicationId/status
  */
 export const updateApplicationStatus = catchAsync(async (req: Request, res: Response) => {
   const { applicationId } = req.params;
@@ -457,7 +456,7 @@ export const updateApplicationStatus = catchAsync(async (req: Request, res: Resp
 
 /**
  * Delete an application (soft delete)
- * DELETE /api/jobs/applications/:applicationId
+ * DELETE /api/v1/jobs/applications/:applicationId
  */
 export const deleteApplication = catchAsync(async (req: Request, res: Response) => {
   const { applicationId } = req.params;
@@ -478,7 +477,7 @@ export const deleteApplication = catchAsync(async (req: Request, res: Response) 
 
 /**
  * Save a job
- * POST /api/jobs/:jobId/save
+ * POST /api/v1/jobs/:jobId/save
  */
 export const saveJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -495,7 +494,7 @@ export const saveJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Unsave a job
- * DELETE /api/jobs/:jobId/save
+ * DELETE /api/v1/jobs/:jobId/save
  */
 export const unsaveJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -511,7 +510,7 @@ export const unsaveJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Toggle save status for a job
- * POST /api/jobs/:jobId/toggle-save
+ * POST /api/v1/jobs/:jobId/toggle-save
  */
 export const toggleSaveJob = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;
@@ -528,7 +527,7 @@ export const toggleSaveJob = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Get user's saved jobs
- * GET /api/jobs/saved
+ * GET /api/v1/jobs/saved
  */
 export const getSavedJobs = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user!._id;
@@ -553,7 +552,7 @@ export const getSavedJobs = catchAsync(async (req: Request, res: Response) => {
 
 /**
  * Check if a job is saved
- * GET /api/jobs/:jobId/is-saved
+ * GET /api/v1/jobs/:jobId/is-saved
  */
 export const isJobSaved = catchAsync(async (req: Request, res: Response) => {
   const { jobId } = req.params;

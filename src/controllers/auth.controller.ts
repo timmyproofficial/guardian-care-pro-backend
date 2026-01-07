@@ -12,7 +12,7 @@ import { successResponse } from '../utils/api-response';
 export const authController = {
   /**
    * Register a new user
-   * @route POST /api/auth/register
+   * @route POST /api/v1/auth/register
    */
   register: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -47,7 +47,7 @@ export const authController = {
 
   /**
    * Login using email and password
-   * @route POST /api/auth/login
+   * @route POST /api/v1/auth/login
    */
   login: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -75,7 +75,7 @@ export const authController = {
 
   /**
    * Refresh the authentication tokens
-   * @route POST /api/auth/refresh-token
+   * @route POST /api/v1/auth/refresh-token
    */
   refreshToken: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -109,7 +109,7 @@ export const authController = {
 
   /**
    * Logout and invalidate refresh token
-   * @route POST /api/auth/logout
+   * @route POST /api/v1/auth/logout
    */
   logout: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -127,7 +127,7 @@ export const authController = {
 
   /**
    * Forgot password
-   * @route POST /api/auth/forgot-password
+   * @route POST /api/v1/auth/forgot-password
    */
   forgotPassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -151,7 +151,7 @@ export const authController = {
 
   /**
    * Reset password using OTP code
-   * @route POST /api/auth/reset-password
+   * @route POST /api/v1/auth/reset-password
    */
   resetPassword: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -164,7 +164,7 @@ export const authController = {
 
   /**
    * Verify email with OTP code
-   * @route POST /api/auth/verify-email
+   * @route POST /api/v1/auth/verify-email
    */
   verifyEmail: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -177,7 +177,7 @@ export const authController = {
 
   /**
    * Resend email verification code
-   * @route POST /api/auth/resend-verification
+   * @route POST /api/v1/auth/resend-verification
    */
   resendVerification: async (req: Request, res: Response, next: NextFunction) => {
     try {

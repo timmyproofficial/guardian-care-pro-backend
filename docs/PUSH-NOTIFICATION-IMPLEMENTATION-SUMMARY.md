@@ -42,10 +42,10 @@ All endpoints require authentication (`Authorization: Bearer <token>`):
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/v1/notifications/register-device` | Register FCM token |
-| POST | `/api/v1/notifications/unregister-device` | Remove FCM token |
-| GET | `/api/v1/notifications/devices` | List registered devices |
-| POST | `/api/v1/notifications/test` | Send test notification |
+| POST | `/api/v1/v1/notifications/register-device` | Register FCM token |
+| POST | `/api/v1/v1/notifications/unregister-device` | Remove FCM token |
+| GET | `/api/v1/v1/notifications/devices` | List registered devices |
+| POST | `/api/v1/v1/notifications/test` | Send test notification |
 
 ### 4. **Notification Integration** ✓
 
@@ -186,7 +186,7 @@ curl http://localhost:5000/health
 ### 2. Test Device Registration
 
 ```bash
-curl -X POST http://localhost:5000/api/v1/notifications/register-device \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/register-device \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
@@ -199,7 +199,7 @@ curl -X POST http://localhost:5000/api/v1/notifications/register-device \
 ### 3. Send Test Notification
 
 ```bash
-curl -X POST http://localhost:5000/api/v1/notifications/test \
+curl -X POST http://localhost:5000/api/v1/v1/notifications/test \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
@@ -401,7 +401,7 @@ For detailed troubleshooting, see:
 ### Related Documentation
 - Email Service: [`docs/EMAIL-INTEGRATION-SUMMARY.md`](./EMAIL-INTEGRATION-SUMMARY.md)
 - Email Delay Solution: [`docs/EMAIL-DELAY-SOLUTION.md`](./EMAIL-DELAY-SOLUTION.md)
-- API Documentation: [`docs/api/`](./api/)
+- API Documentation: [`docs/api/v1/`](./api/v1/)
 
 ---
 

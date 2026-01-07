@@ -12,6 +12,8 @@ export enum JobRole {
   SUPPORT_WORKER = 'Support Worker',
   YOUTH_WORKER = 'Youth Worker',
   NURSING_ASSISTANT = 'Nursing Assistant',
+  CLEANER = 'Cleaner',
+  HANDY_PERSON = 'Handy Person',
 }
 
 /**
@@ -22,6 +24,8 @@ export enum JobType {
   HYBRID = 'hybrid',
   CONTRACT = 'contract',
   REMOTE = 'remote',
+  PART_TIME = 'partTime',
+  CASUAL = 'casual',
 }
 
 /**

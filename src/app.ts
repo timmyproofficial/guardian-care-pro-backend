@@ -13,8 +13,10 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import mongoSanitize from 'express-mongo-sanitize';
 import httpStatus from 'http-status';
+import swaggerUi from 'swagger-ui-express';
 import config from './config/env';
 import routes from './routes';
+import swaggerSpec from './config/swagger.config';
 import { errorConverter, errorHandler, notFoundHandler } from './middlewares/error.middleware';
 import { getSocketServer } from './services/socket.server';
 // import logger from './utils/logger';
@@ -82,6 +84,19 @@ app.options('*', cors({
 if (config.env !== 'production') {
   app.use(morgan('dev'));
 }
+
+// API Documentation - Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  explorer: true,
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'Guardian Care Pro API Docs',
+}));
+
+// Swagger JSON endpoint
+app.get('/api-docs.json', (_req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 // Health check endpoint
 app.get('/health', (_req, res) => {

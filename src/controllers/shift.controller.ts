@@ -109,7 +109,7 @@ import { timesheetController } from './timesheet.controller';
 export const shiftController = {
   /**
  * Create a new shift
- * @route POST /api/shifts
+ * @route POST /api/v1/shifts
  */
   createShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -174,7 +174,7 @@ export const shiftController = {
 
   /**
    * Get shift by ID
-   * @route GET /api/shifts/:shiftId
+   * @route GET /api/v1/shifts/:shiftId
    */
   getShiftById: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -214,7 +214,7 @@ export const shiftController = {
 
   /**
    * Get shift by unique shift ID
-   * @route GET /api/shifts/byShiftId/:shiftIdRef
+   * @route GET /api/v1/shifts/byShiftId/:shiftIdRef
    */
   getShiftByShiftId: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -255,7 +255,7 @@ export const shiftController = {
   /**
  * Get shifts for current user (based on role)
  * Updated to handle multi-worker shifts
- * @route GET /api/shifts
+ * @route GET /api/v1/shifts
  */
   getShifts: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -339,7 +339,7 @@ export const shiftController = {
   /**
  * Get all timesheets for a specific shift
  * Used for multi-worker shifts to view all worker timesheets
- * @route GET /api/shifts/:shiftId/timesheets
+ * @route GET /api/v1/shifts/:shiftId/timesheets
  */
   getShiftTimesheets: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -423,7 +423,7 @@ export const shiftController = {
 
   /**
    * Update shift
-   * @route PATCH /api/shifts/:shiftId
+   * @route PATCH /api/v1/shifts/:shiftId
    */
   updateShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -460,7 +460,7 @@ export const shiftController = {
   /**
  * Respond to shift (worker accepts or declines)
  * Updated to handle multi-worker shifts
- * @route POST /api/shifts/:shiftId/respond
+ * @route POST /api/v1/shifts/:shiftId/respond
  */
   respondToShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -500,7 +500,7 @@ export const shiftController = {
 
   /**
    * Cancel shift
-   * @route POST /api/shifts/:shiftId/cancel
+   * @route POST /api/v1/shifts/:shiftId/cancel
    */
   cancelShift: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

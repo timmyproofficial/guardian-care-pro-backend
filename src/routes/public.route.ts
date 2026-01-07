@@ -41,21 +41,61 @@ const cancellationRateLimiter = rateLimit({
 // ═══════════════════════════════════════════════════════════════
 
 /**
- * Cancel a shift by phone number
- * POST /api/public/shift-cancellation
- * 
- * Body:
- * - workerPhone (required): Worker's phone number for verification
- * - shiftDate (optional): ISO date, 'today', or 'tomorrow'
- * - shiftStartTime (optional): 'HH:mm' or 'morning', 'afternoon', 'evening', 'night'
- * - cancellationReason (required): sick, emergency, unavailable, transport, other
- * - cancellationMessage (optional): Additional details
- * 
- * Response:
- * - success: boolean
- * - message: Human-readable result
- * - shiftDetails: Cancelled shift info (if successful)
- * - eventId: Audit trail event ID (if successful)
+ * @swagger
+ * /api/v1/public/shift-cancellation:
+ *   post:
+ *     summary: Cancel shift by phone
+ *     description: Cancel an upcoming shift using phone number verification (no authentication required). Supports flexible date/time formats including 'today', 'tomorrow', 'morning', 'afternoon'.
+ *     tags: [Public]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - workerPhone
+ *               - cancellationReason
+ *             properties:
+ *               workerPhone:
+ *                 type: string
+ *                 description: Worker's phone number for verification
+ *                 example: "+61412345678"
+ *               shiftDate:
+ *                 type: string
+ *                 description: ISO date string, 'today', or 'tomorrow'
+ *                 example: "today"
+ *               shiftStartTime:
+ *                 type: string
+ *                 description: Time in HH:mm format or 'morning', 'afternoon', 'evening', 'night'
+ *                 example: "morning"
+ *               cancellationReason:
+ *                 type: string
+ *                 enum: [sick, emergency, unavailable, transport, other]
+ *                 description: Reason for cancellation
+ *               cancellationMessage:
+ *                 type: string
+ *                 description: Additional details about the cancellation
+ *     responses:
+ *       200:
+ *         description: Shift cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                   type: string
+ *                 shiftDetails:
+ *                   type: object
+ *                 eventId:
+ *                   type: string
+ *       400:
+ *         description: Validation error or shift not found
+ *       429:
+ *         description: Rate limit exceeded
  */
 router.post(
   '/shift-cancellation',
@@ -64,15 +104,40 @@ router.post(
 );
 
 /**
- * Get upcoming shifts for a worker
- * GET /api/public/my-shifts?phone=+61412345678
- * 
- * Query params:
- * - phone (required): Worker's phone number
- * 
- * Response:
- * - shifts: Array of upcoming shifts
- * - total: Number of shifts found
+ * @swagger
+ * /api/v1/public/my-shifts:
+ *   get:
+ *     summary: Get worker's upcoming shifts
+ *     description: Retrieve upcoming shifts for a worker using phone number (no authentication required)
+ *     tags: [Public]
+ *     parameters:
+ *       - in: query
+ *         name: phone
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Worker's phone number
+ *         example: "+61412345678"
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved shifts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 shifts:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                 total:
+ *                   type: number
+ *       400:
+ *         description: Invalid phone number
+ *       429:
+ *         description: Rate limit exceeded
  */
 router.get(
   '/my-shifts',
@@ -81,11 +146,31 @@ router.get(
 );
 
 /**
- * Get available cancellation reasons
- * GET /api/public/cancellation-reasons
- * 
- * Response:
- * - reasons: Array of { value, label } objects
+ * @swagger
+ * /api/v1/public/cancellation-reasons:
+ *   get:
+ *     summary: Get cancellation reasons
+ *     description: Retrieve list of available shift cancellation reasons
+ *     tags: [Public]
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved cancellation reasons
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 reasons:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       value:
+ *                         type: string
+ *                       label:
+ *                         type: string
  */
 router.get(
   '/cancellation-reasons',

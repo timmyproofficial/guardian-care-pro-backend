@@ -18,7 +18,7 @@ import logger from '../utils/logger';
 export const analyticsController = {
   /**
    * Get overview analytics based on user role
-   * @route GET /api/analytics/overview
+   * @route GET /api/v1/analytics/overview
    */
   getOverviewAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -88,7 +88,7 @@ export const analyticsController = {
 
   /**
    * Get user analytics (admin only)
-   * @route GET /api/analytics/admin/users
+   * @route GET /api/v1/analytics/admin/users
    */
   getAdminUserAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -136,7 +136,7 @@ export const analyticsController = {
 
   /**
    * Get financial analytics (admin only)
-   * @route GET /api/analytics/admin/financial
+   * @route GET /api/v1/analytics/admin/financial
    */
   getAdminFinancialAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -184,7 +184,7 @@ export const analyticsController = {
 
   /**
    * Get participant service analytics
-   * @route GET /api/analytics/participant/services
+   * @route GET /api/v1/analytics/participant/services
    */
   getParticipantServiceAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -234,7 +234,7 @@ export const analyticsController = {
 
   /**
    * Get worker financial analytics
-   * @route GET /api/analytics/worker/financial
+   * @route GET /api/v1/analytics/worker/financial
    */
   getWorkerFinancialAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -284,7 +284,7 @@ export const analyticsController = {
 
   /**
    * Get worker schedule analytics
-   * @route GET /api/analytics/worker/schedule
+   * @route GET /api/v1/analytics/worker/schedule
    */
   getWorkerScheduleAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -334,7 +334,7 @@ export const analyticsController = {
 
   /**
    * Get worker performance metrics
-   * @route GET /api/analytics/worker/performance
+   * @route GET /api/v1/analytics/worker/performance
    */
   getWorkerPerformanceAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -393,7 +393,7 @@ export const analyticsController = {
 
   /**
    * Get filtered analytics (admin only)
-   * @route POST /api/analytics/filtered
+   * @route POST /api/v1/analytics/filtered
    */
   getFilteredAnalytics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -431,7 +431,7 @@ export const analyticsController = {
 
   /**
    * Get platform metrics summary (admin only)
-   * @route GET /api/analytics/platform/summary
+   * @route GET /api/v1/analytics/platform/summary
    */
   getPlatformSummary: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -495,7 +495,7 @@ export const analyticsController = {
 
   /**
    * Export analytics data (all roles)
-   * @route POST /api/analytics/export
+   * @route POST /api/v1/analytics/export
    */
   exportAnalyticsData: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -562,7 +562,7 @@ export const analyticsController = {
 
   /**
    * Get real-time metrics (admin only)
-   * @route GET /api/analytics/realtime
+   * @route GET /api/v1/analytics/realtime
    */
   getRealtimeMetrics: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {

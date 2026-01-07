@@ -37,7 +37,7 @@ Both Worker and Participant models now include a `serviceCategories` field that 
 
 ### Endpoint
 
-`POST /api/users/workers/onboarding`
+`POST /api/v1/users/workers/onboarding`
 
 ### Updated Request Body
 
@@ -220,7 +220,7 @@ Both Worker and Participant models now include a `serviceCategories` field that 
 
 ### Endpoint
 
-`POST /api/users/participants/onboarding`
+`POST /api/v1/users/participants/onboarding`
 
 ### Updated Request Body
 
@@ -354,7 +354,7 @@ Both Worker and Participant models now include a `serviceCategories` field that 
 ### For Existing Workers
 
 Existing workers without `serviceCategories` or `resume` fields should be prompted to:
-1. Upload their resume via `/api/users/upload-resume`
+1. Upload their resume via `/api/v1/users/upload-resume`
 2. Select their service categories
 3. Complete onboarding again if needed
 
@@ -392,7 +392,7 @@ The system includes 7 main categories:
 
 ## Related Documentation
 
-- [Service Categories API](/docs/api/service-categories.md)
-- [Service Types API](/docs/api/service-types.md)
-- [Resume Upload API](/docs/api/resume-upload.md)
-- [User API](/docs/api/users.md)
+- [Service Categories API](/docs/api/v1/service-categories.md)
+- [Service Types API](/docs/api/v1/service-types.md)
+- [Resume Upload API](/docs/api/v1/resume-upload.md)
+- [User API](/docs/api/v1/users.md)

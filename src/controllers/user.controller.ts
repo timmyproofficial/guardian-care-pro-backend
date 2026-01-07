@@ -14,7 +14,7 @@ import { UserRole, UserStatus } from '../types/user.types';
 export const userController = {
   /**
    * Get current user profile
-   * @route GET /api/users/profile
+   * @route GET /api/v1/users/profile
    */
   getProfile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -59,7 +59,7 @@ export const userController = {
   },
   /**
    * Get user by ID
-   * @route GET /api/users/:userId
+   * @route GET /api/v1/users/:userId
    */
   getUserById: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -79,7 +79,7 @@ export const userController = {
 
   /**
    * Get user by email
-   * @route GET /api/users/email/:email
+   * @route GET /api/v1/users/email/:email
    */
   getUserByEmail: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -99,7 +99,7 @@ export const userController = {
 
   /**
    * Update current user profile based on role
-   * @route PATCH /api/users/profile
+   * @route PATCH /api/v1/users/profile
    */
   updateProfile: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -151,7 +151,7 @@ export const userController = {
 
   /**
    * Update specific user by ID and role (admin function)
-   * @route PATCH /api/users/:role/:userId
+   * @route PATCH /api/v1/users/:role/:userId
    */
   updateUserByRoleAndId: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -198,7 +198,7 @@ export const userController = {
   },
   /**
    * Update user by ID (admin function)
-   * @route PATCH /api/users/:userId
+   * @route PATCH /api/v1/users/:userId
    */
   updateUser: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -218,7 +218,7 @@ export const userController = {
 
   /**
    * Update user profile image
-   * @route POST /api/users/profile-image
+   * @route POST /api/v1/users/profile-image
    */
   updateProfileImage: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -247,7 +247,7 @@ export const userController = {
 /** 
  * update the resume of the user
  * 
-  * @route POST /api/users/upload-resume
+  * @route POST /api/v1/users/upload-resume
 */
   uploadResume: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -277,7 +277,7 @@ export const userController = {
 ,
   /**
    * Update user password
-   * @route POST /api/users/change-password
+   * @route POST /api/v1/users/change-password
    */
   changePassword: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -301,7 +301,7 @@ export const userController = {
 
   /**
    * Update user address
-   * @route PATCH /api/users/profile/address
+   * @route PATCH /api/v1/users/profile/address
    */
   updateAddress: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -339,7 +339,7 @@ export const userController = {
 
   /**
    * Delete user by ID
-   * @route DELETE /api/users/:userId
+   * @route DELETE /api/v1/users/:userId
    */
   deleteUser: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -353,7 +353,7 @@ export const userController = {
 
   /**
    * Delete current user's account
-   * @route DELETE /api/users/profile
+   * @route DELETE /api/v1/users/profile
    */
   deleteMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -372,7 +372,7 @@ export const userController = {
 
   /**
    * Deactivate current user's account
-   * @route PATCH /api/users/profile/deactivate
+   * @route PATCH /api/v1/users/profile/deactivate
    */
   deactivateMyAccount: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -424,7 +424,7 @@ export const userController = {
 
   /**
    * Get all users with filtering
-   * @route GET /api/users
+   * @route GET /api/v1/users
    */
   getUsers: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -477,7 +477,7 @@ export const userController = {
 
   /**
    * Get participant by ID
-   * @route GET /api/users/participants/:participantId
+   * @route GET /api/v1/users/participants/:participantId
    */
   getParticipantById: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -497,7 +497,7 @@ export const userController = {
 
   /**
    * Get support worker by ID
-   * @route GET /api/users/workers/:workerId
+   * @route GET /api/v1/users/workers/:workerId
    */
   getWorkerById: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -517,7 +517,7 @@ export const userController = {
 
   /**
    * Get coordinator by ID
-   * @route GET /api/users/coordinators/:coordinatorId
+   * @route GET /api/v1/users/coordinators/:coordinatorId
    */
   getCoordinatorById: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -537,7 +537,7 @@ export const userController = {
 
   /**
    * Update user status
-   * @route PATCH /api/users/:userId/status
+   * @route PATCH /api/v1/users/:userId/status
    */
   updateUserStatus: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -560,7 +560,7 @@ export const userController = {
 
   /**
    * Link guardian to participant
-   * @route POST /api/users/participants/:participantId/guardians/:guardianId
+   * @route POST /api/v1/users/participants/:participantId/guardians/:guardianId
    */
   linkGuardianToParticipant: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -576,7 +576,7 @@ export const userController = {
 
   /**
    * Unlink guardian from participant
-   * @route DELETE /api/users/participants/:participantId/guardians/:guardianId
+   * @route DELETE /api/v1/users/participants/:participantId/guardians/:guardianId
    */
   unlinkGuardianFromParticipant: async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -592,7 +592,7 @@ export const userController = {
 
   /**
    * Complete participant onboarding
-   * @route POST /api/users/participants/onboarding
+   * @route POST /api/v1/users/participants/onboarding
    */
   completeParticipantOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
@@ -625,7 +625,7 @@ export const userController = {
 
   /**
    * Complete worker onboarding
-   * @route POST /api/users/workers/onboarding
+   * @route POST /api/v1/users/workers/onboarding
    */
   completeWorkerOnboarding: async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     try {
