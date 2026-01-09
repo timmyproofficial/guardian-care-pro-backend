@@ -11,7 +11,7 @@ export enum UserRole {
     PARTICIPANT = 'participant',
     GUARDIAN = 'guardian',
     SUPPORT_WORKER = 'supportWorker',
-    // COORDINATOR = 'coordinator',
+    SUPPORT_COORDINATOR = 'supportCoordinator',
     ADMIN = 'admin',
     PROVIDER = 'provider'  // Enterprise providers (aged care, disability support agencies)
   }

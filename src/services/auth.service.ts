@@ -18,7 +18,7 @@ import Participant from '../models/participant.model';
 import Guardian from '../models/guardian.model';
 import Worker from '../models/worker.model';
 import Provider from '../models/provider.model';
-// import Coordinator from '../models/coordinator.model';
+import Coordinator from '../models/coordinator.model';
 import { UserRole, UserStatus, UserRegistrationInput } from '../types/user.types';
 import { ProviderSubscriptionTier, ProviderSubscriptionStatus } from '../types/roster.types';
 import { organizationService } from './organization.service';
@@ -312,6 +312,12 @@ export const authService = {
               onboardingComplete: false,
               onboardingFeeReceived: false,
             },
+          });
+          break;
+        case UserRole.SUPPORT_COORDINATOR:
+          user = await Coordinator.create({
+            ...userInput,
+            status: UserStatus.PENDING,
           });
           break;
         case UserRole.ADMIN:

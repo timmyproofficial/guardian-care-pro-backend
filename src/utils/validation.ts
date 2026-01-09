@@ -33,7 +33,7 @@ export const authValidation = {
     lastName: Joi.string().required(),
     role: Joi.string()
       .required()
-      .valid(UserRole.PARTICIPANT, UserRole.GUARDIAN, UserRole.SUPPORT_WORKER, UserRole.ADMIN, UserRole.PROVIDER),
+      .valid(UserRole.PARTICIPANT, UserRole.GUARDIAN, UserRole.SUPPORT_WORKER, UserRole.SUPPORT_COORDINATOR, UserRole.ADMIN, UserRole.PROVIDER),
     phone: Joi.string().required(),
     
     // Provider-specific fields (required when role is 'provider')
