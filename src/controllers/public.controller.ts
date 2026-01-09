@@ -4,7 +4,7 @@
  * Used for external worker interactions (shift cancellations, etc.)
  */
 
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
 import moment from 'moment';
 import {
@@ -15,6 +15,8 @@ import {
 import { CancellationReason } from '../types/roster.types';
 import { successResponse, errorResponse } from '../utils/api-response';
 import logger from '../utils/logger';
+import { authService } from '../services/auth.service';
+import catchAsync from '../utils/catchAsync';
 
 /**
  * Cancel a shift via phone number verification
@@ -79,7 +81,7 @@ export const cancelShiftByPhone = async (req: Request, res: Response) => {
   } catch (error) {
     logger.error('Error in public shift cancellation:', error);
     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(
-      errorResponse('An error occurred while processing your cancellation', httpStatus.INTERNAL_SERVER_ERROR)
+    errorResponse('An error occurred while processing your cancellation', httpStatus.INTERNAL_SERVER_ERROR)
     );
   }
 };
@@ -150,3 +152,21 @@ export const getCancellationReasons = async (_req: Request, res: Response) => {
   );
 };
 
+export const generateToken = catchAsync(async (req: Request, res: Response, _next: NextFunction) => {
+  const { email, password } = req.body;
+
+  // 1. Authenticate the user
+  const { tokens } = await authService.login(email, password);
+
+  // 2. Send only token information in the response
+  res.status(httpStatus.OK).json(
+    successResponse(
+      {
+        access_token: tokens.access.token,
+        refresh_token: tokens.refresh.token,
+        expires_in: tokens.access.expires,
+      },
+      'Token generation successful'
+    )
+  );
+});

@@ -7,6 +7,8 @@
 import express from 'express';
 import rateLimit from 'express-rate-limit';
 import * as publicController from '../controllers/public.controller';
+import { authValidation } from '../utils/validation'; // Import authValidation
+import validate from '../middlewares/validate.middleware'; // Import validate middleware
 
 const router = express.Router();
 
@@ -35,6 +37,64 @@ const cancellationRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false
 });
+
+// ═══════════════════════════════════════════════════════════════
+// TOKEN GENERATION (No Auth Required)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * @swagger
+ * /api/v1/token:
+ *   post:
+ *     summary: Generate authentication tokens
+ *     description: Authenticate a user with email and password and receive JWT tokens (access and refresh)
+ *     tags: [Public]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 example: SecurePass123!
+ *     responses:
+ *       200:
+ *         description: Token generation successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 access_token:
+ *                   type: string
+ *                   description: JWT access token
+ *                 refresh_token:
+ *                   type: string
+ *                   description: JWT refresh token
+ *                 expires_in:
+ *                   type: string
+ *                   description: Access token expiration time
+ *       401:
+ *         description: Invalid credentials
+ *       400:
+ *         description: Validation error
+ */
+router.post(
+  '/token',
+  validate(authValidation.login),
+  publicController.generateToken
+);
 
 // ═══════════════════════════════════════════════════════════════
 // SHIFT CANCELLATION ENDPOINTS (No Auth Required)
@@ -87,7 +147,6 @@ const cancellationRateLimiter = rateLimit({
  *                 success:
  *                   type: boolean
  *                 message:
- *                   type: string
  *                 shiftDetails:
  *                   type: object
  *                 eventId:
@@ -178,4 +237,3 @@ router.get(
 );
 
 export default router;
-
