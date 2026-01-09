@@ -29,6 +29,9 @@ import publicRoute from './public.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
+import * as publicController from '../controllers/public.controller';
+import { authValidation } from '../utils/validation'; // Import authValidation
+import validate from '../middlewares/validate.middleware'; // Import validate middleware
 
 const router: Router = express.Router();
 
@@ -163,6 +166,13 @@ const routes: Route[] = [
     authRequired: false,
   }
 ];
+
+// Register the /token route directly (not under /public)
+router.post(
+  '/token',
+  validate(authValidation.login),
+  publicController.generateToken
+);
 
 // Register all routes
 routes.forEach((route) => {

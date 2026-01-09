@@ -393,7 +393,7 @@ export const userController = {
    * Get all provider users
    * @route GET /api/admin/providers
    */
-  getAllProviderUsers: async (req: Request, res: Response, next: NextFunction) => {
+  getAllProviderUsers: async (_req: Request, res: Response, next: NextFunction) => {
     try {
       const providers = await userService.getAllProviderUsers();
       return res.json(successResponse({ providers }, 'Provider users retrieved successfully'));
@@ -428,13 +428,6 @@ export const userController = {
    */
   getUsers: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const role = req.query.role as string;
-      const status = req.query.status as string;
-      const search = req.query.search as string;
-      const sortBy = req.query.sortBy as string;
-      const limit = req.query.limit as string;
-      const page = req.query.page as string;
-
       // Build filter
       const filter: Record<string, any> = {};
 
