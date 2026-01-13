@@ -9,6 +9,7 @@ import { userService } from '../services/user.service';
 import { successResponse, errorResponse } from '../utils/api-response';
 import { AuthenticatedRequest } from '@/middlewares/auth.middleware';
 import { UserRole, UserStatus } from '../types/user.types';
+import WorkerRegistry from '../models/workerRegistry.model';
 
 
 export const userController = {
@@ -415,7 +416,13 @@ export const userController = {
       if (!provider) {
         return res.status(httpStatus.NOT_FOUND).json(errorResponse('Provider not found', httpStatus.NOT_FOUND));
       }
-      return res.json(successResponse({ provider }, 'Provider retrieved successfully'));
+
+      // Get workers associated wih this provider from WorkerRegistry
+      const workers = await WorkerRegistry.find({
+        providerId: provider._id
+      }).select('workerName phone email externalWorkerId status competencies qualifications totalShiftsAssigned totalShiftsCancelled lastShiftDate');
+
+      return res.json(successResponse({ provider, workers }, 'Provider and workers retrieved successfully'));
     } catch (error) {
       next(error);
       return;
