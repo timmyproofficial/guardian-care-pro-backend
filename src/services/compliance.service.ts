@@ -14,6 +14,7 @@ import {
   IComplianceAnswers,
   REQUIRED_DOCUMENTS 
 } from '../types/compliance.types';
+import { deleteComplianceDocument } from '../utils/cloudinary';
 
 /**
  * Compliance service implementation
@@ -402,6 +403,22 @@ export const complianceService = {
     
     if (decision === 'rejected') {
       compliance.rejectionReasons = rejectionReasons;
+      
+      // Delete all uploaded documents from Cloudinary
+      // This allows the worker to upload fresh documents when resubmitting
+      if (compliance.documents && compliance.documents.length > 0) {
+        const deletePromises = compliance.documents.map(doc => 
+          deleteComplianceDocument(doc.url).catch(err => {
+            // Log but don't fail the entire operation if one document fails to delete
+            console.error(`Failed to delete document ${doc.type}:`, err);
+            return { result: 'error', error: err };
+          })
+        );
+        await Promise.all(deletePromises);
+        
+        // Clear the documents array so worker can re-upload
+        compliance.documents = [];
+      }
     }
     if (adminNotes) {
       compliance.adminNotes = adminNotes;
