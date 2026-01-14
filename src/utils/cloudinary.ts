@@ -381,4 +381,84 @@ export const deleteEventImage = async (publicId: string): Promise<any> => {
   }
 };
 
+// File filter for compliance documents (certificates, checks)
+const complianceDocumentFileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedMimes = [
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'application/pdf'
+  ];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only JPG, JPEG, PNG and PDF are allowed for compliance documents.'));
+  }
+};
+
+// Multer upload configuration for compliance documents
+export const complianceDocumentUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: complianceDocumentFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
+
+/**
+ * Upload a compliance document to Cloudinary
+ * @param filePath - Path to the local file or buffer
+ * @param documentId - Unique ID for the document (workerId-documentType)
+ * @returns Promise with Cloudinary upload result
+ */
+export const uploadComplianceDocument = async (
+  filePath: string | Buffer,
+  documentId: string
+): Promise<UploadApiResponse> => {
+  try {
+    logger.info('Uploading compliance document to Cloudinary', { 
+      documentId,
+      isBuffer: Buffer.isBuffer(filePath),
+    });
+
+    // If it's a buffer (from multer memory storage)
+    if (Buffer.isBuffer(filePath)) {
+      const result = await uploadBufferToCloudinary(filePath, {
+        folder: 'compliance-documents',
+        public_id: `compliance-${documentId}`,
+        resource_type: 'auto',
+        timeout: 60000,
+      });
+      
+      logger.info('Compliance document uploaded successfully', { 
+        documentId, 
+        url: result.secure_url 
+      });
+      
+      return result;
+    }
+
+    // If it's a file path (existing functionality)
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'compliance-documents',
+      public_id: `compliance-${documentId}`,
+      resource_type: 'auto',
+      timeout: 60000,
+    });
+    
+    logger.info('Compliance document uploaded successfully', { 
+      documentId, 
+      url: result.secure_url 
+    });
+    
+    return result;
+  } catch (error) {
+    logger.error('Error uploading compliance document to Cloudinary:', { 
+      error: error instanceof Error ? error.message : error,
+      documentId,
+    });
+    throw new Error(`Failed to upload compliance document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
 export default cloudinary;

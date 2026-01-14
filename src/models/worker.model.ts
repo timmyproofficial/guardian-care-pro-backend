@@ -63,6 +63,7 @@ export interface IWorker extends IUser {
     ndisWorkerScreeningVerified: boolean;
     onboardingComplete: boolean;
     onboardingFeeReceived: boolean;
+    complianceStatus: 'not_submitted' | 'pending' | 'approved' | 'rejected';
   };
   organizations: mongoose.Types.ObjectId[];
   abn?: string; // Australian Business Number
@@ -205,6 +206,11 @@ const workerSchema = new Schema<IWorker>(
       ndisWorkerScreeningVerified: { type: Boolean, default: false },
       onboardingComplete: { type: Boolean, default: false },
       onboardingFeeReceived: { type: Boolean, default: false },
+      complianceStatus: { 
+        type: String, 
+        enum: ['not_submitted', 'pending', 'approved', 'rejected'], 
+        default: 'not_submitted' 
+      },
     },
     
     // Organizations the worker is associated with
