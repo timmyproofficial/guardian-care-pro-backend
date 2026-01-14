@@ -35,7 +35,7 @@ const allowedOrigins = [
   'https://support-24.netlify.app',
   'https://support24.com.au',
   'https://support-24-staging.netlify.app',
-  'https://staging.support24.com.au/'
+  'https://staging.support24.com.au'
 ];
 
 // Set security headers
