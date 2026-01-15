@@ -15,7 +15,7 @@ dotenv.config({ path: path.join(__dirname, '../../.env') });
  */
 const envVarsSchema = Joi.object()
   .keys({
-    NODE_ENV: Joi.string().valid('production', 'development', 'test').required(),
+    NODE_ENV: Joi.string().valid('production', 'development', 'staging').required(),
     PORT: Joi.number().default(3000),
     API_PREFIX: Joi.string().default('/api/v1/v1'),
     CLIENT_URL: Joi.string().required().description('Client application URL'),
@@ -23,7 +23,7 @@ const envVarsSchema = Joi.object()
     
     // MongoDB
     MONGODB_URI: Joi.string().required().description('MongoDB connection string'),
-    MONGODB_URI_TEST: Joi.string().description('MongoDB connection string for testing'),
+    MONGODB_URI_STAGING: Joi.string().description('MongoDB connection string for testing'),
     
     // JWT
     JWT_SECRET: Joi.string().required().description('JWT secret key'),
@@ -98,7 +98,7 @@ const config = {
   
   // MongoDB config
   mongoose: {
-    url: envVars.NODE_ENV === 'test' ? envVars.MONGODB_URI_TEST : envVars.MONGODB_URI,
+    url: envVars.NODE_ENV === 'staging' ? envVars.MONGODB_URI_STAGING : envVars.MONGODB_URI,
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,
