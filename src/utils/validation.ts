@@ -1170,3 +1170,62 @@ export const publicValidation = {
     phone: Joi.string().required().trim().min(8).max(20),
   }),
 };
+
+/**
+ * Compliance validation schemas
+ */
+export const complianceValidation = {
+  // Update compliance answers
+  updateAnswers: Joi.object({
+    ndisWorkerScreeningCheck: Joi.boolean(),
+    ndisWorkerOrientationModule: Joi.boolean(),
+    nationalPoliceCheck: Joi.boolean(),
+    workingWithChildrenCheck: Joi.boolean(),
+    firstAidCertification: Joi.boolean(),
+    cprCertification: Joi.boolean(),
+    covidVaccinationEvidence: Joi.boolean(),
+    influenzaVaccinationEvidence: Joi.boolean(),
+    relevantQualifications: Joi.boolean(),
+    ndisCodeOfConductAgreement: Joi.boolean(),
+    manualHandlingTraining: Joi.boolean(),
+    medicationAdministrationTraining: Joi.boolean(),
+    infectionControlTraining: Joi.boolean(),
+    publicLiabilityInsurance: Joi.boolean(),
+  }),
+
+  // Submit compliance
+  submitCompliance: Joi.object({
+    complianceAnswers: Joi.object({
+      ndisWorkerScreeningCheck: Joi.boolean(),
+      ndisWorkerOrientationModule: Joi.boolean(),
+      nationalPoliceCheck: Joi.boolean(),
+      workingWithChildrenCheck: Joi.boolean(),
+      firstAidCertification: Joi.boolean(),
+      cprCertification: Joi.boolean(),
+      covidVaccinationEvidence: Joi.boolean(),
+      influenzaVaccinationEvidence: Joi.boolean(),
+      relevantQualifications: Joi.boolean(),
+      ndisCodeOfConductAgreement: Joi.boolean(),
+      manualHandlingTraining: Joi.boolean(),
+      medicationAdministrationTraining: Joi.boolean(),
+      infectionControlTraining: Joi.boolean(),
+      publicLiabilityInsurance: Joi.boolean(),
+    }),
+  }),
+
+  // Upload document
+  uploadDocument: Joi.object({
+    expiryDate: Joi.date().greater('now').optional(),
+  }),
+
+  // Admin review compliance
+  reviewCompliance: Joi.object({
+    decision: Joi.string().valid('approved', 'rejected').required(),
+    rejectionReasons: Joi.array().items(Joi.string().trim()).when('decision', {
+      is: 'rejected',
+      then: Joi.array().min(1).required(),
+      otherwise: Joi.optional(),
+    }),
+    adminNotes: Joi.string().trim().max(1000).optional(),
+  }),
+};

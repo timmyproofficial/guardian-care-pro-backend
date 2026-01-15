@@ -26,6 +26,7 @@ import jobRoute from './job.route';
 import eventRoute from './event.route';
 import serviceCategoryRoute from './serviceCategory.route';
 import publicRoute from './public.route';
+import complianceRoute from './compliance.route';
 // import participantRoute from './participant.route';
 // import documentRoute from './document.route';
 import { authenticate } from '../middlewares/auth.middleware';
@@ -164,6 +165,12 @@ const routes: Route[] = [
     path: '/public',
     route: publicRoute,
     authRequired: false,
+  },
+  // Compliance routes for worker compliance submissions
+  {
+    path: '/compliance',
+    route: complianceRoute,
+    authRequired: false, // Auth handled per-route (workers and admins)
   }
 ];
 
