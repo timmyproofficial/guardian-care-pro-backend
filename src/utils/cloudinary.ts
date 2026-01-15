@@ -381,4 +381,153 @@ export const deleteEventImage = async (publicId: string): Promise<any> => {
   }
 };
 
+// File filter for compliance documents (certificates, checks)
+const complianceDocumentFileFilter = (_req: Express.Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
+  const allowedMimes = [
+    'image/jpeg', 
+    'image/jpg', 
+    'image/png', 
+    'application/pdf'
+  ];
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type. Only JPG, JPEG, PNG and PDF are allowed for compliance documents.'));
+  }
+};
+
+// Multer upload configuration for compliance documents
+export const complianceDocumentUpload = multer({
+  storage: multer.memoryStorage(),
+  fileFilter: complianceDocumentFileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
+
+/**
+ * Upload a compliance document to Cloudinary
+ * @param filePath - Path to the local file or buffer
+ * @param documentId - Unique ID for the document (workerId-documentType)
+ * @returns Promise with Cloudinary upload result
+ */
+export const uploadComplianceDocument = async (
+  filePath: string | Buffer,
+  documentId: string
+): Promise<UploadApiResponse> => {
+  try {
+    logger.info('Uploading compliance document to Cloudinary', { 
+      documentId,
+      isBuffer: Buffer.isBuffer(filePath),
+    });
+
+    // If it's a buffer (from multer memory storage)
+    if (Buffer.isBuffer(filePath)) {
+      const result = await uploadBufferToCloudinary(filePath, {
+        folder: 'compliance-documents',
+        public_id: `compliance-${documentId}`,
+        resource_type: 'auto',
+        timeout: 60000,
+      });
+      
+      logger.info('Compliance document uploaded successfully', { 
+        documentId, 
+        url: result.secure_url 
+      });
+      
+      return result;
+    }
+
+    // If it's a file path (existing functionality)
+    const result = await cloudinary.uploader.upload(filePath, {
+      folder: 'compliance-documents',
+      public_id: `compliance-${documentId}`,
+      resource_type: 'auto',
+      timeout: 60000,
+    });
+    
+    logger.info('Compliance document uploaded successfully', { 
+      documentId, 
+      url: result.secure_url 
+    });
+    
+    return result;
+  } catch (error) {
+    logger.error('Error uploading compliance document to Cloudinary:', { 
+      error: error instanceof Error ? error.message : error,
+      documentId,
+    });
+    throw new Error(`Failed to upload compliance document: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+/**
+ * Extract public_id from a Cloudinary URL
+ * @param url - The Cloudinary secure_url
+ * @returns The public_id or null if extraction fails
+ */
+const extractPublicIdFromUrl = (url: string): string | null => {
+  try {
+    // Cloudinary URLs follow pattern: 
+    // https://res.cloudinary.com/<cloud>/<resource_type>/upload/<version>/<folder>/<public_id>.<ext>
+    // or without version: https://res.cloudinary.com/<cloud>/<resource_type>/upload/<folder>/<public_id>.<ext>
+    const urlObj = new URL(url);
+    const pathParts = urlObj.pathname.split('/');
+    
+    // Find 'upload' index and get everything after it
+    const uploadIndex = pathParts.indexOf('upload');
+    if (uploadIndex === -1) return null;
+    
+    // Skip version if present (starts with 'v' followed by digits)
+    let startIndex = uploadIndex + 1;
+    if (pathParts[startIndex]?.match(/^v\d+$/)) {
+      startIndex++;
+    }
+    
+    // Join remaining parts and remove file extension
+    const publicIdWithExt = pathParts.slice(startIndex).join('/');
+    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, '');
+    
+    return publicId || null;
+  } catch (error) {
+    logger.error('Error extracting public_id from URL:', { url, error });
+    return null;
+  }
+};
+
+/**
+ * Delete a compliance document from Cloudinary
+ * @param url - The Cloudinary URL of the document to delete
+ * @returns Promise with deletion result
+ */
+export const deleteComplianceDocument = async (url: string): Promise<any> => {
+  try {
+    const publicId = extractPublicIdFromUrl(url);
+    if (!publicId) {
+      logger.warn('Could not extract public_id from URL for deletion', { url });
+      return { result: 'not_found' };
+    }
+
+    logger.info('Attempting to delete compliance document from Cloudinary', { publicId, url });
+
+    // Try deleting as 'raw' first (for PDFs), then as 'image' if that fails
+    let result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: 'raw',
+    });
+
+    if (result.result === 'not found') {
+      // Try as image type
+      result = await cloudinary.uploader.destroy(publicId, {
+        resource_type: 'image',
+      });
+    }
+
+    logger.info('Compliance document deletion result', { publicId, result: result.result });
+    return result;
+  } catch (error) {
+    logger.error('Error deleting compliance document from Cloudinary:', { url, error });
+    throw error;
+  }
+};
+
 export default cloudinary;

@@ -10,7 +10,7 @@ const swaggerOptions: swaggerJsDoc.Options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Guardian Care Pro API',
+      title: 'Support24 API',
       version: version,
       description: 'Backend API for Support24 - A platform connecting Independent Support Workers with participants and their guardians',
       contact: {
@@ -24,11 +24,11 @@ const swaggerOptions: swaggerJsDoc.Options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
+        url: 'http://localhost:3000',
         description: 'Development server',
       },
       {
-        url: 'https://your-production-url.com',
+        url: 'https://api.support24.com.au',
         description: 'Production server',
       },
     ],
@@ -162,6 +162,10 @@ const swaggerOptions: swaggerJsDoc.Options = {
       {
         name: 'Service Types',
         description: 'Service type management',
+      },
+      {
+        name: 'Compliance',
+        description: 'Worker compliance submissions and admin reviews',
       },
       {
         name: 'Public',
