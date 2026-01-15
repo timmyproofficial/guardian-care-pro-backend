@@ -10,6 +10,8 @@ import { successResponse, errorResponse } from '../utils/api-response';
 import { AuthenticatedRequest } from '@/middlewares/auth.middleware';
 import { UserRole, UserStatus } from '../types/user.types';
 import WorkerRegistry from '../models/workerRegistry.model';
+import ShiftReference from '../models/shiftReference.model';
+// import { ShiftReferenceStatus } from '../types/roster.types';
 
 
 export const userController = {
@@ -422,7 +424,62 @@ export const userController = {
         providerId: provider._id
       }).select('workerName phone email externalWorkerId status competencies qualifications totalShiftsAssigned totalShiftsCancelled lastShiftDate');
 
-      return res.json(successResponse({ provider, workers }, 'Provider and workers retrieved successfully'));
+      // Get upcoming shifts for this provider (scheduled or confirmed, future dates)
+    // const upcomingShifts = await ShiftReference.find({
+    //   providerId: provider._id,
+    //   shiftDate: { $gte: new Date() },
+    //   currentStatus: { $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED] }
+    // }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies');
+
+    // Get all future shifts for this provider (for admin overview)
+    const allFutureShifts = await ShiftReference.find({
+      providerId: provider._id,
+      shiftDate: { $gte: new Date() }
+    }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies currentStatus');
+
+    // Group shifts by worker
+    // const shiftsByWorker = new Map();
+
+    // for (const shift of upcomingShifts) {
+    //   let workerKey = null;
+      
+    //   // First try to match by assignedWorkerId (for full user accounts)
+    //   if (shift.assignedWorkerId) {
+    //     workerKey = shift.assignedWorkerId.toString();
+    //   } else {
+    //     // For lightweight workers, create a composite key from worker details
+    //     const shiftWorkerKey = `${shift.assignedWorkerName || ''}|${shift.assignedWorkerPhone || ''}|${shift.assignedWorkerEmail || ''}`.toLowerCase();
+    //     workerKey = shiftWorkerKey;
+    //   }
+      
+    //   if (!shiftsByWorker.has(workerKey)) {
+    //     shiftsByWorker.set(workerKey, []);
+    //   }
+    //   shiftsByWorker.get(workerKey).push(shift);
+    // }
+
+    // Add upcoming shifts to each worker
+    // const workersWithShifts = workers.map(worker => {
+    //   let workerKey = null;
+      
+    //   // Check if worker has a matched user ID
+    //   if (worker.matchedUserId) {
+    //     workerKey = worker.matchedUserId.toString();
+    //   } else {
+    //     // Create composite key for lightweight workers
+    //     const workerKeyComposite = `${worker.workerName || ''}|${worker.phone || ''}|${worker.email || ''}`.toLowerCase();
+    //     workerKey = workerKeyComposite;
+    //   }
+      
+    //   const workerShifts = shiftsByWorker.get(workerKey) || [];
+      
+    //   return {
+    //     ...worker.toObject(),
+    //     upcomingShifts: workerShifts
+    //   };
+    // });
+
+      return res.json(successResponse({ provider, workers, allFutureShifts }, 'Provider and workers retrieved successfully'));
     } catch (error) {
       next(error);
       return;
