@@ -1157,11 +1157,13 @@ export const publicValidation = {
   // Cancel shift by phone
   cancelShift: Joi.object({
     workerPhone: Joi.string().required().trim().min(8).max(20),
-    shiftDate: Joi.string().trim(),
-    shiftStartTime: Joi.string().trim(),
-    cancellationReason: Joi.string()
-      .required()
-      .valid('sick', 'emergency', 'unavailable', 'transport', 'other'),
+    shiftReferenceId: Joi.string().regex(/^[0-9a-fA-F]{24}$/),
+    // shiftDate: Joi.string().trim(),
+    // shiftStartTime: Joi.string().trim(),
+    // cancellationReason: Joi.string()
+    //   .required()
+    //   .valid('sick', 'emergency', 'unavailable', 'transport', 'other'),
+    cancellationReason: Joi.string().required().trim(),
     cancellationMessage: Joi.string().trim().max(500),
   }),
 
