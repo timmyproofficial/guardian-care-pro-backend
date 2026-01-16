@@ -157,9 +157,74 @@ router.post(
  *         description: Rate limit exceeded
  */
 router.post(
-  '/shift-cancellation',
+  '/shift-cancellation-old',
   cancellationRateLimiter,
   publicController.cancelShiftByPhone
+);
+
+/**
+ * @swagger
+ * /api/v1/public/shift-cancellation:
+ *   post:
+ *     summary: Cancel shift by shift reference ID
+ *     description: Cancel a shift using shift reference ID and phone verification (no authentication required). Requires admin to provide shift reference ID.
+ *     tags: [Public]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - shiftReferenceId
+ *               - cancellationReason
+ *               - workerPhone
+ *               - providerId
+ *             properties:
+ *               shiftReferenceId:
+ *                 type: string
+ *                 description: Unique identifier for the shift reference
+ *                 example: "shift123"
+ *               cancellationReason:
+ *                 type: string
+ *                 description: Reason for cancellation
+ *                 example: "I'm on break"
+ *               cancellationMessage:
+ *                 type: string
+ *                 description: Additional details about the cancellation
+ *                 example: "Can't do johnson's 8am shift tomorrow I'm on break"
+ *               workerPhone:
+ *                 type: string
+ *                 description: Worker's phone number for verification
+ *                 example: "+61298765432"
+ *               providerId:
+ *                 type: string
+ *                 description: Provider ID for additional verification
+ *                 example: "69413d1fd1e2032e8a4a3de3"
+ *     responses:
+ *       200:
+ *         description: Shift cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 message:
+ *                 shiftDetails:
+ *                   type: object
+ *                 eventId:
+ *                   type: string
+ *       400:
+ *         description: Validation error or shift not found
+ *       429:
+ *         description: Rate limit exceeded
+ */
+router.post(
+  '/shift-cancellation',
+  cancellationRateLimiter,
+  publicController.cancelShiftByShiftId
 );
 
 /**
