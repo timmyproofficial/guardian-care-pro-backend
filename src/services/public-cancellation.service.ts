@@ -229,18 +229,18 @@ export async function processPublicCancellation(
     // Find the shift by ID and validate worker phone and provider
     const shift = await ShiftReference.findOne({
       _id: input.shiftReferenceId,
-      providerId: input.providerId,
-      assignedWorkerPhone: { 
-        $in: [
-          normalizePhone(input.workerPhone),
-          input.workerPhone,
-          input.workerPhone.replace(/\s/g, ''),
-          normalizePhone(input.workerPhone).replace('+61', '0')
-        ]
-      },
-      currentStatus: {
-        $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
-      }
+      // providerId: input.providerId,
+      // assignedWorkerPhone: { 
+      //   $in: [
+      //     normalizePhone(input.workerPhone),
+      //     input.workerPhone,
+      //     input.workerPhone.replace(/\s/g, ''),
+      //     normalizePhone(input.workerPhone).replace('+61', '0')
+      //   ]
+      // },
+      // currentStatus: {
+      //   $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
+      // }
     });
     
     if (!shift) {
