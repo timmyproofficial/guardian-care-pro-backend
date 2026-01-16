@@ -19,25 +19,25 @@ import { authService } from '../services/auth.service';
 import catchAsync from '../utils/catchAsync';
 
 /**
- * Cancel a shift via phone number verification
+ * Cancel a shift via shift reference ID and phone verification
  * POST /api/v1/public/shift-cancellation
  * 
- * No authentication required - worker identifies via phone number
+ * No authentication required - admin provides shift ID and worker verifies via phone
  */
-export const cancelShiftByPhone = async (req: Request, res: Response) => {
+export const cancelShiftByShiftId = async (req: Request, res: Response) => {
   try {
     const {
-      workerPhone,
-      shiftDate,
-      shiftStartTime,
+      shiftReferenceId,
       cancellationReason,
-      cancellationMessage
+      cancellationMessage,
+      workerPhone,
+      providerId
     } = req.body;
     
     // Validate required fields
-    if (!workerPhone) {
+    if (!shiftReferenceId) {
       return res.status(httpStatus.BAD_REQUEST).json(
-        errorResponse('Worker phone number is required', httpStatus.BAD_REQUEST)
+        errorResponse('Shift reference ID is required', httpStatus.BAD_REQUEST)
       );
     }
     
@@ -47,23 +47,24 @@ export const cancelShiftByPhone = async (req: Request, res: Response) => {
       );
     }
     
-    // Validate cancellation reason
-    const validReasons = Object.values(CancellationReason);
-    if (!validReasons.includes(cancellationReason)) {
+    if (!workerPhone) {
       return res.status(httpStatus.BAD_REQUEST).json(
-        errorResponse(
-          `Invalid cancellation reason. Valid options: ${validReasons.join(', ')}`,
-          httpStatus.BAD_REQUEST
-        )
+        errorResponse('Worker phone number is required', httpStatus.BAD_REQUEST)
+      );
+    }
+    
+    if (!providerId) {
+      return res.status(httpStatus.BAD_REQUEST).json(
+        errorResponse('Provider ID is required', httpStatus.BAD_REQUEST)
       );
     }
     
     const input: PublicCancellationInput = {
-      workerPhone,
-      shiftDate,
-      shiftStartTime,
+      shiftReferenceId,
       cancellationReason,
-      cancellationMessage
+      cancellationMessage,
+      workerPhone,
+      providerId
     };
     
     const result = await processPublicCancellation(input);
@@ -85,6 +86,74 @@ export const cancelShiftByPhone = async (req: Request, res: Response) => {
     );
   }
 };
+
+// /**
+//  * Cancel a shift via phone number verification
+//  * POST /api/v1/public/shift-cancellation
+//  * 
+//  * No authentication required - worker identifies via phone number
+//  */
+// export const cancelShiftByPhone = async (req: Request, res: Response) => {
+//   try {
+//     const {
+//       workerPhone,
+//       shiftDate,
+//       shiftStartTime,
+//       cancellationReason,
+//       cancellationMessage
+//     } = req.body;
+    
+//     // Validate required fields
+//     if (!workerPhone) {
+//       return res.status(httpStatus.BAD_REQUEST).json(
+//         errorResponse('Worker phone number is required', httpStatus.BAD_REQUEST)
+//       );
+//     }
+    
+//     if (!cancellationReason) {
+//       return res.status(httpStatus.BAD_REQUEST).json(
+//         errorResponse('Cancellation reason is required', httpStatus.BAD_REQUEST)
+//       );
+//     }
+    
+//     // Validate cancellation reason
+//     const validReasons = Object.values(CancellationReason);
+//     if (!validReasons.includes(cancellationReason)) {
+//       return res.status(httpStatus.BAD_REQUEST).json(
+//         errorResponse(
+//           `Invalid cancellation reason. Valid options: ${validReasons.join(', ')}`,
+//           httpStatus.BAD_REQUEST
+//         )
+//       );
+//     }
+    
+//     const input: PublicCancellationInput = {
+//       workerPhone,
+//       shiftDate,
+//       shiftStartTime,
+//       cancellationReason,
+//       cancellationMessage
+//     };
+    
+//     const result = await processPublicCancellation(input);
+    
+//     if (!result.success) {
+//       return res.status(httpStatus.NOT_FOUND).json(
+//         errorResponse(result.message, httpStatus.NOT_FOUND)
+//       );
+//     }
+    
+//     return res.status(httpStatus.OK).json(
+//       successResponse(result, result.message)
+//     );
+    
+//   } catch (error) {
+//     logger.error('Error in public shift cancellation:', error);
+//     return res.status(httpStatus.INTERNAL_SERVER_ERROR).json(
+//     errorResponse('An error occurred while processing your cancellation', httpStatus.INTERNAL_SERVER_ERROR)
+//     );
+//   }
+// };
 
 /**
  * Get upcoming shifts for a worker by phone

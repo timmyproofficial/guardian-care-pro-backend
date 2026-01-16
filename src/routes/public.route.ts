@@ -104,8 +104,8 @@ router.post(
  * @swagger
  * /api/v1/public/shift-cancellation:
  *   post:
- *     summary: Cancel shift by phone
- *     description: Cancel an upcoming shift using phone number verification (no authentication required). Supports flexible date/time formats including 'today', 'tomorrow', 'morning', 'afternoon'.
+ *     summary: Cancel shift by shift reference ID
+ *     description: Cancel a shift using shift reference ID and phone verification (no authentication required). Requires admin to provide shift reference ID.
  *     tags: [Public]
  *     requestBody:
  *       required: true
@@ -114,28 +114,31 @@ router.post(
  *           schema:
  *             type: object
  *             required:
- *               - workerPhone
+ *               - shiftReferenceId
  *               - cancellationReason
+ *               - workerPhone
+ *               - providerId
  *             properties:
- *               workerPhone:
+ *               shiftReferenceId:
  *                 type: string
- *                 description: Worker's phone number for verification
- *                 example: "+61412345678"
- *               shiftDate:
- *                 type: string
- *                 description: ISO date string, 'today', or 'tomorrow'
- *                 example: "today"
- *               shiftStartTime:
- *                 type: string
- *                 description: Time in HH:mm format or 'morning', 'afternoon', 'evening', 'night'
- *                 example: "morning"
+ *                 description: Unique identifier for the shift reference
+ *                 example: "shift123"
  *               cancellationReason:
  *                 type: string
- *                 enum: [sick, emergency, unavailable, transport, other]
  *                 description: Reason for cancellation
+ *                 example: "I'm on break"
  *               cancellationMessage:
  *                 type: string
  *                 description: Additional details about the cancellation
+ *                 example: "Can't do johnson's 8am shift tomorrow I'm on break"
+ *               workerPhone:
+ *                 type: string
+ *                 description: Worker's phone number for verification
+ *                 example: "+61298765432"
+ *               providerId:
+ *                 type: string
+ *                 description: Provider ID for additional verification
+ *                 example: "69413d1fd1e2032e8a4a3de3"
  *     responses:
  *       200:
  *         description: Shift cancelled successfully
@@ -159,7 +162,7 @@ router.post(
 router.post(
   '/shift-cancellation',
   cancellationRateLimiter,
-  publicController.cancelShiftByPhone
+  publicController.cancelShiftByShiftId
 );
 
 /**

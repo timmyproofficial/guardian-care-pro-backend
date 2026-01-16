@@ -20,12 +20,23 @@ import logger from '../utils/logger';
 /**
  * Input for public shift cancellation
  */
+// export interface PublicCancellationInput {
+//   workerPhone: string;
+//   shiftDate?: string; // ISO date or 'today', 'tomorrow'
+//   shiftStartTime?: string; // HH:mm format or 'morning', 'afternoon', 'evening', 'night'
+//   cancellationReason: CancellationReason;
+//   cancellationMessage?: string;
+// }
+
+/**
+ * Input for public shift cancellation
+ */
 export interface PublicCancellationInput {
-  workerPhone: string;
-  shiftDate?: string; // ISO date or 'today', 'tomorrow'
-  shiftStartTime?: string; // HH:mm format or 'morning', 'afternoon', 'evening', 'night'
-  cancellationReason: CancellationReason;
+  shiftReferenceId: string;
+  cancellationReason: string;
   cancellationMessage?: string;
+  workerPhone: string;
+  providerId: string;
 }
 
 /**
@@ -215,23 +226,33 @@ export async function processPublicCancellation(
   input: PublicCancellationInput
 ): Promise<PublicCancellationResult> {
   try {
-    // Parse date and time
-    const dateRange = parseShiftDate(input.shiftDate);
-    const timePeriod = parseTimePeriod(input.shiftStartTime);
-    
-    // Find the shift
-    const shift = await findWorkerShift(input.workerPhone, dateRange, timePeriod);
+    // Find the shift by ID and validate worker phone and provider
+    const shift = await ShiftReference.findOne({
+      _id: input.shiftReferenceId,
+      providerId: input.providerId,
+      assignedWorkerPhone: { 
+        $in: [
+          normalizePhone(input.workerPhone),
+          input.workerPhone,
+          input.workerPhone.replace(/\s/g, ''),
+          normalizePhone(input.workerPhone).replace('+61', '0')
+        ]
+      },
+      currentStatus: {
+        $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
+      }
+    });
     
     if (!shift) {
       logger.warn('Public cancellation: No shift found', {
+        shiftReferenceId: input.shiftReferenceId,
         workerPhone: input.workerPhone,
-        dateRange,
-        timePeriod
+        providerId: input.providerId
       });
       
       return {
         success: false,
-        message: 'No upcoming shift found for this phone number. Please check your details and try again.'
+        message: 'Shift not found or you are not authorized to cancel this shift. Please verify the shift ID and your phone number.'
       };
     }
     
@@ -292,6 +313,7 @@ export async function processPublicCancellation(
     
     logger.info('Public cancellation processed', {
       shiftId: shift._id,
+      shiftReferenceId: input.shiftReferenceId,
       workerPhone: input.workerPhone,
       reason: input.cancellationReason,
       noticeHours
@@ -315,6 +337,114 @@ export async function processPublicCancellation(
     throw error;
   }
 }
+
+// /**
+//  * Process public shift cancellation
+//  */
+// export async function processPublicCancellation(
+//   input: PublicCancellationInput
+// ): Promise<PublicCancellationResult> {
+//   try {
+//     // Parse date and time
+//     const dateRange = parseShiftDate(input.shiftDate);
+//     const timePeriod = parseTimePeriod(input.shiftStartTime);
+    
+//     // Find the shift
+//     const shift = await findWorkerShift(input.workerPhone, dateRange, timePeriod);
+    
+//     if (!shift) {
+//       logger.warn('Public cancellation: No shift found', {
+//         workerPhone: input.workerPhone,
+//         dateRange,
+//         timePeriod
+//       });
+      
+//       return {
+//         success: false,
+//         message: 'No upcoming shift found for this phone number. Please check your details and try again.'
+//       };
+//     }
+    
+//     // Check if already cancelled
+//     if (shift.currentStatus === ShiftReferenceStatus.CANCELLED) {
+//       return {
+//         success: false,
+//         message: 'This shift has already been cancelled.',
+//         shiftDetails: {
+//           shiftId: shift._id.toString(),
+//           shiftDate: moment(shift.shiftDate).format('YYYY-MM-DD'),
+//           shiftTime: `${shift.shiftStartTime} - ${shift.shiftEndTime}`,
+//           participantName: shift.participantName,
+//           serviceType: shift.shiftType || shift.supportCategory
+//         }
+//       };
+//     }
+    
+//     // Calculate notice hours
+//     const noticeHours = calculateNoticeHours(shift.shiftDate, shift.shiftStartTime);
+    
+//     // Create cancellation event
+//     const event = await ShiftEvent.create({
+//       shiftReferenceId: shift._id,
+//       providerId: shift.providerId,
+//       eventType: ShiftEventType.CANCELLATION_REPORTED,
+//       triggeredBy: EventTriggerSource.WORKER_PORTAL,
+//       eventPayload: {
+//         cancellationReason: input.cancellationReason,
+//         messageContent: input.cancellationMessage,
+//         noticeHours,
+//         previousStatus: shift.currentStatus,
+//         workerName: shift.assignedWorkerName,
+//         workerPhone: shift.assignedWorkerPhone || input.workerPhone
+//       },
+//       resolutionStatus: ResolutionStatus.PENDING
+//     });
+    
+//     // Update shift status
+//     shift.currentStatus = ShiftReferenceStatus.CANCELLED;
+//     shift.cancellationEventId = event._id;
+//     shift.statusUpdatedAt = new Date();
+//     await shift.save();
+    
+//     // Update worker registry stats if worker is in registry
+//     if (shift.assignedWorkerId) {
+//       await WorkerRegistry.updateOne(
+//         { 
+//           providerId: shift.providerId,
+//           $or: [
+//             { matchedUserId: shift.assignedWorkerId },
+//             { _id: shift.assignedWorkerId }
+//           ]
+//         },
+//         { $inc: { totalShiftsCancelled: 1 } }
+//       );
+//     }
+    
+//     logger.info('Public cancellation processed', {
+//       shiftId: shift._id,
+//       workerPhone: input.workerPhone,
+//       reason: input.cancellationReason,
+//       noticeHours
+//     });
+    
+//     return {
+//       success: true,
+//       message: `Shift cancelled successfully. ${noticeHours > 0 ? `You provided ${noticeHours.toFixed(1)} hours notice.` : 'Please note this is a late cancellation.'}`,
+//       shiftDetails: {
+//         shiftId: shift._id.toString(),
+//         shiftDate: moment(shift.shiftDate).format('dddd, MMMM D, YYYY'),
+//         shiftTime: `${shift.shiftStartTime} - ${shift.shiftEndTime}`,
+//         participantName: shift.participantName,
+//         serviceType: shift.shiftType || shift.supportCategory
+//       },
+//       eventId: event._id.toString()
+//     };
+    
+//   } catch (error) {
+//     logger.error('Error processing public cancellation:', error);
+//     throw error;
+//   }
+// }
 
 /**
  * Get worker's upcoming shifts by phone
