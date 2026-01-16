@@ -104,68 +104,6 @@ router.post(
  * @swagger
  * /api/v1/public/shift-cancellation:
  *   post:
- *     summary: Cancel shift by phone
- *     description: Cancel an upcoming shift using phone number verification (no authentication required). Supports flexible date/time formats including 'today', 'tomorrow', 'morning', 'afternoon'.
- *     tags: [Public]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - workerPhone
- *               - cancellationReason
- *             properties:
- *               workerPhone:
- *                 type: string
- *                 description: Worker's phone number for verification
- *                 example: "+61412345678"
- *               shiftDate:
- *                 type: string
- *                 description: ISO date string, 'today', or 'tomorrow'
- *                 example: "today"
- *               shiftStartTime:
- *                 type: string
- *                 description: Time in HH:mm format or 'morning', 'afternoon', 'evening', 'night'
- *                 example: "morning"
- *               cancellationReason:
- *                 type: string
- *                 enum: [sick, emergency, unavailable, transport, other]
- *                 description: Reason for cancellation
- *               cancellationMessage:
- *                 type: string
- *                 description: Additional details about the cancellation
- *     responses:
- *       200:
- *         description: Shift cancelled successfully
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                 message:
- *                 shiftDetails:
- *                   type: object
- *                 eventId:
- *                   type: string
- *       400:
- *         description: Validation error or shift not found
- *       429:
- *         description: Rate limit exceeded
- */
-router.post(
-  '/shift-cancellation-old',
-  cancellationRateLimiter,
-  publicController.cancelShiftByPhone
-);
-
-/**
- * @swagger
- * /api/v1/public/shift-cancellation:
- *   post:
  *     summary: Cancel shift by shift reference ID
  *     description: Cancel a shift using shift reference ID and phone verification (no authentication required). Requires admin to provide shift reference ID.
  *     tags: [Public]
