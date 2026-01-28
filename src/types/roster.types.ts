@@ -90,7 +90,21 @@ export enum ShiftEventType {
   ESCALATION_TRIGGERED = 'escalation_triggered',
   SHIFT_CONFIRMED = 'shift_confirmed',
   SHIFT_COMPLETED = 'shift_completed',
-  MANUAL_OVERRIDE = 'manual_override'
+  MANUAL_OVERRIDE = 'manual_override',
+
+  // Emergency coverage workflow events
+  COVERAGE_NEEDED = 'coverage_needed',
+  WORKERS_RANKED = 'workers_ranked',
+  SHIFT_OFFER_SENT = 'shift_offer_sent',
+  SHIFT_OFFER_ACCEPTED = 'shift_offer_accepted',
+  SHIFT_OFFER_DECLINED = 'shift_offer_declined',
+  AUTO_APPROVAL_CHECKED = 'auto_approval_checked',
+  AUTO_APPROVED = 'auto_approved',
+  MANUAL_REVIEW_REQUESTED = 'manual_review_requested',
+  PROVIDER_OVERRIDE = 'provider_override',
+  COVERAGE_ESCALATED = 'coverage_escalated',
+  COVERAGE_SECURED = 'coverage_secured',
+  COVERAGE_FAILED = 'coverage_failed'
 }
 
 /**
@@ -140,12 +154,95 @@ export enum CancellationReason {
 // INTERFACES - Provider
 // ═══════════════════════════════════════════════════════════════
 
+/**
+ * Worker ranking priority criteria for shift assignments
+ */
+export enum WorkerPriorityCriteria {
+  WORKED_EXACT_SHIFT = 'worked_exact_shift',
+  WORKED_SAME_LOCATION = 'worked_same_location',
+  HIGHEST_RATING = 'highest_rating',
+  CLOSEST_DISTANCE = 'closest_distance',
+  MOST_RECENT_SHIFT = 'most_recent_shift',
+  LONGEST_TIME_SINCE_SHIFT = 'longest_time_since_shift'
+}
+
+/**
+ * Coverage escalation options when no workers accept
+ */
+export enum CoverageEscalationOption {
+  NOTIFY_PROVIDER = 'notify_provider',
+  CONTACT_BACKUP_AGENCY = 'contact_backup_agency',
+  OFFER_HIGHER_RATE = 'offer_higher_rate',
+  BROADCAST_TO_ALL = 'broadcast_to_all'
+}
+
+/**
+ * Auto-approval criteria for shift assignments
+ */
+export interface AutoApprovalCriteria {
+  minRating?: number;
+  requireExperienceWithShiftType?: boolean;
+  requireExperienceWithLocation?: boolean;
+  maxDistanceKm?: number;
+  requireValidCredentials?: boolean;
+  maxAcceptTimeMinutes?: number;
+}
+
+/**
+ * Manual approval triggers
+ */
+export interface ManualApprovalTriggers {
+  ratingBelow?: number;
+  newWorkerThreshold?: number; // shifts completed
+  requireShiftTypeExperience?: boolean;
+  maxDistanceKm?: number;
+  weekendOrOvernightShifts?: boolean;
+  highComplexityParticipants?: boolean;
+  highRateThreshold?: number;
+}
+
+/**
+ * Coverage escalation settings
+ */
+export interface CoverageEscalationSettings {
+  standardShiftTimeoutMinutes?: number;
+  emergencyShiftTimeoutMinutes?: number;
+  escalationOptions?: CoverageEscalationOption[];
+  rateIncreaseAmount?: number;
+}
+
+/**
+ * Worker communication preferences
+ */
+export interface WorkerCommunicationSettings {
+  useDirectiveLanguage?: boolean; // "You are assigned" vs "Shift available"
+  standardCancellationNoticeHours?: number;
+  emergencyCancellationNoticeHours?: number;
+}
+
+/**
+ * Comprehensive provider coverage rules
+ */
+export interface ProviderCoverageRules {
+  enableAutoApproval?: boolean;
+  enableEmergencyAutoApproval?: boolean;
+  autoApprovalCriteria?: AutoApprovalCriteria;
+  manualApprovalTriggers?: ManualApprovalTriggers;
+  priorityRankingOrder?: WorkerPriorityCriteria[];
+  escalationSettings?: CoverageEscalationSettings;
+  communicationSettings?: WorkerCommunicationSettings;
+}
+
 export interface ProviderSettings {
+  // Legacy settings
   autoCreateWorkers: boolean;
   autoCreateParticipants: boolean;
   requireWorkerApproval: boolean;
   enableAutoCancellationReplacement: boolean;
   smsNotifications: boolean;
+
+  // New coverage rules
+  coverageRules?: ProviderCoverageRules;
 }
 
 export interface BusinessAddress {

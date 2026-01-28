@@ -15,6 +15,7 @@ import {
   EventTriggerSource,
   ResolutionStatus
 } from '../types/roster.types';
+import { processEmergencyCoverage } from './emergency-coverage.service';
 import logger from '../utils/logger';
 
 /**
@@ -229,18 +230,18 @@ export async function processPublicCancellation(
     // Find the shift by ID and validate worker phone and provider
     const shift = await ShiftReference.findOne({
       _id: input.shiftReferenceId,
-      // providerId: input.providerId,
-      // assignedWorkerPhone: { 
-      //   $in: [
-      //     normalizePhone(input.workerPhone),
-      //     input.workerPhone,
-      //     input.workerPhone.replace(/\s/g, ''),
-      //     normalizePhone(input.workerPhone).replace('+61', '0')
-      //   ]
-      // },
-      // currentStatus: {
-      //   $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
-      // }
+      providerId: input.providerId,
+      assignedWorkerPhone: {
+        $in: [
+          normalizePhone(input.workerPhone),
+          input.workerPhone,
+          input.workerPhone.replace(/\s/g, ''),
+          normalizePhone(input.workerPhone).replace('+61', '0')
+        ]
+      },
+      currentStatus: {
+        $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
+      }
     });
     
     if (!shift) {
@@ -300,7 +301,7 @@ export async function processPublicCancellation(
     // Update worker registry stats if worker is in registry
     if (shift.assignedWorkerId) {
       await WorkerRegistry.updateOne(
-        { 
+        {
           providerId: shift.providerId,
           $or: [
             { matchedUserId: shift.assignedWorkerId },
@@ -310,18 +311,40 @@ export async function processPublicCancellation(
         { $inc: { totalShiftsCancelled: 1 } }
       );
     }
-    
+
+    // Trigger emergency coverage workflow
+    const isEmergency = noticeHours < 2; // Less than 2 hours notice
+    const coverageRequest = {
+      shiftReferenceId: input.shiftReferenceId,
+      providerId: input.providerId,
+      noticeHours,
+      isEmergency
+    };
+
+    try {
+      await processEmergencyCoverage(coverageRequest);
+      logger.info('Emergency coverage triggered for cancelled shift', {
+        shiftId: shift._id,
+        noticeHours,
+        isEmergency
+      });
+    } catch (coverageError) {
+      logger.error('Failed to trigger emergency coverage:', coverageError);
+      // Don't fail the cancellation if coverage fails
+    }
+
     logger.info('Public cancellation processed', {
       shiftId: shift._id,
       shiftReferenceId: input.shiftReferenceId,
       workerPhone: input.workerPhone,
       reason: input.cancellationReason,
-      noticeHours
+      noticeHours,
+      coverageTriggered: true
     });
-    
+
     return {
       success: true,
-      message: `Shift cancelled successfully. ${noticeHours > 0 ? `You provided ${noticeHours.toFixed(1)} hours notice.` : 'Please note this is a late cancellation.'}`,
+      message: `Shift cancelled successfully. ${noticeHours > 0 ? `You provided ${noticeHours.toFixed(1)} hours notice.` : 'Please note this is a late cancellation.'} Coverage search has been initiated.`,
       shiftDetails: {
         shiftId: shift._id.toString(),
         shiftDate: moment(shift.shiftDate).format('dddd, MMMM D, YYYY'),

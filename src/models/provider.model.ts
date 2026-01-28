@@ -11,7 +11,9 @@ import {
   ProviderSubscriptionTier,
   ProviderSubscriptionStatus,
   ProviderSettings,
-  BusinessAddress
+  BusinessAddress,
+  WorkerPriorityCriteria,
+  CoverageEscalationOption
 } from '../types/roster.types';
 
 /**
@@ -144,6 +146,7 @@ const providerSchema = new Schema<IProvider>(
     
     // Configuration
     settings: {
+      // Legacy settings
       autoCreateWorkers: {
         type: Boolean,
         default: true
@@ -163,6 +166,132 @@ const providerSchema = new Schema<IProvider>(
       smsNotifications: {
         type: Boolean,
         default: false
+      },
+
+      // Coverage rules
+      coverageRules: {
+        enableAutoApproval: {
+          type: Boolean,
+          default: false
+        },
+        enableEmergencyAutoApproval: {
+          type: Boolean,
+          default: false
+        },
+        autoApprovalCriteria: {
+          minRating: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: 4.5
+          },
+          requireExperienceWithShiftType: {
+            type: Boolean,
+            default: true
+          },
+          requireExperienceWithLocation: {
+            type: Boolean,
+            default: false
+          },
+          maxDistanceKm: {
+            type: Number,
+            min: 0,
+            default: 20
+          },
+          requireValidCredentials: {
+            type: Boolean,
+            default: true
+          },
+          maxAcceptTimeMinutes: {
+            type: Number,
+            min: 1,
+            default: 30
+          }
+        },
+        manualApprovalTriggers: {
+          ratingBelow: {
+            type: Number,
+            min: 0,
+            max: 5,
+            default: 4.5
+          },
+          newWorkerThreshold: {
+            type: Number,
+            min: 0,
+            default: 3
+          },
+          requireShiftTypeExperience: {
+            type: Boolean,
+            default: true
+          },
+          maxDistanceKm: {
+            type: Number,
+            min: 0,
+            default: 20
+          },
+          weekendOrOvernightShifts: {
+            type: Boolean,
+            default: true
+          },
+          highComplexityParticipants: {
+            type: Boolean,
+            default: true
+          },
+          highRateThreshold: {
+            type: Number,
+            min: 0,
+            default: 50
+          }
+        },
+        priorityRankingOrder: [{
+          type: String,
+          enum: Object.values(WorkerPriorityCriteria),
+          default: [
+            WorkerPriorityCriteria.WORKED_EXACT_SHIFT,
+            WorkerPriorityCriteria.WORKED_SAME_LOCATION,
+            WorkerPriorityCriteria.HIGHEST_RATING,
+            WorkerPriorityCriteria.CLOSEST_DISTANCE,
+            WorkerPriorityCriteria.MOST_RECENT_SHIFT
+          ]
+        }],
+        escalationSettings: {
+          standardShiftTimeoutMinutes: {
+            type: Number,
+            min: 1,
+            default: 120
+          },
+          emergencyShiftTimeoutMinutes: {
+            type: Number,
+            min: 1,
+            default: 10
+          },
+          escalationOptions: [{
+            type: String,
+            enum: Object.values(CoverageEscalationOption),
+            default: [CoverageEscalationOption.NOTIFY_PROVIDER]
+          }],
+          rateIncreaseAmount: {
+            type: Number,
+            min: 0,
+            default: 5
+          }
+        },
+        communicationSettings: {
+          useDirectiveLanguage: {
+            type: Boolean,
+            default: false
+          },
+          standardCancellationNoticeHours: {
+            type: Number,
+            min: 0,
+            default: 24
+          },
+          emergencyCancellationNoticeHours: {
+            type: Number,
+            min: 0,
+            default: 2
+          }
+        }
       }
     },
     

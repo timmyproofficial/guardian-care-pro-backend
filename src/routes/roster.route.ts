@@ -8,6 +8,8 @@ import { rosterController } from '../controllers/roster.controller';
 import { authenticate, authorize } from '../middlewares/auth.middleware';
 import { upload } from '../middlewares/upload.middleware';
 import { UserRole } from '../types/user.types';
+import { handleWorkerOfferResponse, providerCoverageOverride } from '../services/emergency-coverage.service';
+import { successResponse } from '../utils/api-response';
 
 const router = express.Router();
 
@@ -477,6 +479,141 @@ router.post(
   authenticate,
   authorize([UserRole.PROVIDER, UserRole.ADMIN]),
   rosterController.findReplacements
+);
+
+// ═══════════════════════════════════════════════════════════════
+// EMERGENCY COVERAGE ENDPOINTS
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * @swagger
+ * /api/v1/shift-offers/{shiftId}/respond:
+ *   post:
+ *     summary: Worker response to shift offer
+ *     description: Accept or decline a shift offer during emergency coverage
+ *     tags: [Roster]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: shiftId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The shift ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - workerId
+ *               - accepted
+ *             properties:
+ *               workerId:
+ *                 type: string
+ *                 description: Worker registry ID
+ *               accepted:
+ *                 type: boolean
+ *                 description: Whether the worker accepts the offer
+ *               responseTimeMinutes:
+ *                 type: number
+ *                 default: 0
+ *                 description: Time taken to respond in minutes
+ *     responses:
+ *       200:
+ *         description: Response recorded successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden
+ *       404:
+ *         description: Shift or worker not found
+ */
+router.post(
+  '/shift-offers/:shiftId/respond',
+  authenticate,
+  authorize([UserRole.PROVIDER, UserRole.ADMIN]), // In production, this might be public with different auth
+  async (req: any, res: any, next: any) => {
+    try {
+      const { shiftId } = req.params;
+      const { workerId, accepted, responseTimeMinutes } = req.body;
+
+      const result = await handleWorkerOfferResponse(shiftId, workerId, accepted, responseTimeMinutes);
+
+      return res.json(successResponse(result, result.message));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+/**
+ * @swagger
+ * /api/v1/coverage/{shiftId}/override:
+ *   post:
+ *     summary: Provider coverage override
+ *     description: Provider manually approves, rejects, or reassigns coverage for a shift
+ *     tags: [Roster]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: shiftId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: The shift ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - decision
+ *             properties:
+ *               decision:
+ *                 type: string
+ *                 enum: [approve, reject, reassign]
+ *                 description: Provider's decision
+ *               workerId:
+ *                 type: string
+ *                 description: Worker ID for approval/reassignment (required for approve/reassign)
+ *               notes:
+ *                 type: string
+ *                 description: Optional notes about the decision
+ *     responses:
+ *       200:
+ *         description: Override processed successfully
+ *       400:
+ *         description: Validation error
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Forbidden - Provider/Admin only
+ *       404:
+ *         description: Shift not found
+ */
+router.post(
+  '/coverage/:shiftId/override',
+  authenticate,
+  authorize([UserRole.PROVIDER, UserRole.ADMIN]),
+  async (req: any, res: any, next: any) => {
+    try {
+      const { shiftId } = req.params;
+      const { decision, workerId, notes } = req.body;
+
+      const result = await providerCoverageOverride(shiftId, req.user._id, decision, workerId, notes);
+
+      return res.json(successResponse(result, result.message));
+    } catch (error) {
+      next(error);
+    }
+  }
 );
 
 export default router;
