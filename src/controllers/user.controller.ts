@@ -5,13 +5,16 @@
 
 import { Request, Response, NextFunction } from 'express';
 import httpStatus from 'http-status';
+import mongoose from 'mongoose';
 import { userService } from '../services/user.service';
 import { successResponse, errorResponse } from '../utils/api-response';
 import { AuthenticatedRequest } from '@/middlewares/auth.middleware';
 import { UserRole, UserStatus } from '../types/user.types';
+import { IProvider } from '../models/provider.model';
 import WorkerRegistry from '../models/workerRegistry.model';
 import ShiftReference from '../models/shiftReference.model';
-// import { ShiftReferenceStatus } from '../types/roster.types';
+import ParticipantRegistry from '../models/participantRegistry.model';
+import { ShiftReferenceStatus } from '../types/roster.types';
 
 
 export const userController = {
@@ -419,67 +422,174 @@ export const userController = {
         return res.status(httpStatus.NOT_FOUND).json(errorResponse('Provider not found', httpStatus.NOT_FOUND));
       }
 
-      // Get workers associated wih this provider from WorkerRegistry
+      // Get workers associated with this provider from WorkerRegistry
       const workers = await WorkerRegistry.find({
         providerId: provider._id
-      }).select('workerName phone email externalWorkerId status competencies qualifications totalShiftsAssigned totalShiftsCancelled lastShiftDate');
+      }).select('workerName phone email externalWorkerId status competencies qualifications totalShiftsAssigned totalShiftsCancelled lastShiftDate matchedUserId availabilitySchedule averageRating');
 
       // Get upcoming shifts for this provider (scheduled or confirmed, future dates)
-    // const upcomingShifts = await ShiftReference.find({
-    //   providerId: provider._id,
-    //   shiftDate: { $gte: new Date() },
-    //   currentStatus: { $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED] }
-    // }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies');
+      const upcomingShifts = await ShiftReference.find({
+        providerId: provider._id,
+        shiftDate: { $gte: new Date() },
+        currentStatus: { $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED] }
+      }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies currentStatus');
 
-    // Get all future shifts for this provider (for admin overview)
-    const allFutureShifts = await ShiftReference.find({
-      providerId: provider._id,
-      shiftDate: { $gte: new Date() }
-    }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies currentStatus');
+      // Create a map of worker registry entries by composite key for matching
+      const workerRegistryMap = new Map();
+      workers.forEach(worker => {
+        // Create composite keys for matching (same logic as shift grouping)
+        const keys = [
+          worker.matchedUserId?.toString(), // Primary key if matched to user
+          `${worker.workerName || ''}|${worker.phone || ''}|${worker.email || ''}`.toLowerCase() // Fallback composite key
+        ];
 
-    // Group shifts by worker
-    // const shiftsByWorker = new Map();
+        keys.forEach(key => {
+          if (key) {
+            workerRegistryMap.set(key, worker);
+          }
+        });
+      });
 
-    // for (const shift of upcomingShifts) {
-    //   let workerKey = null;
-      
-    //   // First try to match by assignedWorkerId (for full user accounts)
-    //   if (shift.assignedWorkerId) {
-    //     workerKey = shift.assignedWorkerId.toString();
-    //   } else {
-    //     // For lightweight workers, create a composite key from worker details
-    //     const shiftWorkerKey = `${shift.assignedWorkerName || ''}|${shift.assignedWorkerPhone || ''}|${shift.assignedWorkerEmail || ''}`.toLowerCase();
-    //     workerKey = shiftWorkerKey;
-    //   }
-      
-    //   if (!shiftsByWorker.has(workerKey)) {
-    //     shiftsByWorker.set(workerKey, []);
-    //   }
-    //   shiftsByWorker.get(workerKey).push(shift);
-    // }
+      // Group shifts by worker and populate worker details
+      const shiftsByWorker = new Map();
 
-    // Add upcoming shifts to each worker
-    // const workersWithShifts = workers.map(worker => {
-    //   let workerKey = null;
-      
-    //   // Check if worker has a matched user ID
-    //   if (worker.matchedUserId) {
-    //     workerKey = worker.matchedUserId.toString();
-    //   } else {
-    //     // Create composite key for lightweight workers
-    //     const workerKeyComposite = `${worker.workerName || ''}|${worker.phone || ''}|${worker.email || ''}`.toLowerCase();
-    //     workerKey = workerKeyComposite;
-    //   }
-      
-    //   const workerShifts = shiftsByWorker.get(workerKey) || [];
-      
-    //   return {
-    //     ...worker.toObject(),
-    //     upcomingShifts: workerShifts
-    //   };
-    // });
+      for (const shift of upcomingShifts) {
+        let workerKey = null;
+        let assignedWorkerId = shift.assignedWorkerId;
 
-      return res.json(successResponse({ provider, workers, allFutureShifts }, 'Provider and workers retrieved successfully'));
+        // First try to match by assignedWorkerId (for full user accounts)
+        if (shift.assignedWorkerId) {
+          workerKey = shift.assignedWorkerId.toString();
+        } else {
+          // For lightweight workers, create a composite key from worker details
+          const shiftWorkerKey = `${shift.assignedWorkerName || ''}|${shift.assignedWorkerPhone || ''}|${shift.assignedWorkerEmail || ''}`.toLowerCase();
+          workerKey = shiftWorkerKey;
+
+          // Try to populate assignedWorkerId from worker registry
+          const registryWorker = workerRegistryMap.get(shiftWorkerKey);
+          if (registryWorker?.matchedUserId) {
+            assignedWorkerId = registryWorker.matchedUserId;
+          }
+        }
+
+        if (!shiftsByWorker.has(workerKey)) {
+          shiftsByWorker.set(workerKey, []);
+        }
+
+        // Include the populated assignedWorkerId in the shift data
+        shiftsByWorker.get(workerKey).push({
+          ...shift.toObject(),
+          assignedWorkerId
+        });
+      }
+
+      // Add upcoming shifts to each worker
+      const workersWithShifts = workers.map(worker => {
+        let workerKey = null;
+
+        // Check if worker has a matched user ID
+        if (worker.matchedUserId) {
+          workerKey = worker.matchedUserId.toString();
+        } else {
+          // Create composite key for lightweight workers
+          const workerKeyComposite = `${worker.workerName || ''}|${worker.phone || ''}|${worker.email || ''}`.toLowerCase();
+          workerKey = workerKeyComposite;
+        }
+
+        const workerShifts = shiftsByWorker.get(workerKey) || [];
+
+        return {
+          ...worker.toObject(),
+          upcomingShifts: workerShifts
+        };
+      });
+
+      return res.json(successResponse({ provider, workersWithShifts }, 'Provider and workers retrieved successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
+   * Get all past shifts for a provider by phone number
+   * @route GET /api/admin/providers/past-shifts/phone/:phoneNumber
+   */
+  getProviderPastShifts: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { phoneNumber } = req.params;
+      const provider = await userService.getProviderByPhoneNumber(phoneNumber);
+
+      if (!provider) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Provider not found', httpStatus.NOT_FOUND));
+      }
+
+      // Get all past shifts (completed shifts before today)
+      const pastShifts = await ShiftReference.find({
+        providerId: provider._id,
+        shiftDate: { $lt: new Date() },
+        currentStatus: { $in: [ShiftReferenceStatus.COMPLETED, ShiftReferenceStatus.CANCELLED] }
+      })
+      .populate('assignedWorkerId', 'averageRating')
+      .sort({ shiftDate: -1, shiftStartTime: -1 })
+      .lean();
+
+      // Get all worker registries for this provider
+      const workerRegistries = await WorkerRegistry.find({
+        providerId: provider._id
+      }).select('workerName phone email externalWorkerId competencies qualifications availabilitySchedule averageRating status matchedUserId');
+
+      // Create a map for quick lookup by various keys
+      const workerRegistryMap = new Map();
+      workerRegistries.forEach(worker => {
+        // Key by user ID if matched
+        if (worker.matchedUserId) {
+          workerRegistryMap.set(worker.matchedUserId.toString(), worker);
+        }
+        // Key by worker registry ID
+        workerRegistryMap.set(worker._id.toString(), worker);
+        // Key by name/phone/email combination for fallback matching
+        const compositeKey = `${worker.workerName || ''}|${worker.phone || ''}|${worker.email || ''}`.toLowerCase();
+        workerRegistryMap.set(compositeKey, worker);
+      });
+
+      // Transform shifts to match the required format
+      const allPastShifts = pastShifts.map(shift => {
+        let workerRegistry = null;
+
+        // Try to find worker registry by assignedWorkerId first
+        if (shift.assignedWorkerId) {
+          workerRegistry = workerRegistryMap.get(shift.assignedWorkerId.toString());
+        }
+
+        // Fallback: try to match by worker name/phone/email combination
+        if (!workerRegistry) {
+          const compositeKey = `${shift.assignedWorkerName || ''}|${shift.assignedWorkerPhone || ''}|${shift.assignedWorkerEmail || ''}`.toLowerCase();
+          workerRegistry = workerRegistryMap.get(compositeKey);
+        }
+
+        return {
+          _id: shift._id,
+          shiftDate: shift.shiftDate,
+          shiftStartTime: shift.shiftStartTime,
+          shiftEndTime: shift.shiftEndTime,
+          assignedWorkerName: shift.assignedWorkerName,
+          assignedWorkerPhone: shift.assignedWorkerPhone,
+          assignedWorkerEmail: shift.assignedWorkerEmail,
+          participantName: shift.participantName,
+          externalWorkerId: workerRegistry?.externalWorkerId || null,
+          status: workerRegistry?.status || 'lightweight',
+          competencies: workerRegistry?.competencies || [],
+          qualifications: workerRegistry?.qualifications || [],
+          participantLocation: shift.locationName || 'Client Location',
+          providerBusinessLocation: `${(provider as IProvider).businessAddress.street}, ${(provider as IProvider).businessAddress.city} ${(provider as IProvider).businessAddress.state} ${(provider as IProvider).businessAddress.postcode}`,
+          currentStatus: shift.currentStatus,
+          workerAvailability: workerRegistry?.availabilitySchedule || [],
+          workerRating: workerRegistry?.averageRating || null
+        };
+      });
+
+      return res.json(successResponse({ allPastShifts }, 'Past shifts retrieved successfully'));
     } catch (error) {
       next(error);
       return;

@@ -109,6 +109,13 @@ router.get(
   userController.getProviderByPhoneNumber,
 );
 
+router.get(
+  '/admin/providers/past-shifts/phone/:phoneNumber',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.getProviderPastShifts,
+);
+
 // Role-specific user routes
 router.get('/participants/:participantId', authenticate, userController.getParticipantById);
 

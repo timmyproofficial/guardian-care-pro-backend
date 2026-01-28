@@ -584,7 +584,7 @@ export const userService = {
    */
   getProviderByPhoneNumber: async (phoneNumber: string): Promise<IUser | null> => {
     try {
-      const provider = await User.findOne({ phone: phoneNumber, role: UserRole.PROVIDER });
+      const provider = await User.findOne({ primaryContactPhone: phoneNumber, role: UserRole.PROVIDER });
       return provider;
     } catch (error) {
       logger.error(`Error getting provider by phone number ${phoneNumber}:`, error);

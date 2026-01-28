@@ -29,7 +29,13 @@ export interface IWorkerRegistry extends Document {
   // Skills/competencies (extracted from rosters over time)
   competencies: string[];
   qualifications: string[];
-  
+
+  // Availability and preferences
+  availabilitySchedule: string[]; // e.g., ["Friday 5pm to 6pm", "Wednesday 2pm to 3pm"]
+
+  // Rating and performance
+  averageRating?: number; // Average rating from 0-5
+
   // Statistics
   totalShiftsAssigned: number;
   totalShiftsCancelled: number;
@@ -103,7 +109,20 @@ const workerRegistrySchema = new Schema<IWorkerRegistry>(
       type: String,
       trim: true
     }],
-    
+
+    // Availability and preferences
+    availabilitySchedule: [{
+      type: String,
+      trim: true
+    }],
+
+    // Rating and performance
+    averageRating: {
+      type: Number,
+      min: 0,
+      max: 5
+    },
+
     // Statistics
     totalShiftsAssigned: {
       type: Number,
