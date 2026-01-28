@@ -22,6 +22,7 @@ import routineRoute from './routine.route';
 import notificationRoute from './notification.routes';
 import locationRoute from './location.route';
 import rosterRoute from './roster.route';
+import registryRoute from './registry.route';
 import jobRoute from './job.route';
 import eventRoute from './event.route';
 import serviceCategoryRoute from './serviceCategory.route';
@@ -141,6 +142,12 @@ const routes: Route[] = [
   {
     path: '/',
     route: rosterRoute,
+    authRequired: true,
+  },
+  // Registry routes for manual worker/participant onboarding
+  {
+    path: '/registry',
+    route: registryRoute,
     authRequired: true,
   },
   // Job module routes
