@@ -116,6 +116,20 @@ router.get(
   userController.getProviderPastShifts,
 );
 
+router.get(
+  '/admin/providers/workers/:phoneNumber',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.getAllProviderWorkers,
+);
+
+router.post(
+  '/admin/assign-worker-to-shift',
+  authenticate,
+  authorize([UserRole.ADMIN]),
+  userController.assignWorkerToShift,
+);
+
 // Role-specific user routes
 router.get('/participants/:participantId', authenticate, userController.getParticipantById);
 

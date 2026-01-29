@@ -432,7 +432,7 @@ export const userController = {
         providerId: provider._id,
         shiftDate: { $gte: new Date() },
         currentStatus: { $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED] }
-      }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantName locationName shiftType supportCategory requiredCompetencies currentStatus');
+      }).select('shiftDate shiftStartTime shiftEndTime assignedWorkerId assignedWorkerName assignedWorkerPhone assignedWorkerEmail participantId participantName locationName shiftType supportCategory requiredCompetencies currentStatus');
 
       // Create a map of worker registry entries by composite key for matching
       const workerRegistryMap = new Map();
@@ -504,7 +504,26 @@ export const userController = {
         };
       });
 
-      return res.json(successResponse({ provider, workersWithShifts }, 'Provider and workers retrieved successfully'));
+      // Get all future shifts for this provider (for admin overview)
+      const allFutureShifts = upcomingShifts.map(shift => ({
+        _id: shift._id,
+        shiftDate: shift.shiftDate.toISOString().split('T')[0],
+        shiftStartTime: shift.shiftStartTime,
+        shiftEndTime: shift.shiftEndTime,
+        assignedWorkerId: shift.assignedWorkerId,
+        assignedWorkerName: shift.assignedWorkerName,
+        assignedWorkerPhone: shift.assignedWorkerPhone,
+        assignedWorkerEmail: shift.assignedWorkerEmail,
+        participantId: shift.participantId,
+        participantName: shift.participantName,
+        locationName: shift.locationName,
+        shiftType: shift.shiftType,
+        supportCategory: shift.supportCategory,
+        requiredCompetencies: shift.requiredCompetencies,
+        currentStatus: shift.currentStatus
+      }));
+
+      return res.json(successResponse({ provider, workersWithShifts, allFutureShifts }, 'Provider and workers retrieved successfully'));
     } catch (error) {
       next(error);
       return;
@@ -533,6 +552,26 @@ export const userController = {
       .populate('assignedWorkerId', 'averageRating')
       .sort({ shiftDate: -1, shiftStartTime: -1 })
       .lean();
+
+      // Get participant data for addresses
+      const participantIds = pastShifts
+        .map(shift => shift.participantId)
+        .filter((id): id is mongoose.Types.ObjectId => id != null);
+
+      const participants = await ParticipantRegistry.find({
+        providerId: provider._id,
+        $or: [
+          { _id: { $in: participantIds } },
+          { participantName: { $in: pastShifts.map(s => s.participantName).filter(Boolean) } }
+        ]
+      }).select('participantName address postcode _id');
+
+      // Create participant map
+      const participantMap = new Map();
+      participants.forEach(participant => {
+        participantMap.set(participant._id.toString(), participant);
+        participantMap.set(participant.participantName.toLowerCase(), participant);
+      });
 
       // Get all worker registries for this provider
       const workerRegistries = await WorkerRegistry.find({
@@ -568,20 +607,36 @@ export const userController = {
           workerRegistry = workerRegistryMap.get(compositeKey);
         }
 
+        // Get participant location
+        let participantLocation = shift.locationName || 'Client Location';
+        if (shift.participantId) {
+          const participant = participantMap.get(shift.participantId.toString());
+          if (participant?.address) {
+            participantLocation = participant.address;
+          }
+        } else if (shift.participantName) {
+          const participant = participantMap.get(shift.participantName.toLowerCase());
+          if (participant?.address) {
+            participantLocation = participant.address;
+          }
+        }
+
         return {
           _id: shift._id,
-          shiftDate: shift.shiftDate,
+          shiftDate: shift.shiftDate.toISOString().split('T')[0], // Format as YYYY-MM-DD
           shiftStartTime: shift.shiftStartTime,
           shiftEndTime: shift.shiftEndTime,
+          assignedWorkerId: shift.assignedWorkerId,
           assignedWorkerName: shift.assignedWorkerName,
           assignedWorkerPhone: shift.assignedWorkerPhone,
           assignedWorkerEmail: shift.assignedWorkerEmail,
+          participantId: shift.participantId,
           participantName: shift.participantName,
           externalWorkerId: workerRegistry?.externalWorkerId || null,
           status: workerRegistry?.status || 'lightweight',
           competencies: workerRegistry?.competencies || [],
           qualifications: workerRegistry?.qualifications || [],
-          participantLocation: shift.locationName || 'Client Location',
+          participantLocation: participantLocation,
           providerBusinessLocation: `${(provider as IProvider).businessAddress.street}, ${(provider as IProvider).businessAddress.city} ${(provider as IProvider).businessAddress.state} ${(provider as IProvider).businessAddress.postcode}`,
           currentStatus: shift.currentStatus,
           workerAvailability: workerRegistry?.availabilitySchedule || [],
@@ -590,6 +645,72 @@ export const userController = {
       });
 
       return res.json(successResponse({ allPastShifts }, 'Past shifts retrieved successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
+   * Get all workers for a provider
+   * @route GET /api/admin/providers/workers/:phoneNumber
+   */
+  getAllProviderWorkers: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { phoneNumber } = req.params;
+      const provider = await userService.getProviderByPhoneNumber(phoneNumber);
+
+      if (!provider) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Provider not found', httpStatus.NOT_FOUND));
+      }
+
+      // Get all workers for this provider
+      const workers = await WorkerRegistry.find({
+        providerId: provider._id
+      }).select('workerName phone email externalWorkerId status competencies qualifications availabilitySchedule averageRating totalShiftsAssigned totalShiftsCancelled lastShiftDate matchedUserId')
+        .sort({ workerName: 1 });
+
+      return res.json(successResponse({ workers }, 'Workers retrieved successfully'));
+    } catch (error) {
+      next(error);
+      return;
+    }
+  },
+
+  /**
+   * Assign worker to shift
+   * @route POST /api/v1/users/admin/assign-worker-to-shift
+   */
+  assignWorkerToShift: async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { workerId, shiftId } = req.body;
+
+      if (!workerId || !shiftId) {
+        return res.status(httpStatus.BAD_REQUEST).json(errorResponse('workerId and shiftId are required', httpStatus.BAD_REQUEST));
+      }
+
+      // Find the shift
+      const shift = await ShiftReference.findById(shiftId);
+      if (!shift) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Shift not found', httpStatus.NOT_FOUND));
+      }
+
+      // Find the worker
+      const worker = await WorkerRegistry.findById(workerId);
+      if (!worker) {
+        return res.status(httpStatus.NOT_FOUND).json(errorResponse('Worker not found', httpStatus.NOT_FOUND));
+      }
+
+      // Update the shift with the new worker
+      shift.assignedWorkerId = worker._id;
+      shift.assignedWorkerName = worker.workerName;
+      shift.assignedWorkerPhone = worker.phone;
+      shift.assignedWorkerEmail = worker.email;
+      shift.statusUpdatedAt = new Date();
+
+      await shift.save();
+
+      return res.json(successResponse({ shift }, 'Worker assigned to shift successfully'));
     } catch (error) {
       next(error);
       return;

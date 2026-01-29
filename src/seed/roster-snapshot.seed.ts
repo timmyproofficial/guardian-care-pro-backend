@@ -222,7 +222,7 @@ async function createProviderRosterData(provider: any) {
   const workers = await createWorkersForProvider(provider._id, snapshot._id, 80);
 
   // Create 60 participants for this provider
-  const participants = await createParticipantsForProvider(provider._id, snapshot._id, 60);
+  const participants = await createParticipantsForProvider(provider._id, snapshot._id, 60, provider.businessAddress.state);
 
   // Create 800 shift references (mix of past and future)
   await createShiftReferencesForProvider(provider._id, snapshot._id, workers, participants, 800);
@@ -360,7 +360,7 @@ async function createWorkersForProvider(providerId: mongoose.Types.ObjectId, sna
 }
 
 // Helper function to create participants
-async function createParticipantsForProvider(providerId: mongoose.Types.ObjectId, snapshotId: mongoose.Types.ObjectId, numParticipants: number = 60) {
+async function createParticipantsForProvider(providerId: mongoose.Types.ObjectId, snapshotId: mongoose.Types.ObjectId, numParticipants: number = 60, providerState?: string) {
   const baseParticipantNames = [
     'Margaret Chen', 'Robert Davis', 'Susan Patel', 'James Wilson', 'Linda Thompson',
     'Michael Brown', 'Patricia Garcia', 'Christopher Lee', 'Jennifer Martin', 'Daniel Rodriguez',
@@ -406,7 +406,20 @@ async function createParticipantsForProvider(providerId: mongoose.Types.ObjectId
   const locations = [
     'Sydney CBD', 'Bondi Beach', 'Parramatta', 'Newtown', 'Surry Hills',
     'Melbourne CBD', 'St Kilda', 'Richmond', 'Footscray', 'Brunswick',
-    'Brisbane CBD', 'South Bank', 'Fortitude Valley', 'West End', 'New Farm'
+    'Brisbane CBD', 'South Bank', 'Fortitude Valley', 'West End', 'New Farm',
+    'Perth CBD', 'Fremantle', 'Subiaco', 'Joondalup', 'Mandurah',
+    'Adelaide CBD', 'North Adelaide', 'Glenelg', 'Modbury', 'Tea Tree Gully',
+    'Hobart CBD', 'Sandy Bay', 'New Town', 'Lenah Valley', 'Kingston',
+    'Darwin CBD', 'Palmerston', 'Nightcliff', 'Alice Springs', 'Katherine',
+    'Cairns', 'Townsville', 'Mackay', 'Rockhampton', 'Toowoomba',
+    'Wollongong', 'Newcastle', 'Central Coast', 'Gold Coast', 'Sunshine Coast'
+  ];
+
+  const streetNames = [
+    'George Street', 'Pitt Street', 'Elizabeth Street', 'Collins Street', 'Flinders Street',
+    'Queen Street', 'Adelaide Street', 'Albert Street', 'William Street', 'Mary Street',
+    'Smith Street', 'High Street', 'Church Street', 'Victoria Street', 'Oxford Street',
+    'King Street', 'Princess Street', 'Stanley Street', 'Campbell Street', 'Liverpool Street'
   ];
 
   const participants = [];
@@ -417,7 +430,7 @@ async function createParticipantsForProvider(providerId: mongoose.Types.ObjectId
       participantName: participantNames[i],
       phone: `+614${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
       ndisNumber: `123${String(Math.floor(Math.random() * 900000) + 100000)}`,
-      address: `${Math.floor(Math.random() * 200) + 1} ${locations[i % locations.length]} St, ${locations[i % locations.length]}`,
+      address: `${Math.floor(Math.random() * 500) + 1} ${streetNames[i % streetNames.length]}, ${locations[i % locations.length]}, ${providerState || 'NSW'} ${String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0')}`,
       postcode: String(Math.floor(Math.random() * 9000) + 1000).padStart(4, '0'),
       supportNeeds: supportNeeds[i % supportNeeds.length],
       preferredLanguages: ['English'],
