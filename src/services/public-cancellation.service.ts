@@ -231,14 +231,14 @@ export async function processPublicCancellation(
     const shift = await ShiftReference.findOne({
       _id: input.shiftReferenceId,
       providerId: input.providerId,
-      assignedWorkerPhone: {
-        $in: [
-          normalizePhone(input.workerPhone),
-          input.workerPhone,
-          input.workerPhone.replace(/\s/g, ''),
-          normalizePhone(input.workerPhone).replace('+61', '0')
-        ]
-      },
+      // assignedWorkerPhone: {
+      //   $in: [
+      //     normalizePhone(input.workerPhone),
+      //     input.workerPhone,
+      //     input.workerPhone.replace(/\s/g, ''),
+      //     normalizePhone(input.workerPhone).replace('+61', '0')
+      //   ]
+      // },
       currentStatus: {
         $in: [ShiftReferenceStatus.SCHEDULED, ShiftReferenceStatus.CONFIRMED]
       }

@@ -195,6 +195,7 @@ async function createMultipleProviders() {
 
 // Helper function to create extensive roster data for a provider
 async function createProviderRosterData(provider: any) {
+  console.log(`  Creating roster snapshot for ${provider.organizationName}...`);
   // Create roster snapshot
   const snapshot = await RosterSnapshot.create({
     providerId: provider._id,
@@ -218,14 +219,20 @@ async function createProviderRosterData(provider: any) {
     uploadedBy: provider._id
   });
 
+  console.log(`  Creating 80 workers for ${provider.organizationName}...`);
   // Create 80 workers for this provider
   const workers = await createWorkersForProvider(provider._id, snapshot._id, 80);
+  console.log(`  ✓ Created ${workers.length} workers`);
 
+  console.log(`  Creating 60 participants for ${provider.organizationName}...`);
   // Create 60 participants for this provider
   const participants = await createParticipantsForProvider(provider._id, snapshot._id, 60, provider.businessAddress.state);
+  console.log(`  ✓ Created ${participants.length} participants`);
 
+  console.log(`  Creating 800 shift references for ${provider.organizationName}...`);
   // Create 800 shift references (mix of past and future)
   await createShiftReferencesForProvider(provider._id, snapshot._id, workers, participants, 800);
+  console.log(`  ✓ Created shift references`);
 
   logger.info(`Completed roster data for ${provider.organizationName}`);
 }
@@ -561,8 +568,11 @@ async function seedRosterSnapshots() {
     console.log(`Created ${providers.length} providers`);
 
     // For each provider, create extensive roster data
-    for (const provider of providers) {
+    for (let i = 0; i < providers.length; i++) {
+      const provider = providers[i];
+      console.log(`\n--- Processing provider ${i + 1}/${providers.length}: ${provider.organizationName} ---`);
       await createProviderRosterData(provider);
+      console.log(`✓ Completed provider ${i + 1}/${providers.length}: ${provider.organizationName}`);
     }
 
     console.log('\n========================================');
