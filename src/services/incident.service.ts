@@ -61,7 +61,7 @@ export const incidentService = {
   /**
    * Create a new incident
    */
-  createIncident: async (incidentData: CreateIncidentInput, user: { id: string; role: UserRole }) => {
+  createIncident: async (incidentData: CreateIncidentInput, user: { id: string; role: UserRole }): Promise<any> => {
     try {
       // Check if user can create incidents
       if (!checkIncidentPermissions.canCreateIncident(user.role)) {
@@ -110,7 +110,7 @@ export const incidentService = {
     filters: IncidentFilterOptions = {},
     pagination: PaginationOptions = {},
     user: { id: string; role: UserRole },
-  ) => {
+  ): Promise<any> => {
     try {
       // Build filter query
       const query: any = {};
@@ -187,7 +187,7 @@ export const incidentService = {
   /**
    * Get incidents for a specific shift
    */
-  getIncidentsByShift: async (shiftId: string, user: { id: string; role: UserRole }) => {
+  getIncidentsByShift: async (shiftId: string, user: { id: string; role: UserRole }): Promise<IIncident[]> => {
     try {
       // Validate shift exists
       const shift = await Shift.findOne({ shiftId });
@@ -582,4 +582,4 @@ export const incidentService = {
       throw error;
     }
   },
-};
+} as const;
