@@ -2,7 +2,7 @@
 
 ## 🎉 Implementation Complete!
 
-The complete push notification system has been successfully implemented for the Support24 application. This document provides an overview of all changes and how to use the system.
+The complete push notification system has been successfully implemented for the Guardian Care Pro application. This document provides an overview of all changes and how to use the system.
 
 ---
 
@@ -204,7 +204,7 @@ curl -X POST http://localhost:5000/api/v1/v1/notifications/test \
   -H "Authorization: Bearer YOUR_AUTH_TOKEN" \
   -d '{
     "title": "Test Notification",
-    "body": "Testing push notifications from Support24"
+    "body": "Testing push notifications from Guardian Care Pro"
   }'
 ```
 

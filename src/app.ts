@@ -26,16 +26,16 @@ import { getSocketServer } from './services/socket.server';
  */
 const app: Express = express();
 
+// Extra origins come from CORS_ORIGINS (comma-separated), e.g.
+// CORS_ORIGINS=https://my-app.vercel.app,https://staging.my-app.com
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:5173',
   'http://localhost:8080',
-  'https://guardian-pro-webapp.vercel.app',
-  'https://guardian-pro-webapp-git-main-timmyproofficials-projects.vercel.app',
-  'https://support24.vercel.app',
-  'https://support-24.netlify.app',
-  'https://support24.com.au',
-  'https://support-24-staging.netlify.app',
-  'https://staging.support24.com.au'
+  ...(process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
 ];
 
 // Set security headers

@@ -1,7 +1,7 @@
 {
-  "name": "support24-api",
+  "name": "guardian-care-pro-api",
   "version": "1.0.0",
-  "description": "Backend API for Support24 - a platform connecting Independent Support Workers with participants and their guardians",
+  "description": "Backend API for Guardian Care Pro - a platform connecting Independent Support Workers with participants and their guardians",
   "main": "dist/server.js",
   "scripts": {
     "start": "node dist/server.js",
@@ -34,7 +34,7 @@
     "workers",
     "API"
   ],
-  "author": "Support24 Team",
+  "author": "Guardian Care Pro Team",
   "license": "ISC",
   "dependencies": {
     "@types/bcryptjs": "^2.4.6",

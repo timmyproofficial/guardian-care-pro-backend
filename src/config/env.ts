@@ -130,13 +130,13 @@ const config = {
   },
 
   // email: {
-  //   from: 'support@support24.com.au',
+  //   from: 'support@example.com',
   //   smtp: {
-  //     host: 'mail.support24.com.au',
+  //     host: 'mail.example.com',
   //     port: Number(465),
   //     secure: Number(465) === 465,
   //     auth: {
-  //       user: 'support@support24.com.au',
+  //       user: 'support@example.com',
   //       pass: 'U6%6U*]X-7h5',
   //     },
   //     tls: {

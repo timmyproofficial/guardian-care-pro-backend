@@ -3,7 +3,7 @@
   "info": {
     "title": "Guardian Care Pro API",
     "version": "1.0.0",
-    "description": "Backend API for Support24 - A platform connecting Independent Support Workers with participants and their guardians"
+    "description": "Backend API for Guardian Care Pro - A platform connecting Independent Support Workers with participants and their guardians"
   },
   "servers": [
     {

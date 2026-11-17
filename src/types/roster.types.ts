@@ -1,6 +1,6 @@
 /**
  * Roster Lookup Table (RLT) Type Definitions
- * For Support24 NDIS support coordination platform
+ * For Guardian Care Pro NDIS support coordination platform
  * 
  * This module defines types for:
  * - Provider user type

@@ -1,4 +1,4 @@
-# Support24 API - Postman Testing Guide
+# Guardian Care Pro API - Postman Testing Guide
 
 This guide provides comprehensive sample data for testing the shift and timesheet workflow in Postman.
 
@@ -737,4 +737,4 @@ pm.test("Timesheet data is valid", function () {
 
 ---
 
-This comprehensive guide provides all the necessary sample data and test cases for testing the Support24 API's shift and timesheet workflows. Make sure to follow the sequence of operations for the best testing experience. 
+This comprehensive guide provides all the necessary sample data and test cases for testing the Guardian Care Pro API's shift and timesheet workflows. Make sure to follow the sequence of operations for the best testing experience. 

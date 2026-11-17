@@ -986,7 +986,7 @@
     "name": "Guardian Care Pro API",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": {
-      "content": "Backend API for Support24 - A platform connecting Independent Support Workers with participants and their guardians",
+      "content": "Backend API for Guardian Care Pro - A platform connecting Independent Support Workers with participants and their guardians",
       "type": "text/plain"
     }
   }

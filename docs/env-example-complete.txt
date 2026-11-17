@@ -1,5 +1,5 @@
 # =============================================================================
-# SUPPORT24 API - COMPLETE ENVIRONMENT CONFIGURATION
+# GUARDIAN CARE PRO API - COMPLETE ENVIRONMENT CONFIGURATION
 # =============================================================================
 # Copy this to your .env file and update with your actual values
 # DO NOT commit .env file to version control!
@@ -16,8 +16,8 @@ CORS_ORIGIN=*
 # =============================================================================
 # DATABASE
 # =============================================================================
-MONGODB_URI=mongodb://localhost:27017/support24
-MONGODB_URI_TEST=mongodb://localhost:27017/support24_test
+MONGODB_URI=mongodb://localhost:27017/guardian_care_pro
+MONGODB_URI_TEST=mongodb://localhost:27017/guardian_care_pro_test
 
 # =============================================================================
 # JWT AUTHENTICATION
@@ -29,7 +29,7 @@ JWT_REFRESH_EXPIRATION_DAYS=30
 # =============================================================================
 # EMAIL (SMTP Configuration)
 # =============================================================================
-EMAIL_FROM=noreply@support24.com
+EMAIL_FROM=noreply@example.com
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
@@ -54,9 +54,9 @@ USE_BASE64_IMAGES=true
 FACEBOOK_ICON_URL=https://cdn-icons-png.flaticon.com/512/124/124010.png
 INSTAGRAM_ICON_URL=https://cdn-icons-png.flaticon.com/512/2111/2111463.png
 LINKEDIN_ICON_URL=https://cdn-icons-png.flaticon.com/512/174/174857.png
-FACEBOOK_URL=https://facebook.com/support24
-INSTAGRAM_URL=https://instagram.com/support24
-LINKEDIN_URL=https://linkedin.com/company/support24
+FACEBOOK_URL=https://facebook.com/your-company
+INSTAGRAM_URL=https://instagram.com/your-company
+LINKEDIN_URL=https://linkedin.com/company/your-company
 
 # =============================================================================
 # FIREBASE ADMIN SDK (Push Notifications)
@@ -84,3 +84,17 @@ STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxx
 # =============================================================================
 LOG_LEVEL=info
 
+
+# ============================================
+# CORS (extra allowed frontend origins, comma-separated)
+# ============================================
+CORS_ORIGINS=https://your-app.vercel.app
+
+# ============================================
+# STAGING SEEDER (required only for `staging-seeder` scripts)
+# Never commit real values.
+# ============================================
+SEED_ADMIN_PASSWORD=change-me-admin
+SEED_WORKER_PASSWORD=change-me-worker
+SEED_PARTICIPANT_PASSWORD=change-me-participant
+SEED_EMAIL_DOMAIN=example.com

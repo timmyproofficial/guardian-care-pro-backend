@@ -1,6 +1,6 @@
 # 📱 Flutter Push Notification Integration Guide
 
-Complete guide for integrating Firebase Cloud Messaging (FCM) push notifications in your Flutter mobile app for Support24.
+Complete guide for integrating Firebase Cloud Messaging (FCM) push notifications in your Flutter mobile app for Guardian Care Pro.
 
 ---
 
@@ -33,7 +33,7 @@ Complete guide for integrating Firebase Cloud Messaging (FCM) push notifications
 ### 1. Create/Access Firebase Project
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Create a new project or select your existing **Support24** project
+2. Create a new project or select your existing **Guardian Care Pro** project
 3. Add Android and iOS apps to your project
 
 ### 2. Download Configuration Files
@@ -121,7 +121,7 @@ android {
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     
     <application
-        android:label="Support24"
+        android:label="Guardian Care Pro"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         
@@ -130,7 +130,7 @@ android {
         <!-- FCM default channel -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
-            android:value="support24_notifications" />
+            android:value="guardian_care_pro_notifications" />
         
         <!-- FCM icon (optional - use your app icon) -->
         <meta-data
@@ -216,7 +216,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Support24',
+      title: 'Guardian Care Pro',
       theme: ThemeData(
         primaryColor: const Color(0xFF0D2BEC),
         colorScheme: ColorScheme.fromSeed(
@@ -259,9 +259,9 @@ class NotificationService {
   
   // Notification channel for Android
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
-    'support24_notifications', // id
-    'Support24 Notifications', // title
-    description: 'This channel is used for important Support24 notifications.',
+    'guardian_care_pro_notifications', // id
+    'Guardian Care Pro Notifications', // title
+    description: 'This channel is used for important Guardian Care Pro notifications.',
     importance: Importance.high,
     playSound: true,
     enableVibration: true,
@@ -523,7 +523,7 @@ class NotificationService {
         },
         body: jsonEncode({
           'title': 'Test Notification',
-          'body': 'This is a test notification from Support24',
+          'body': 'This is a test notification from Guardian Care Pro',
         }),
       );
     } catch (e) {
@@ -593,7 +593,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       navigatorKey: navigatorKey, // Add this
-      title: 'Support24',
+      title: 'Guardian Care Pro',
       // ... rest of your app
     );
   }
@@ -731,7 +731,7 @@ curl -X POST https://your-api-url.com/api/v1/v1/notifications/test \
 
 ## 🎉 You're All Set!
 
-Your Flutter app is now ready to receive push notifications from Support24 backend!
+Your Flutter app is now ready to receive push notifications from Guardian Care Pro backend!
 
 For questions or issues, refer to the main project documentation or contact the development team.
 

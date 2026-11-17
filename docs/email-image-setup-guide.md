@@ -409,9 +409,9 @@ INSTAGRAM_ICON_URL=https://cdn-icons-png.flaticon.com/512/2111/2111463.png
 LINKEDIN_ICON_URL=https://cdn-icons-png.flaticon.com/512/174/174857.png
 
 # Social Media Profile Links
-FACEBOOK_URL=https://facebook.com/support24
-INSTAGRAM_URL=https://instagram.com/support24
-LINKEDIN_URL=https://linkedin.com/company/support24
+FACEBOOK_URL=https://facebook.com/your-company
+INSTAGRAM_URL=https://instagram.com/your-company
+LINKEDIN_URL=https://linkedin.com/company/your-company
 ```
 
 ---

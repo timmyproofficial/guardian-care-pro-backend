@@ -18,9 +18,9 @@ INSTAGRAM_ICON_URL=https://cdn-icons-png.flaticon.com/512/2111/2111463.png
 LINKEDIN_ICON_URL=https://cdn-icons-png.flaticon.com/512/174/174857.png
 
 # Social Media Profile Links - OPTIONAL (defaults to '#' if not specified)
-FACEBOOK_URL=https://facebook.com/support24
-INSTAGRAM_URL=https://instagram.com/support24  
-LINKEDIN_URL=https://linkedin.com/company/support24
+FACEBOOK_URL=https://facebook.com/your-company
+INSTAGRAM_URL=https://instagram.com/your-company  
+LINKEDIN_URL=https://linkedin.com/company/your-company
 ```
 
 ## Quick Setup Guide
@@ -189,7 +189,7 @@ If you don't have custom icons, use these free sources:
 
 ```env
 # Use placeholder images for development
-EMAIL_BANNER=https://via.placeholder.com/770x219/0D2BEC/FFFFFF?text=Support24
+EMAIL_BANNER=https://via.placeholder.com/770x219/0D2BEC/FFFFFF?text=Guardian Care Pro
 LOGO_URL=https://via.placeholder.com/200x80/FFFFFF/0D2BEC?text=Logo
 ```
 

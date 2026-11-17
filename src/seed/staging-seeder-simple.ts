@@ -11,6 +11,7 @@ import User from '../models/user.model';
 import { UserRole, UserStatus } from '../types/user.types';
 import logger from '../utils/logger';
 import config from '../config/env';
+import { getSeedPasswords, SEED_EMAIL_DOMAIN } from './seed-credentials';
 
 /**
  * Connect to MongoDB
@@ -69,8 +70,8 @@ const seedAdminUsers = async (): Promise<void> => {
 
     const adminUsers = [
       {
-        email: 'admin@guardiance.com',
-        password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+        email: `admin@${SEED_EMAIL_DOMAIN}`,
+        password: await bcrypt.hash(getSeedPasswords().admin, 10),
         firstName: 'System',
         lastName: 'Administrator',
         role: UserRole.ADMIN,
@@ -79,8 +80,8 @@ const seedAdminUsers = async (): Promise<void> => {
         isEmailVerified: true
       },
       {
-        email: 'manager@guardiance.com',
-        password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+        email: `manager@${SEED_EMAIL_DOMAIN}`,
+        password: await bcrypt.hash(getSeedPasswords().admin, 10),
         firstName: 'Operations',
         lastName: 'Manager',
         role: UserRole.ADMIN,
@@ -118,13 +119,13 @@ const seedSupportWorkers = async (): Promise<void> => {
     for (let i = 0; i < 25; i++) {
       const firstName = AUSTRALIAN_FIRST_NAMES[Math.floor(Math.random() * AUSTRALIAN_FIRST_NAMES.length)];
       const lastName = AUSTRALIAN_LAST_NAMES[Math.floor(Math.random() * AUSTRALIAN_LAST_NAMES.length)];
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@workers.com.au`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@workers.${SEED_EMAIL_DOMAIN}`;
 
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         const userData = {
           email,
-          password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+          password: await bcrypt.hash(getSeedPasswords().worker, 10),
           firstName,
           lastName,
           role: UserRole.SUPPORT_WORKER,
@@ -157,13 +158,13 @@ const seedParticipants = async (): Promise<void> => {
     for (let i = 0; i < 25; i++) {
       const firstName = AUSTRALIAN_FIRST_NAMES[Math.floor(Math.random() * AUSTRALIAN_FIRST_NAMES.length)];
       const lastName = AUSTRALIAN_LAST_NAMES[Math.floor(Math.random() * AUSTRALIAN_LAST_NAMES.length)];
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@participants.com.au`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@participants.${SEED_EMAIL_DOMAIN}`;
 
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
         const userData = {
           email,
-          password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+          password: await bcrypt.hash(getSeedPasswords().participant, 10),
           firstName,
           lastName,
           role: UserRole.PARTICIPANT,
@@ -210,14 +211,14 @@ const displaySeedingSummary = async (): Promise<void> => {
 
     logger.info('\n' + '='.repeat(60));
     logger.info('📋 ADMIN CREDENTIALS:');
-    logger.info('  admin@guardiance.com / REDACTED_SEED_PASSWORD');
-    logger.info('  manager@guardiance.com / REDACTED_SEED_PASSWORD');
+    logger.info(`  admin@${SEED_EMAIL_DOMAIN} / password from SEED_ADMIN_PASSWORD`);
+    logger.info(`  manager@${SEED_EMAIL_DOMAIN} / password from SEED_ADMIN_PASSWORD`);
     logger.info('');
     logger.info('👷 WORKER CREDENTIALS:');
-    logger.info('  [FirstName.LastName]@workers.com.au / REDACTED_SEED_PASSWORD');
+    logger.info(`  [FirstName.LastName]@workers.${SEED_EMAIL_DOMAIN} / password from SEED_WORKER_PASSWORD`);
     logger.info('');
     logger.info('👤 PARTICIPANT CREDENTIALS:');
-    logger.info('  [FirstName.LastName]@participants.com.au / REDACTED_SEED_PASSWORD');
+    logger.info(`  [FirstName.LastName]@participants.${SEED_EMAIL_DOMAIN} / password from SEED_PARTICIPANT_PASSWORD`);
     logger.info('='.repeat(60));
 
     logger.info('\n📝 NEXT STEPS:');

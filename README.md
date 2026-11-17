@@ -1,10 +1,10 @@
-# Support24 API
+# Guardian Care Pro API
 
-Backend API for Support24 - a platform connecting Independent Support Workers (ISWs) with participants (clients seeking care) and their guardians.
+Backend API for Guardian Care Pro - a platform connecting Independent Support Workers (ISWs) with participants (clients seeking care) and their guardians.
 
 ## Overview
 
-Support24 is a web and mobile marketplace that enables discovery of support workers, secure onboarding with compliance checks, and end-to-end management of support sessions (booking, timesheets, etc.) in one platform.
+Guardian Care Pro is a web and mobile marketplace that enables discovery of support workers, secure onboarding with compliance checks, and end-to-end management of support sessions (booking, timesheets, etc.) in one platform.
 
 This repository contains the backend API implementation built with Express.js, TypeScript, and MongoDB.
 
@@ -35,7 +35,7 @@ This repository contains the backend API implementation built with Express.js, T
 ## Project Structure
 
 ```
-support24-api/
+guardian-care-pro-api/
 ├── src/
 │   ├── config/         # Configuration files
 │   ├── controllers/    # HTTP request handlers

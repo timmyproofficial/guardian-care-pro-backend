@@ -71,11 +71,11 @@ export const emailService = {
     name: string,
     otpCode: string
   ): Promise<void> => {
-    const subject = 'Email Verification Code - Support24';
+    const subject = 'Email Verification Code - Guardian Care Pro';
     const text = `
       Hello ${name},
       
-      Your verification code for Support24 is: ${otpCode}
+      Your verification code for Guardian Care Pro is: ${otpCode}
       
       This code will expire in 10 minutes.
       
@@ -83,14 +83,14 @@ export const emailService = {
     `;
     
     const bodyContent = `
-      ${createParagraph('Thank you for creating an account with Support24! Your verification code is:')}
+      ${createParagraph('Thank you for creating an account with Guardian Care Pro! Your verification code is:')}
       ${createCodeBox(otpCode)}
       ${createAlertBox('⏱️ This code will expire in 10 minutes.', 'warning')}
       ${createParagraph('If you did not create an account with us, please ignore this email.')}
     `;
 
     const html = generateEmailTemplate({
-      preheader: 'Your verification code for Support24',
+      preheader: 'Your verification code for Guardian Care Pro',
       greeting: 'Dear',
       recipientName: name,
       bodyContent,
@@ -109,7 +109,7 @@ export const emailService = {
     name: string,
     otpCode: string
   ): Promise<void> => {
-    const subject = 'Password Reset Code - Support24';
+    const subject = 'Password Reset Code - Guardian Care Pro';
     const text = `
       Hello ${name},
       
@@ -128,7 +128,7 @@ export const emailService = {
     `;
     
     const html = generateEmailTemplate({
-      preheader: 'Reset your Support24 password',
+      preheader: 'Reset your Guardian Care Pro password',
       greeting: 'Dear',
       recipientName: name,
       bodyContent,
@@ -155,7 +155,7 @@ export const emailService = {
       location: string;
     }
   ): Promise<void> => {
-    const subject = 'New Shift Booking - Support24';
+    const subject = 'New Shift Booking - Guardian Care Pro';
     
     // Customize message based on whether it's for a worker or participant
     const recipientDetails = shiftDetails.participantName
@@ -172,7 +172,7 @@ export const emailService = {
       Service: ${shiftDetails.serviceType}
       Location: ${shiftDetails.location}
       
-      You can view the details and manage this booking in your Support24 dashboard.
+      You can view the details and manage this booking in your Guardian Care Pro dashboard.
     `;
     
     const bodyContent = `
@@ -183,7 +183,7 @@ export const emailService = {
         { label: '🏥 Service:', value: shiftDetails.serviceType },
         { label: '📍 Location:', value: shiftDetails.location },
       ])}
-      ${createParagraph('You can view the full details and manage this booking in your Support24 dashboard.')}
+      ${createParagraph('You can view the full details and manage this booking in your Guardian Care Pro dashboard.')}
     `;
     
     const html = generateEmailTemplate({
@@ -214,7 +214,7 @@ export const emailService = {
       status: string;
     }
   ): Promise<void> => {
-    const subject = 'Timesheet Update - Support24';
+    const subject = 'Timesheet Update - Guardian Care Pro';
     
     const text = `
       Hello ${name},
@@ -227,7 +227,7 @@ export const emailService = {
       Hours: ${timesheetDetails.hours}
       Status: ${timesheetDetails.status}
       
-      You can view all timesheet details in your Support24 dashboard.
+      You can view all timesheet details in your Guardian Care Pro dashboard.
     `;
     
     const alertType = timesheetDetails.status.toLowerCase() === 'approved' ? 'success' : 
@@ -242,7 +242,7 @@ export const emailService = {
         { label: '📋 Status:', value: timesheetDetails.status },
       ])}
       ${createAlertBox(`Timesheet has been ${timesheetDetails.status}`, alertType)}
-      ${createParagraph('You can view all timesheet details in your Support24 dashboard.')}
+      ${createParagraph('You can view all timesheet details in your Guardian Care Pro dashboard.')}
     `;
     
     const html = generateEmailTemplate({
@@ -271,7 +271,7 @@ export const emailService = {
       notes?: string;
     }
   ): Promise<void> => {
-    const subject = 'Document Verification Update - Support24';
+    const subject = 'Document Verification Update - Guardian Care Pro';
     
     const text = `
       Hello ${name},
@@ -328,12 +328,12 @@ export const emailService = {
       renewalDate: string;
     }
   ): Promise<void> => {
-    const subject = 'Subscription Confirmation - Support24';
+    const subject = 'Subscription Confirmation - Guardian Care Pro';
     
     const text = `
       Hello ${name},
       
-      Thank you for subscribing to Support24. Your subscription has been confirmed.
+      Thank you for subscribing to Guardian Care Pro. Your subscription has been confirmed.
       
       Subscription Details:
       Tier: ${subscriptionDetails.tier}
@@ -345,7 +345,7 @@ export const emailService = {
     `;
     
     const bodyContent = `
-      ${createParagraph('Thank you for subscribing to Support24! Your subscription has been confirmed.')}
+      ${createParagraph('Thank you for subscribing to Guardian Care Pro! Your subscription has been confirmed.')}
       ${createInfoBox('Subscription Details', [
         { label: '📦 Tier:', value: subscriptionDetails.tier },
         { label: '📅 Start Date:', value: subscriptionDetails.startDate },
@@ -357,7 +357,7 @@ export const emailService = {
     `;
     
     const html = generateEmailTemplate({
-      preheader: 'Your Support24 subscription is confirmed',
+      preheader: 'Your Guardian Care Pro subscription is confirmed',
       greeting: 'Dear',
       recipientName: name,
       bodyContent,
@@ -382,7 +382,7 @@ export const emailService = {
       daysRemaining: number;
     }
   ): Promise<void> => {
-    const subject = 'Document Expiry Reminder - Support24';
+    const subject = 'Document Expiry Reminder - Guardian Care Pro';
     
     const text = `
       Hello ${name},
@@ -433,7 +433,7 @@ sendInvoiceEmail: async (
     amount: string;
   }
 ): Promise<void> => {
-  const subject = `Invoice ${invoiceDetails.invoiceNumber} - Support24`;
+  const subject = `Invoice ${invoiceDetails.invoiceNumber} - Guardian Care Pro`;
   
   const text = `
     Hello ${name},
@@ -445,7 +445,7 @@ sendInvoiceEmail: async (
     Due Date: ${invoiceDetails.dueDate}
     Amount: $${invoiceDetails.amount}
     
-    You can view and download the invoice from your Support24 dashboard.
+    You can view and download the invoice from your Guardian Care Pro dashboard.
   `;
   
   const bodyContent = `
@@ -456,7 +456,7 @@ sendInvoiceEmail: async (
       { label: '⏰ Due Date:', value: invoiceDetails.dueDate },
       { label: '💰 Amount:', value: `$${invoiceDetails.amount}` },
     ])}
-    ${createParagraph('You can view and download the invoice from your Support24 dashboard.')}
+    ${createParagraph('You can view and download the invoice from your Guardian Care Pro dashboard.')}
   `;
   
   const html = generateEmailTemplate({
@@ -500,7 +500,7 @@ sendBatchInvoiceEmail: async (
     Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
     Total Amount: $${invoiceDetails.totalAmount}
     
-    You can view and download the detailed invoice from your Support24 dashboard.
+    You can view and download the detailed invoice from your Guardian Care Pro dashboard.
   `;
   
   const bodyContent = `
@@ -511,7 +511,7 @@ sendBatchInvoiceEmail: async (
       { label: '📅 Period:', value: `${invoiceDetails.startDate} to ${invoiceDetails.endDate}` },
       { label: '💰 Total Amount:', value: `$${invoiceDetails.totalAmount}` },
     ])}
-    ${createParagraph('You can view and download the detailed invoice from your Support24 dashboard.')}
+    ${createParagraph('You can view and download the detailed invoice from your Guardian Care Pro dashboard.')}
   `;
   
   const html = generateEmailTemplate({
@@ -556,7 +556,7 @@ sendWorkerBatchInvoiceEmail: async (
     Period: ${invoiceDetails.startDate} to ${invoiceDetails.endDate}
     Total Amount: $${invoiceDetails.totalAmount}
     
-    You can view, download, and send this invoice to the participant from your Support24 dashboard.
+    You can view, download, and send this invoice to the participant from your Guardian Care Pro dashboard.
   `;
   
   const bodyContent = `
@@ -569,7 +569,7 @@ sendWorkerBatchInvoiceEmail: async (
       { label: '💰 Total Amount:', value: `$${invoiceDetails.totalAmount}` },
     ])}
     ${createAlertBox('✅ Your invoice is ready to view and send!', 'success')}
-    ${createParagraph('You can view, download, and send this invoice to the participant from your Support24 dashboard.')}
+    ${createParagraph('You can view, download, and send this invoice to the participant from your Guardian Care Pro dashboard.')}
   `;
   
   const html = generateEmailTemplate({
@@ -600,7 +600,7 @@ sendBatchInvoicesEmail: async (
     endDate: string;
   }
 ): Promise<void> => {
-  const subject = `Batch Invoices (${batchDetails.invoiceCount}) - Support24`;
+  const subject = `Batch Invoices (${batchDetails.invoiceCount}) - Guardian Care Pro`;
   
   const text = `
     Hello ${name},
@@ -610,7 +610,7 @@ sendBatchInvoicesEmail: async (
     Invoice Numbers: ${batchDetails.invoiceNumbers}
     Total Amount: $${batchDetails.totalAmount}
     
-    You can view and download these invoices from your Support24 dashboard.
+    You can view and download these invoices from your Guardian Care Pro dashboard.
   `;
   
   const bodyContent = `
@@ -621,7 +621,7 @@ sendBatchInvoicesEmail: async (
       { label: '📅 Period:', value: `${batchDetails.startDate} to ${batchDetails.endDate}` },
       { label: '💰 Total Amount:', value: `$${batchDetails.totalAmount}` },
     ])}
-    ${createParagraph('You can view and download these invoices from your Support24 dashboard.')}
+    ${createParagraph('You can view and download these invoices from your Guardian Care Pro dashboard.')}
   `;
   
   const html = generateEmailTemplate({
@@ -653,7 +653,7 @@ sendShiftConfirmationEmail: async (
     location: string;
   }
 ): Promise<void> => {
-  const subject = 'Shift Confirmed - Support24';
+  const subject = 'Shift Confirmed - Guardian Care Pro';
   
   const text = `
     Hello ${name},
@@ -665,7 +665,7 @@ sendShiftConfirmationEmail: async (
     Service: ${shiftDetails.serviceType}
     Location: ${shiftDetails.location}
     
-    You can view the details in your Support24 dashboard.
+    You can view the details in your Guardian Care Pro dashboard.
   `;
   
   const bodyContent = `
@@ -678,7 +678,7 @@ sendShiftConfirmationEmail: async (
       { label: '📍 Location:', value: shiftDetails.location },
     ])}
     ${createAlertBox('✅ Your shift is now confirmed and scheduled!', 'success')}
-    ${createParagraph('You can view all shift details in your Support24 dashboard.')}
+    ${createParagraph('You can view all shift details in your Guardian Care Pro dashboard.')}
   `;
   
   const html = generateEmailTemplate({
@@ -710,7 +710,7 @@ sendShiftDeclineEmail: async (
     reason?: string;
   }
 ): Promise<void> => {
-  const subject = 'Shift Declined - Support24';
+  const subject = 'Shift Declined - Guardian Care Pro';
   
   const text = `
     Hello ${name},
@@ -766,7 +766,7 @@ sendShiftCompletionEmail: async (
     endTime: string;
   }
 ): Promise<void> => {
-  const subject = 'Shift Completed - Support24';
+  const subject = 'Shift Completed - Guardian Care Pro';
   
   const text = `
     Hello ${name},
@@ -823,7 +823,7 @@ sendShiftCancellationEmail: async (
   },
   isWorker: boolean = false
 ): Promise<void> => {
-  const subject = 'Shift Cancelled - Support24';
+  const subject = 'Shift Cancelled - Guardian Care Pro';
   
   const text = `
     Hello ${name},
@@ -880,7 +880,7 @@ sendTimesheetSubmissionEmail: async (
     amount: string;
   }
 ): Promise<void> => {
-  const subject = 'Timesheet Submitted - Review Required - Support24';
+  const subject = 'Timesheet Submitted - Review Required - Guardian Care Pro';
   
   const text = `
     Hello ${name},
@@ -933,7 +933,7 @@ sendTimesheetRevisionEmail: async (
     amount: string;
   }
 ): Promise<void> => {
-  const subject = 'Timesheet Revised - Review Required - Support24';
+  const subject = 'Timesheet Revised - Review Required - Guardian Care Pro';
   
   const text = `
     Hello ${name},

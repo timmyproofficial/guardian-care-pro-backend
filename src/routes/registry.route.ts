@@ -46,7 +46,7 @@ const requireProviderOrAdmin = [authenticate, authorize([UserRole.PROVIDER, User
  *               email:
  *                 type: string
  *                 description: Worker email address
- *                 example: "jane.smith@email.com"
+ *                 example: "jane.smith@example.com"
  *               externalWorkerId:
  *                 type: string
  *                 description: External system worker ID

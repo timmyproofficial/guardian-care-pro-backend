@@ -17,11 +17,11 @@ Get push notifications working in **under 10 minutes**!
 ### Step 1: Get Firebase Credentials
 
 1. Open [Firebase Console](https://console.firebase.google.com/)
-2. Select your **Support24** project
+2. Select your **Guardian Care Pro** project
 3. Click ⚙️ (Settings) → **Project settings**
 4. Go to **Service accounts** tab
 5. Click **"Generate new private key"**
-6. Save the JSON file (e.g., `support24-firebase-key.json`)
+6. Save the JSON file (e.g., `firebase-service-account.json`)
 
 ### Step 2: Extract & Add to .env
 
@@ -29,9 +29,9 @@ Open the downloaded JSON file and extract these values:
 
 ```json
 {
-  "project_id": "support24-xxxxx",
+  "project_id": "your-project-id",
   "private_key": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk@support24-xxxxx.iam.gserviceaccount.com"
+  "client_email": "firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com"
 }
 ```
 
@@ -39,8 +39,8 @@ Add to your `.env` file:
 
 ```bash
 # Firebase Push Notifications
-FIREBASE_PROJECT_ID=support24-xxxxx
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk@support24-xxxxx.iam.gserviceaccount.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nYOUR_ACTUAL_PRIVATE_KEY_HERE\n-----END PRIVATE KEY-----\n"
 ```
 

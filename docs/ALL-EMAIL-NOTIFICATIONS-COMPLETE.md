@@ -357,5 +357,5 @@ Just let me know! 🚀
 
 **🎊 Congratulations! Your email notification system is now fully operational!** 
 
-All users will receive timely, professional, and beautiful email notifications for every important event in your Support24 platform! 📧✨
+All users will receive timely, professional, and beautiful email notifications for every important event in your Guardian Care Pro platform! 📧✨
 

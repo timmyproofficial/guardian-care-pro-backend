@@ -65,7 +65,7 @@ import {
 } from '../utils/email-template';
 
 const bodyContent = `
-  ${createParagraph('Welcome to Support24!')}
+  ${createParagraph('Welcome to Guardian Care Pro!')}
   ${createCodeBox('ABC123')}
   ${createInfoBox('Details', [
     { label: 'Field:', value: 'Value' },

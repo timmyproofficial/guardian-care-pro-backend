@@ -34,7 +34,7 @@ interface DetailRow {
  */
   export const generateEmailTemplate = (options: EmailTemplateOptions): string => {
     const {
-    preheader = 'Support24 - Professional Care Services',
+    preheader = 'Guardian Care Pro - Professional Care Services',
     greeting = 'Dear',
       recipientName = 'there',
     bodyContent,
@@ -65,7 +65,7 @@ interface DetailRow {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Support24</title>
+  <title>Guardian Care Pro</title>
     
     <!-- Preheader text (hidden but shown in email previews) -->
   <div style="display: none; max-height: 0px; overflow: hidden; mso-hide: all;">
@@ -358,7 +358,7 @@ interface DetailRow {
           <!-- Email Header with Banner -->
           <tr>
             <td class="email-header" style="padding: 0;">
-              <img src="${bannerUrl}" alt="Support24" class="banner-img" style="width: 100%; height: 219px; display: block; border: 0;">
+              <img src="${bannerUrl}" alt="Guardian Care Pro" class="banner-img" style="width: 100%; height: 219px; display: block; border: 0;">
           </td>
         </tr>
         
@@ -395,7 +395,7 @@ interface DetailRow {
               <!-- Sign-off -->
               <p class="sign-off" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #000000; line-height: 1.6; margin: 20px 0 0 0;">
                 <strong>Best Regards</strong><br>
-                <strong>Support24 Team</strong>
+                <strong>Guardian Care Pro Team</strong>
               </p>
               
           </td>
@@ -406,7 +406,7 @@ interface DetailRow {
             <td class="email-footer" style="background: #050F53; padding: 30px 50px; text-align: center;">
               
               <p class="footer-text-primary" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 8px 0;">
-                © 2025 Support24. All rights reserved.
+                © 2025 Guardian Care Pro. All rights reserved.
               </p>
               
               <p class="footer-text-secondary" style="font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 18px; font-weight: 400; color: #ffffff; margin: 0 0 20px 0;">

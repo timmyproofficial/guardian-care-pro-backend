@@ -355,12 +355,12 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
             <div class="invoice-title">CONSOLIDATED INVOICE</div>
             <div class="invoice-subtitle">Weekly Service Summary</div>
             <div class="company-info">
-              <div>Support24</div>
+              <div>Guardian Care Pro</div>
               <div>123 Support Street</div>
               <div>Sydney, NSW 2000</div>
               <div>ABN: 12 345 678 901</div>
               <div>Phone: (02) 1234 5678</div>
-              <div>Email: billing@guardiancapro.com</div>
+              <div>Email: billing@example.com</div>
             </div>
           </div>
           <div class="invoice-meta">
@@ -448,7 +448,7 @@ export const generateBatchInvoiceHtml = (data: BatchInvoiceTemplateData): string
           <p>This consolidated invoice includes multiple service periods. See line items for details.</p>
           <p><strong>Note:</strong> Additional expenses are listed for reference only and are not included in the invoice total.</p>
           <p>Thank you for your business. If you have any questions about this invoice, please contact us.</p>
-          <p>&copy; ${new Date().getFullYear()} Support24. All rights reserved.</p>
+          <p>&copy; ${new Date().getFullYear()} Guardian Care Pro. All rights reserved.</p>
         </div>
       </div>
     </body>

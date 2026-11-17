@@ -24,7 +24,7 @@ async function createMultipleProviders() {
     {
       firstName: 'John',
       lastName: 'Smith',
-      email: 'john.smith@agedcareplus.com.au',
+      email: 'john.smith@agedcareplus.example.com',
       password: '$2a$10$hashedpassword1', // In real scenario, use proper hashing
       role: 'provider',
       isEmailVerified: true,
@@ -39,12 +39,12 @@ async function createMultipleProviders() {
       providerType: 'AGED_CARE',
       primaryContactName: 'John Smith',
       primaryContactPhone: '+61412345678',
-      primaryContactEmail: 'john.smith@agedcareplus.com.au'
+      primaryContactEmail: 'john.smith@agedcareplus.example.com'
     },
     {
       firstName: 'Sarah',
       lastName: 'Johnson',
-      email: 'sarah.johnson@disabilitysupport.com.au',
+      email: 'sarah.johnson@disabilitysupport.example.com',
       password: '$2a$10$hashedpassword2',
       role: 'provider',
       isEmailVerified: true,
@@ -59,12 +59,12 @@ async function createMultipleProviders() {
       providerType: 'DISABILITY_SUPPORT',
       primaryContactName: 'Sarah Johnson',
       primaryContactPhone: '+61423456789',
-      primaryContactEmail: 'sarah.johnson@disabilitysupport.com.au'
+      primaryContactEmail: 'sarah.johnson@disabilitysupport.example.com'
     },
     {
       firstName: 'Mike',
       lastName: 'Wilson',
-      email: 'mike.wilson@communitycare.com.au',
+      email: 'mike.wilson@communitycare.example.com',
       password: '$2a$10$hashedpassword3',
       role: 'provider',
       isEmailVerified: true,
@@ -79,12 +79,12 @@ async function createMultipleProviders() {
       providerType: 'COMMUNITY_SUPPORT',
       primaryContactName: 'Mike Wilson',
       primaryContactPhone: '+61434567890',
-      primaryContactEmail: 'mike.wilson@communitycare.com.au'
+      primaryContactEmail: 'mike.wilson@communitycare.example.com'
     },
     {
       firstName: 'Emma',
       lastName: 'Davis',
-      email: 'emma.davis@seniorliving.com.au',
+      email: 'emma.davis@seniorliving.example.com',
       password: '$2a$10$hashedpassword4',
       role: 'provider',
       isEmailVerified: true,
@@ -99,12 +99,12 @@ async function createMultipleProviders() {
       providerType: 'AGED_CARE',
       primaryContactName: 'Emma Davis',
       primaryContactPhone: '+61445678901',
-      primaryContactEmail: 'emma.davis@seniorliving.com.au'
+      primaryContactEmail: 'emma.davis@seniorliving.example.com'
     },
     {
       firstName: 'David',
       lastName: 'Brown',
-      email: 'david.brown@inclusioncare.com.au',
+      email: 'david.brown@inclusioncare.example.com',
       password: '$2a$10$hashedpassword5',
       role: 'provider',
       isEmailVerified: true,
@@ -119,12 +119,12 @@ async function createMultipleProviders() {
       providerType: 'DISABILITY_SUPPORT',
       primaryContactName: 'David Brown',
       primaryContactPhone: '+61456789012',
-      primaryContactEmail: 'david.brown@inclusioncare.com.au'
+      primaryContactEmail: 'david.brown@inclusioncare.example.com'
     },
     {
       firstName: 'Lisa',
       lastName: 'Garcia',
-      email: 'lisa.garcia@wellbeingcare.com.au',
+      email: 'lisa.garcia@wellbeingcare.example.com',
       password: '$2a$10$hashedpassword6',
       role: 'provider',
       isEmailVerified: true,
@@ -139,12 +139,12 @@ async function createMultipleProviders() {
       providerType: 'COMMUNITY_SUPPORT',
       primaryContactName: 'Lisa Garcia',
       primaryContactPhone: '+61467890123',
-      primaryContactEmail: 'lisa.garcia@wellbeingcare.com.au'
+      primaryContactEmail: 'lisa.garcia@wellbeingcare.example.com'
     },
     {
       firstName: 'Robert',
       lastName: 'Martinez',
-      email: 'robert.martinez@compassioncare.com.au',
+      email: 'robert.martinez@compassioncare.example.com',
       password: '$2a$10$hashedpassword7',
       role: 'provider',
       isEmailVerified: true,
@@ -159,12 +159,12 @@ async function createMultipleProviders() {
       providerType: 'AGED_CARE',
       primaryContactName: 'Robert Martinez',
       primaryContactPhone: '+61478901234',
-      primaryContactEmail: 'robert.martinez@compassioncare.com.au'
+      primaryContactEmail: 'robert.martinez@compassioncare.example.com'
     },
     {
       firstName: 'Jennifer',
       lastName: 'Lee',
-      email: 'jennifer.lee@empowermentcare.com.au',
+      email: 'jennifer.lee@empowermentcare.example.com',
       password: '$2a$10$hashedpassword8',
       role: 'provider',
       isEmailVerified: true,
@@ -179,7 +179,7 @@ async function createMultipleProviders() {
       providerType: 'DISABILITY_SUPPORT',
       primaryContactName: 'Jennifer Lee',
       primaryContactPhone: '+61489012345',
-      primaryContactEmail: 'jennifer.lee@empowermentcare.com.au'
+      primaryContactEmail: 'jennifer.lee@empowermentcare.example.com'
     }
   ];
 
@@ -348,7 +348,7 @@ async function createWorkersForProvider(providerId: mongoose.Types.ObjectId, sna
       externalWorkerId: `WRK-${providerId.toString().slice(-4)}-${String(i + 1).padStart(3, '0')}`,
       workerName: workerNames[i],
       phone: `+614${String(Math.floor(Math.random() * 90000000) + 10000000)}`,
-      email: `${workerNames[i].toLowerCase().replace(/\s+/g, '.')}@workers.com`,
+      email: `${workerNames[i].toLowerCase().replace(/\s+/g, '.')}@workers.example.com`,
       competencies: competencies[i % competencies.length],
       qualifications: qualifications[i % qualifications.length],
       availabilitySchedule: availabilityOptions[i % availabilityOptions.length],

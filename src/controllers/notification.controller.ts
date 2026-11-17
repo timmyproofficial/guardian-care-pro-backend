@@ -162,7 +162,7 @@ export const testPushNotification = async (req: Request, res: Response): Promise
 
     await PushNotificationService.sendToUser(userId, {
       title: title || 'Test Notification',
-      body: body || 'This is a test push notification from Support24',
+      body: body || 'This is a test push notification from Guardian Care Pro',
       data: {
         type: 'test',
         timestamp: new Date().toISOString(),

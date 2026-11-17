@@ -85,6 +85,7 @@ import { ComplianceStatus, ComplianceDocumentType, REQUIRED_DOCUMENTS } from '..
 // Utils
 import logger from '../utils/logger';
 import config from '../config/env';
+import { getSeedPasswords, SEED_EMAIL_DOMAIN } from './seed-credentials';
 
 /**
  * Connect to MongoDB
@@ -214,8 +215,8 @@ const seedAdminUsers = async (): Promise<void> => {
 
     const adminUsers = [
       {
-        email: 'admin@guardiance.com',
-        password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+        email: `admin@${SEED_EMAIL_DOMAIN}`,
+        password: await bcrypt.hash(getSeedPasswords().admin, 10),
         firstName: 'System',
         lastName: 'Administrator',
         status: UserStatus.ACTIVE,
@@ -234,8 +235,8 @@ const seedAdminUsers = async (): Promise<void> => {
         }
       },
       {
-        email: 'manager@guardiance.com',
-        password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+        email: `manager@${SEED_EMAIL_DOMAIN}`,
+        password: await bcrypt.hash(getSeedPasswords().admin, 10),
         firstName: 'Operations',
         lastName: 'Manager',
         status: UserStatus.ACTIVE,
@@ -334,7 +335,7 @@ const seedSupportWorkers = async (): Promise<void> => {
     for (let i = 0; i < workerNames.length; i++) {
       const fullName = workerNames[i];
       const [firstName, lastName] = fullName.split(' ');
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@workers.com.au`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@workers.${SEED_EMAIL_DOMAIN}`;
 
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
@@ -348,7 +349,7 @@ const seedSupportWorkers = async (): Promise<void> => {
         const address = generateAUAddress();
         const workerData = {
           email,
-          password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+          password: await bcrypt.hash(getSeedPasswords().worker, 10),
           firstName,
           lastName,
           status: UserStatus.ACTIVE,
@@ -436,7 +437,7 @@ const seedParticipants = async (): Promise<void> => {
     for (let i = 0; i < participantNames.length; i++) {
       const fullName = participantNames[i];
       const [firstName, lastName] = fullName.split(' ');
-      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@participants.com.au`;
+      const email = `${firstName.toLowerCase()}.${lastName.toLowerCase()}@participants.${SEED_EMAIL_DOMAIN}`;
 
       const existingUser = await User.findOne({ email });
       if (!existingUser) {
@@ -450,7 +451,7 @@ const seedParticipants = async (): Promise<void> => {
         const address = generateAUAddress();
         const participantData = {
           email,
-          password: await bcrypt.hash('REDACTED_SEED_PASSWORD', 10),
+          password: await bcrypt.hash(getSeedPasswords().participant, 10),
           firstName,
           lastName,
           status: UserStatus.ACTIVE,
@@ -472,7 +473,7 @@ const seedParticipants = async (): Promise<void> => {
           },
           planManager: {
             name: 'NDIS Plan Manager',
-            email: 'plan.manager@ndis.gov.au'
+            email: 'plan.manager@example.com'
           },
           subscription: {
             tier: SubscriptionTier.BASIC,
@@ -1186,9 +1187,9 @@ const seedOrganizations = async (): Promise<void> => {
         description: 'Providing comprehensive support services to the community',
         type: 'NON_PROFIT',
         address: generateAUAddress(),
-        contactEmail: `info${i}@organization.com.au`,
+        contactEmail: `info${i}@organization.${SEED_EMAIL_DOMAIN}`,
         contactPhone: generateAUSPhone(),
-        website: `https://organization${i}.com.au`,
+        website: `https://organization${i}.example.com`,
         status: 'ACTIVE',
         establishedDate: new Date(2000 + Math.floor(Math.random() * 20), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1)
       };
@@ -1264,14 +1265,14 @@ const displaySeedingSummary = async (): Promise<void> => {
 
     logger.info('\n' + '='.repeat(60));
     logger.info('📋 ADMIN CREDENTIALS:');
-    logger.info('  admin@guardiance.com / REDACTED_SEED_PASSWORD');
-    logger.info('  manager@guardiance.com / REDACTED_SEED_PASSWORD');
+    logger.info(`  admin@${SEED_EMAIL_DOMAIN} / password from SEED_ADMIN_PASSWORD`);
+    logger.info(`  manager@${SEED_EMAIL_DOMAIN} / password from SEED_ADMIN_PASSWORD`);
     logger.info('');
     logger.info('👷 WORKER CREDENTIALS:');
-    logger.info('  [WorkerName]@workers.com.au / REDACTED_SEED_PASSWORD');
+    logger.info(`  [WorkerName]@workers.${SEED_EMAIL_DOMAIN} / password from SEED_WORKER_PASSWORD`);
     logger.info('');
     logger.info('👤 PARTICIPANT CREDENTIALS:');
-    logger.info('  [ParticipantName]@participants.com.au / REDACTED_SEED_PASSWORD');
+    logger.info(`  [ParticipantName]@participants.${SEED_EMAIL_DOMAIN} / password from SEED_PARTICIPANT_PASSWORD`);
     logger.info('='.repeat(60));
 
   } catch (error) {

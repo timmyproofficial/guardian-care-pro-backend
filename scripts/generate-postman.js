@@ -25,7 +25,7 @@ const generateSwaggerSpec = () => {
       info: {
         title: 'Guardian Care Pro API',
         version: packageJson.version,
-        description: 'Backend API for Support24 - A platform connecting Independent Support Workers with participants and their guardians',
+        description: 'Backend API for Guardian Care Pro - A platform connecting Independent Support Workers with participants and their guardians',
       },
       servers: [
         {

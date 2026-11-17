@@ -105,7 +105,7 @@ export class PushNotificationService {
             icon: notification.icon || 'ic_notification',
             color: '#0D2BEC', // Your brand color
             sound: notification.sound || 'default',
-            channelId: 'support24_notifications',
+            channelId: 'guardian_care_pro_notifications',
             clickAction: 'FLUTTER_NOTIFICATION_CLICK',
           },
         },

@@ -1,6 +1,6 @@
 # 🚀 Push Notification Backend Setup Guide
 
-Complete guide for setting up Firebase Cloud Messaging on the Support24 backend.
+Complete guide for setting up Firebase Cloud Messaging on the Guardian Care Pro backend.
 
 ---
 
@@ -32,11 +32,11 @@ The push notification system uses **Firebase Cloud Messaging (FCM)** to send not
 ### 1. Get Firebase Service Account Credentials
 
 1. Go to [Firebase Console](https://console.firebase.google.com/)
-2. Select your **Support24** project
+2. Select your **Guardian Care Pro** project
 3. Click the gear icon (⚙️) → **Project settings**
 4. Go to **Service accounts** tab
 5. Click **Generate new private key**
-6. Download the JSON file (e.g., `support24-firebase-admin.json`)
+6. Download the JSON file (e.g., `firebase-service-account.json`)
 
 ### 2. Extract Required Credentials
 
@@ -84,8 +84,8 @@ CORS_ORIGIN=*
 # =============================================================================
 # DATABASE
 # =============================================================================
-MONGODB_URI=mongodb://localhost:27017/support24
-MONGODB_URI_TEST=mongodb://localhost:27017/support24_test
+MONGODB_URI=mongodb://localhost:27017/guardian_care_pro
+MONGODB_URI_TEST=mongodb://localhost:27017/guardian_care_pro_test
 
 # =============================================================================
 # JWT AUTHENTICATION
@@ -97,7 +97,7 @@ JWT_REFRESH_EXPIRATION_DAYS=30
 # =============================================================================
 # EMAIL (SMTP)
 # =============================================================================
-EMAIL_FROM=noreply@support24.com
+EMAIL_FROM=noreply@example.com
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USERNAME=your-email@gmail.com
@@ -123,15 +123,15 @@ USE_BASE64_IMAGES=true
 FACEBOOK_ICON_URL=https://cdn-icons-png.flaticon.com/512/124/124010.png
 INSTAGRAM_ICON_URL=https://cdn-icons-png.flaticon.com/512/2111/2111463.png
 LINKEDIN_ICON_URL=https://cdn-icons-png.flaticon.com/512/174/174857.png
-FACEBOOK_URL=https://facebook.com/support24
-INSTAGRAM_URL=https://instagram.com/support24
-LINKEDIN_URL=https://linkedin.com/company/support24
+FACEBOOK_URL=https://facebook.com/your-company
+INSTAGRAM_URL=https://instagram.com/your-company
+LINKEDIN_URL=https://linkedin.com/company/your-company
 
 # =============================================================================
 # FIREBASE ADMIN SDK (Push Notifications)
 # =============================================================================
-FIREBASE_PROJECT_ID=support24-xxxxx
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@support24-xxxxx.iam.gserviceaccount.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0...\n-----END PRIVATE KEY-----\n"
 
 # =============================================================================

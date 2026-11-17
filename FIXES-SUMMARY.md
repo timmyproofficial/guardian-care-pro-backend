@@ -194,7 +194,7 @@ Your verification code is: 123456  ← Wrong font (default)
 ```
 Email opens in Gmail:
 ┌─────────────────────────┐
-│  🎨 SUPPORT24 BANNER    │  ✅ Banner displays instantly
+│  🎨 GUARDIAN CARE PRO BANNER    │  ✅ Banner displays instantly
 │     Professional Look   │
 └─────────────────────────┘
 Dear John,                    ← Clean system font
@@ -266,7 +266,7 @@ app.use('/email-assets', express.static(path.join(__dirname, 'assets')));
 
 Then use:
 ```env
-EMAIL_BANNER=https://api.support24.com/email-assets/email-banner.png
+EMAIL_BANNER=https://api.example.com/email-assets/email-banner.png
 ```
 
 **Downsides:**

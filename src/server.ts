@@ -104,7 +104,7 @@ const startServer = async (): Promise<void> => {
   
   server.listen(port, () => {
     logger.info('='.repeat(50));
-    logger.info('🚀 Support24 API Server Started');
+    logger.info('🚀 Guardian Care Pro API Server Started');
     logger.info('='.repeat(50));
     logger.info(`📡 HTTP Server: http://localhost:${port}`);
     logger.info(`🔌 WebSocket Server: ws://localhost:${port}`);

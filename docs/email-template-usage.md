@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Support24 email template system provides a reusable, professional email template with consistent branding, responsive design, and flexible content sections. All emails sent from the application use the same header, footer, and styling while allowing customized body content.
+The Guardian Care Pro email template system provides a reusable, professional email template with consistent branding, responsive design, and flexible content sections. All emails sent from the application use the same header, footer, and styling while allowing customized body content.
 
 ## Architecture
 
@@ -35,7 +35,7 @@ Every email consists of:
 ┌─────────────────────────────────┐
 │  HEADER (Reusable)              │
 │  - Banner Image                 │
-│  - Support24 Logo               │
+│  - Guardian Care Pro Logo               │
 └─────────────────────────────────┘
 ┌─────────────────────────────────┐
 │  BODY (Customizable)            │
@@ -70,9 +70,9 @@ INSTAGRAM_ICON_URL=https://your-cdn.com/icons/instagram.png
 LINKEDIN_ICON_URL=https://your-cdn.com/icons/linkedin.png
 
 # Social Media Profile Links
-FACEBOOK_URL=https://facebook.com/support24
-INSTAGRAM_URL=https://instagram.com/support24
-LINKEDIN_URL=https://linkedin.com/company/support24
+FACEBOOK_URL=https://facebook.com/your-company
+INSTAGRAM_URL=https://instagram.com/your-company
+LINKEDIN_URL=https://linkedin.com/company/your-company
 ```
 
 ### Recommended Image Specifications
@@ -100,17 +100,17 @@ const bodyContent = `
     { label: 'Email:', value: 'john@example.com' },
     { label: 'Account Type:', value: 'Premium' },
   ])}
-  ${createAlertBox('Welcome to Support24!', 'success')}
+  ${createAlertBox('Welcome to Guardian Care Pro!', 'success')}
 `;
 
 const html = generateEmailTemplate({
-  preheader: 'Welcome to Support24',
+  preheader: 'Welcome to Guardian Care Pro',
   greeting: 'Dear',
   recipientName: 'John Doe',
   bodyContent,
   showButton: true,
   buttonText: 'Get Started',
-  buttonUrl: 'https://app.support24.com/dashboard',
+  buttonUrl: 'https://app.example.com/dashboard',
   includeTagline: true,
 });
 ```
@@ -125,7 +125,7 @@ Main template generator function.
 
 | Parameter | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `preheader` | string | 'Support24 - Professional Care Services' | Hidden text shown in email preview |
+| `preheader` | string | 'Guardian Care Pro - Professional Care Services' | Hidden text shown in email preview |
 | `greeting` | string | 'Dear' | Greeting word |
 | `recipientName` | string | 'there' | Recipient's name |
 | `bodyContent` | string | *required* | HTML content for email body |
@@ -224,7 +224,7 @@ createAlertBox('✅ Payment processed successfully', 'success')
 ```typescript
 sendVerificationOTP: async (to: string, name: string, otpCode: string) => {
   const bodyContent = `
-    ${createParagraph('Thank you for creating an account with Support24!')}
+    ${createParagraph('Thank you for creating an account with Guardian Care Pro!')}
     ${createParagraph('Your verification code is:')}
     ${createCodeBox(otpCode)}
     ${createAlertBox('⏱️ This code will expire in 10 minutes.', 'warning')}
@@ -232,7 +232,7 @@ sendVerificationOTP: async (to: string, name: string, otpCode: string) => {
   `;
 
   const html = generateEmailTemplate({
-    preheader: 'Your verification code for Support24',
+    preheader: 'Your verification code for Guardian Care Pro',
     greeting: 'Dear',
     recipientName: name,
     bodyContent,
@@ -290,7 +290,7 @@ sendInvoice: async (to: string, name: string, invoice: InvoiceDetails) => {
   `;
 
   const html = generateEmailTemplate({
-    preheader: `Invoice ${invoice.number} from Support24`,
+    preheader: `Invoice ${invoice.number} from Guardian Care Pro`,
     greeting: 'Dear',
     recipientName: name,
     bodyContent,
@@ -321,7 +321,7 @@ sendNewEmailType: async (
   name: string,
   details: YourDetailsType
 ): Promise<void> => {
-  const subject = 'Your Email Subject - Support24';
+  const subject = 'Your Email Subject - Guardian Care Pro';
   
   // Plain text version (for email clients that don't support HTML)
   const text = `
@@ -495,5 +495,5 @@ For issues or questions about the email template system:
 
 **Last Updated:** January 2025  
 **Version:** 1.0.0  
-**Maintainer:** Support24 Development Team
+**Maintainer:** Guardian Care Pro Development Team
 
