@@ -204,3 +204,20 @@ Base URL: `/api`
 ## Contact
 
 For support or inquiries, please contact [your.email@example.com].
+## Deploying to Render
+
+This repo includes a [Render Blueprint](render.yaml) that deploys the API (free web service) and the
+[web app](https://github.com/timmyproofficial/guardian-care-pro-web) (static site) together.
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/timmyproofficial/guardian-care-pro-backend)
+
+You'll be asked for:
+
+| Variable | Service | Value |
+|---|---|---|
+| `MONGODB_URI` | API | MongoDB Atlas connection string |
+| `CLOUDINARY_CLOUD_NAME` / `_API_KEY` / `_API_SECRET` | API | From your Cloudinary dashboard |
+| `CLIENT_URL`, `CORS_ORIGINS` | API | The web app's URL, e.g. `https://guardian-care-pro-web.onrender.com` |
+| `VITE_API_BASE_URL` | Web | The API's URL + `/api/v1`, e.g. `https://guardian-care-pro-api.onrender.com/api/v1` |
+
+`JWT_SECRET` is generated automatically. Email (SMTP), push notifications (Firebase), Stripe and AWS are optional.

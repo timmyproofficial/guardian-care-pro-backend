@@ -1,0 +1,58 @@
+# Render Blueprint for Guardian Care Pro (API + web app).
+# Deploy: Render dashboard -> New -> Blueprint -> select this repo.
+# Values marked `sync: false` are prompted for when the Blueprint is first created.
+
+services:
+  # ---------------------------------------------------------------- API
+  - type: web
+    name: guardian-care-pro-api
+    runtime: node
+    plan: free
+    region: oregon
+    branch: master
+    healthCheckPath: /health
+    buildCommand: npm ci --include=dev && npx puppeteer browsers install chrome && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NODE_VERSION
+        value: "22"
+      - key: API_PREFIX
+        value: /api/v1
+      # Keep Puppeteer's Chrome inside the project so it survives from build to runtime
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/.cache/puppeteer
+      - key: JWT_SECRET
+        generateValue: true
+      - key: MONGODB_URI
+        sync: false
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      # Public URL of the web app below, e.g. https://guardian-care-pro-web.onrender.com
+      - key: CLIENT_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+
+  # ------------------------------------------------------------ Web app
+  - type: web
+    name: guardian-care-pro-web
+    runtime: static
+    repo: https://github.com/timmyproofficial/guardian-care-pro-web
+    branch: main
+    buildCommand: npm ci && npm run build
+    staticPublishPath: ./dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # Public URL of the API above + /api/v1,
+      # e.g. https://guardian-care-pro-api.onrender.com/api/v1
+      - key: VITE_API_BASE_URL
+        sync: false
